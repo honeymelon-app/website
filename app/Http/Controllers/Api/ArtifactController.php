@@ -1,66 +1,79 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use App\Http\Requests\StoreArtifactRequest;
-use App\Http\Requests\UpdateArtifactRequest;
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ArtifactCollection;
+use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
+use App\Services\DownloadService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ArtifactController extends Controller
 {
+    public function __construct(
+        private readonly DownloadService $downloadService
+    ) {}
+
     /**
-     * Display a listing of the resource.
+     * Display a listing of artifacts.
      */
-    public function index()
+    public function index(Request $request): ArtifactCollection
     {
-        //
+        $artifacts = Artifact::query()
+            ->with('release')
+            ->latest('created_at')
+            ->paginate($request->input('per_page', 20));
+
+        return new ArtifactCollection($artifacts);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display the specified artifact.
      */
-    public function create()
+    public function show(Artifact $artifact): ArtifactResource
     {
-        //
+        return new ArtifactResource($artifact->load('release'));
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Handle artifact download with license validation.
      */
-    public function store(StoreArtifactRequest $request)
+    public function download(Request $request): RedirectResponse
     {
-        //
-    }
+        $license = $request->query('license');
+        $version = $request->query('version');
+        $platform = $request->query('platform', 'darwin-aarch64');
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Artifact $artifact)
-    {
-        //
-    }
+        if (! $version) {
+            abort(400, 'Version parameter is required');
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Artifact $artifact)
-    {
-        //
-    }
+        Log::info('Download request', [
+            'version' => $version,
+            'platform' => $platform,
+            'license_last4' => $license ? substr($license, -4) : null,
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateArtifactRequest $request, Artifact $artifact)
-    {
-        //
-    }
+        try {
+            $url = $this->downloadService->resolveUrl($version, $platform, $license);
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Artifact $artifact)
-    {
-        //
+            return redirect($url);
+        } catch (AccessDeniedHttpException $e) {
+            abort(403, $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Download failed', [
+                'version' => $version,
+                'platform' => $platform,
+                'error' => $e->getMessage(),
+            ]);
+
+            abort(404, 'Artifact not found');
+        }
     }
 }

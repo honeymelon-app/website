@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Release;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('artifacts', function (Blueprint $table) {
-            $table->uuid('id');
-            $table->foreignIdFor(Release::class)->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('release_id')->constrained()->cascadeOnDelete();
             $table->string('platform', 64)->index();                // e.g., darwin-aarch64
             $table->string('source', 16)->default('github');        // github | r2 | s3
             $table->string('filename')->nullable();                 // display name

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
-            $table->uuid('id');
+            $table->uuid('id')->primary();
             $table->string('provider', 16);                    // ls | stripe
             $table->string('external_id', 64)->index();        // provider-side id
             $table->string('email')->index();

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use App\Enums\LicenseStatus;
@@ -9,6 +11,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class License extends Model implements Filterable
@@ -56,10 +59,18 @@ class License extends Model implements Filterable
     }
 
     /**
-     * Get the orders associated with the license.
+     * Get the order associated with the license.
      */
-    public function orders(): BelongsTo
+    public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
+    }
+
+    /**
+     * Get the activations for the license.
+     */
+    public function activations(): HasMany
+    {
+        return $this->hasMany(Activation::class);
     }
 }

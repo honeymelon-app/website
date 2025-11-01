@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    'github' => [
+        'owner' => env('GITHUB_OWNER', 'honeymelon-app'),
+        'repo' => env('GITHUB_REPO', 'app-macos'),
+        'token' => env('GITHUB_TOKEN'),
+    ],
+
 ];

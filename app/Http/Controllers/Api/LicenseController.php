@@ -1,66 +1,35 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use App\Http\Requests\StoreLicenseRequest;
-use App\Http\Requests\UpdateLicenseRequest;
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\LicenseCollection;
+use App\Http\Resources\LicenseResource;
 use App\Models\License;
+use Illuminate\Http\Request;
 
 class LicenseController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of licenses.
      */
-    public function index()
+    public function index(Request $request): LicenseCollection
     {
-        //
+        $licenses = License::query()
+            ->with('order', 'activations')
+            ->latest('created_at')
+            ->paginate($request->input('per_page', 20));
+
+        return new LicenseCollection($licenses);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display the specified license.
      */
-    public function create()
+    public function show(License $license): LicenseResource
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreLicenseRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(License $license)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(License $license)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateLicenseRequest $request, License $license)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(License $license)
-    {
-        //
+        return new LicenseResource($license->load('order', 'activations'));
     }
 }

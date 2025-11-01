@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Filterable\Contracts\Filterable;
@@ -36,6 +38,7 @@ class Update extends Model implements Filterable
     protected function casts(): array
     {
         return [
+            'manifest' => 'array',
             'is_latest' => 'boolean',
             'published_at' => 'datetime',
         ];

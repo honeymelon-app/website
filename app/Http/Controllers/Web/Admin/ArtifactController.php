@@ -1,66 +1,40 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use App\Http\Requests\StoreArtifactRequest;
-use App\Http\Requests\UpdateArtifactRequest;
+namespace App\Http\Controllers\Web\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ArtifactCollection;
+use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ArtifactController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of artifacts.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $artifacts = Artifact::query()
+            ->with('release')
+            ->latest('created_at')
+            ->paginate(20);
+
+        return Inertia::render('Admin/Artifacts/Index', [
+            'artifacts' => new ArtifactCollection($artifacts),
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display the specified artifact.
      */
-    public function create()
+    public function show(Artifact $artifact): Response
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreArtifactRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Artifact $artifact)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Artifact $artifact)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateArtifactRequest $request, Artifact $artifact)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Artifact $artifact)
-    {
-        //
+        return Inertia::render('Admin/Artifacts/Show', [
+            'artifact' => new ArtifactResource($artifact->load('release')),
+        ]);
     }
 }

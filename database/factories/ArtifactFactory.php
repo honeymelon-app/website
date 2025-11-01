@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Factories;
 
 use App\Models\Artifact;
@@ -47,5 +49,13 @@ class ArtifactFactory extends Factory
     public function forRelease(Release $release): self
     {
         return $this->state(fn () => ['release_id' => $release->id]);
+    }
+
+    /**
+     * Configure the artifact for a specific platform.
+     */
+    public function forPlatform(string $platform): self
+    {
+        return $this->state(fn () => ['platform' => $platform]);
     }
 }

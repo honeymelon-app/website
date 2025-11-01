@@ -1,66 +1,40 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use App\Http\Requests\StoreReleaseRequest;
-use App\Http\Requests\UpdateReleaseRequest;
+namespace App\Http\Controllers\Web\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\ReleaseCollection;
+use App\Http\Resources\ReleaseResource;
 use App\Models\Release;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class ReleaseController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of releases.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $releases = Release::query()
+            ->with('user')
+            ->latest('published_at')
+            ->paginate(20);
+
+        return Inertia::render('Admin/Releases/Index', [
+            'releases' => new ReleaseCollection($releases),
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display the specified release.
      */
-    public function create()
+    public function show(Release $release): Response
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreReleaseRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Release $release)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Release $release)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateReleaseRequest $request, Release $release)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Release $release)
-    {
-        //
+        return Inertia::render('Admin/Releases/Show', [
+            'release' => new ReleaseResource($release->load('artifacts', 'updates', 'user')),
+        ]);
     }
 }

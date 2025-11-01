@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Release;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('updates', function (Blueprint $table) {
-            $table->uuid('id');
-            $table->foreignIdFor(Release::class)->cascadeOnDelete();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('release_id')->constrained()->cascadeOnDelete();
             $table->string('channel', 16)->index();            // stable | beta
             $table->string('version', 50)->index();            // redundant for quick lookups
             $table->json('manifest');                           // full Tauri manifest JSON

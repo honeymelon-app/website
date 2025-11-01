@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Models;
 
 use Filterable\Contracts\Filterable;
@@ -40,7 +42,6 @@ class Artifact extends Model implements Filterable
     protected function casts(): array
     {
         return [
-            'signature' => 'hashed',
             'notarized' => 'boolean',
         ];
     }

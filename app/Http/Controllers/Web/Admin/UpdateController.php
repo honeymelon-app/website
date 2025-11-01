@@ -1,66 +1,40 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use App\Http\Requests\StoreUpdateRequest;
-use App\Http\Requests\UpdateUpdateRequest;
+namespace App\Http\Controllers\Web\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UpdateCollection;
+use App\Http\Resources\UpdateResource;
 use App\Models\Update;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class UpdateController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of updates.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $updates = Update::query()
+            ->with('release')
+            ->latest('published_at')
+            ->paginate(20);
+
+        return Inertia::render('Admin/Updates/Index', [
+            'updates' => new UpdateCollection($updates),
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display the specified update.
      */
-    public function create()
+    public function show(Update $update): Response
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreUpdateRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Update $update)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Update $update)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateUpdateRequest $request, Update $update)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Update $update)
-    {
-        //
+        return Inertia::render('Admin/Updates/Show', [
+            'update' => new UpdateResource($update->load('release')),
+        ]);
     }
 }

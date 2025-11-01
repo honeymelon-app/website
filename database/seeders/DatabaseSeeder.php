@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Database\Seeders;
 
 use App\Models\User;
@@ -22,6 +24,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             ReleaseSeeder::class,
+            PlatformDemoSeeder::class,
         ]);
     }
 }

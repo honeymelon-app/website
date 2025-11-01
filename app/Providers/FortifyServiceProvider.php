@@ -36,7 +36,7 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Configure Fortify actions.
      */
-    private function configureActions(): void
+    protected function configureActions(): void
     {
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
         Fortify::createUsersUsing(CreateNewUser::class);
@@ -45,7 +45,7 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Configure Fortify views.
      */
-    private function configureViews(): void
+    protected function configureViews(): void
     {
         Fortify::loginView(fn (Request $request) => Inertia::render('auth/Login', [
             'canResetPassword' => Features::enabled(Features::resetPasswords()),
@@ -76,7 +76,7 @@ class FortifyServiceProvider extends ServiceProvider
     /**
      * Configure rate limiting.
      */
-    private function configureRateLimiting(): void
+    protected function configureRateLimiting(): void
     {
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));

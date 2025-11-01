@@ -1,66 +1,40 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use App\Http\Requests\StoreLicenseRequest;
-use App\Http\Requests\UpdateLicenseRequest;
+namespace App\Http\Controllers\Web\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\LicenseCollection;
+use App\Http\Resources\LicenseResource;
 use App\Models\License;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class LicenseController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of licenses.
      */
-    public function index()
+    public function index(): Response
     {
-        //
+        $licenses = License::query()
+            ->with('order', 'activations')
+            ->latest('created_at')
+            ->paginate(20);
+
+        return Inertia::render('Admin/Licenses/Index', [
+            'licenses' => new LicenseCollection($licenses),
+        ]);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display the specified license.
      */
-    public function create()
+    public function show(License $license): Response
     {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreLicenseRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(License $license)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(License $license)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateLicenseRequest $request, License $license)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(License $license)
-    {
-        //
+        return Inertia::render('Admin/Licenses/Show', [
+            'license' => new LicenseResource($license->load('order', 'activations')),
+        ]);
     }
 }

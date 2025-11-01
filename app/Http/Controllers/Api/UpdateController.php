@@ -1,66 +1,76 @@
 <?php
 
-namespace App\Http\Controllers;
+declare(strict_types=1);
 
-use App\Http\Requests\StoreUpdateRequest;
-use App\Http\Requests\UpdateUpdateRequest;
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\UpdateCollection;
+use App\Http\Resources\UpdateResource;
+use App\Http\Responses\UpdateManifestResponse;
 use App\Models\Update;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class UpdateController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of updates.
      */
-    public function index()
+    public function index(Request $request): UpdateCollection
     {
-        //
+        $updates = Update::query()
+            ->latest('published_at')
+            ->paginate($request->input('per_page', 20));
+
+        return new UpdateCollection($updates);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Display the specified update.
      */
-    public function create()
+    public function show(Update $update): UpdateResource
     {
-        //
+        return new UpdateResource($update);
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Get the latest update manifest for a channel (raw Tauri format).
      */
-    public function store(StoreUpdateRequest $request)
+    public function latest(string $channel): UpdateManifestResponse
     {
-        //
+        $update = Cache::remember(
+            "update:latest:{$channel}",
+            300,
+            fn () => Update::where('channel', $channel)
+                ->where('is_latest', true)
+                ->first()
+        );
+
+        if (! $update) {
+            abort(404, 'No update available for this channel');
+        }
+
+        return UpdateManifestResponse::fromUpdate($update, 300);
     }
 
     /**
-     * Display the specified resource.
+     * Get a specific update manifest by channel and version (raw Tauri format).
      */
-    public function show(Update $update)
+    public function byVersion(string $channel, string $version): UpdateManifestResponse
     {
-        //
-    }
+        $update = Cache::remember(
+            "update:{$channel}:{$version}",
+            300,
+            fn () => Update::where('channel', $channel)
+                ->where('version', $version)
+                ->first()
+        );
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Update $update)
-    {
-        //
-    }
+        if (! $update) {
+            abort(404, 'Update not found');
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateUpdateRequest $request, Update $update)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Update $update)
-    {
-        //
+        return UpdateManifestResponse::fromUpdate($update, 300);
     }
 }
