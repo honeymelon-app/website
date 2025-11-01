@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ReleaseChannel;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -17,7 +18,7 @@ return new class extends Migration
             $table->string('version', 50)->index();
             $table->string('tag', 50)->index();
             $table->string('commit_hash', 1024)->index();
-            $table->string('channel', 16)->index();
+            $table->enum('channel', ReleaseChannel::cases())->default(ReleaseChannel::STABLE->value)->index();
             $table->text('notes')->nullable();
             $table->timestamp('published_at')->nullable();
             $table->boolean('major')->default(false);

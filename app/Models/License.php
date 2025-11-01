@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\LicenseStatus;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -36,10 +37,7 @@ class License extends Model implements Filterable
      * @var list<string>
      */
     protected $hidden = [
-        'password',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
-        'remember_token',
+        'key',
     ];
 
     /**
@@ -50,6 +48,7 @@ class License extends Model implements Filterable
     protected function casts(): array
     {
         return [
+            'status' => LicenseStatus::class,
             'entitlements' => 'array',
             'updates_until' => 'datetime',
             'meta' => 'array',
@@ -61,6 +60,6 @@ class License extends Model implements Filterable
      */
     public function orders(): BelongsTo
     {
-        return $this->hasMany(Order::class);
+        return $this->belongsTo(Order::class);
     }
 }

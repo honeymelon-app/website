@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\ReleaseChannel;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Release extends Model implements Filterable
 {
     /** @use HasFactory<\Database\Factories\ReleaseFactory> */
-    use HasFactory, HasFilters;
+    use HasFactory, HasFilters, HasUuids;
 
     /**
      * The attributes that are mass assignable.
@@ -37,8 +39,8 @@ class Release extends Model implements Filterable
     protected function casts(): array
     {
         return [
+            'channel' => ReleaseChannel::class,
             'published_at' => 'datetime',
-            'commit_hash' => 'hashed',
             'major' => 'boolean',
         ];
     }
