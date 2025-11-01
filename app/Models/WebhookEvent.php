@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Enums\WebhookEvent as WebhookEventEnum;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
-class Order extends Model implements Filterable
+class WebhookEvent extends Model implements Filterable
 {
-    /** @use HasFactory<\Database\Factories\OrderFactory> */
+    /** @use HasFactory<\Database\Factories\WebhookEventFactory> */
     use HasFactory, HasFilters;
 
     /**
@@ -20,11 +20,9 @@ class Order extends Model implements Filterable
      */
     protected $fillable = [
         'provider',
-        'external_id',
-        'email',
-        'amount_cents',
-        'currency',
-        'meta',
+        'type',
+        'payload',
+        'processed_at',
     ];
 
     /**
@@ -35,15 +33,9 @@ class Order extends Model implements Filterable
     protected function casts(): array
     {
         return [
-            'meta' => 'array',
+            'payload' => 'array',
+            'processed_at' => 'datetime',
+            'type' => WebhookEventEnum::class,
         ];
-    }
-
-    /**
-     * Get the license associated with the order.
-     */
-    public function license(): HasOne
-    {
-        return $this->hasOne(License::class);
     }
 }

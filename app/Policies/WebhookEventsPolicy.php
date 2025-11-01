@@ -3,10 +3,9 @@
 namespace App\Policies;
 
 use App\Models\User;
-use App\Models\WebhookEvents;
-use Illuminate\Auth\Access\Response;
+use App\Models\WebhookEvent;
 
-class WebhookEventsPolicy
+class WebhookEventPolicy
 {
     /**
      * Determine whether the user can view any models.
@@ -19,7 +18,7 @@ class WebhookEventsPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, WebhookEvents $webhookEvents): bool
+    public function view(User $user, WebhookEvent $WebhookEvent): bool
     {
         return false;
     }
@@ -35,7 +34,7 @@ class WebhookEventsPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, WebhookEvents $webhookEvents): bool
+    public function update(User $user, WebhookEvent $WebhookEvent): bool
     {
         return false;
     }
@@ -43,7 +42,7 @@ class WebhookEventsPolicy
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, WebhookEvents $webhookEvents): bool
+    public function delete(User $user, WebhookEvent $WebhookEvent): bool
     {
         return false;
     }
@@ -51,7 +50,7 @@ class WebhookEventsPolicy
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, WebhookEvents $webhookEvents): bool
+    public function restore(User $user, WebhookEvent $WebhookEvent): bool
     {
         return false;
     }
@@ -59,7 +58,7 @@ class WebhookEventsPolicy
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, WebhookEvents $webhookEvents): bool
+    public function forceDelete(User $user, WebhookEvent $WebhookEvent): bool
     {
         return false;
     }

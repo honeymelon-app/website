@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class WebhookEventsSeeder extends Seeder
+class WebhookEventeeder extends Seeder
 {
     /**
      * Run the database seeds.

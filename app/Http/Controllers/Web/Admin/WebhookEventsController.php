@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreWebhookEventsRequest;
-use App\Http\Requests\UpdateWebhookEventsRequest;
-use App\Models\WebhookEvents;
+use App\Http\Requests\StoreWebhookEventRequest;
+use App\Http\Requests\UpdateWebhookEventRequest;
+use App\Models\WebhookEvent;
 
-class WebhookEventsController extends Controller
+class WebhookEventController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,7 +27,7 @@ class WebhookEventsController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreWebhookEventsRequest $request)
+    public function store(StoreWebhookEventRequest $request)
     {
         //
     }
@@ -35,7 +35,7 @@ class WebhookEventsController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(WebhookEvents $webhookEvents)
+    public function show(WebhookEvent $WebhookEvent)
     {
         //
     }
@@ -43,7 +43,7 @@ class WebhookEventsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(WebhookEvents $webhookEvents)
+    public function edit(WebhookEvent $WebhookEvent)
     {
         //
     }
@@ -51,7 +51,7 @@ class WebhookEventsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateWebhookEventsRequest $request, WebhookEvents $webhookEvents)
+    public function update(UpdateWebhookEventRequest $request, WebhookEvent $WebhookEvent)
     {
         //
     }
@@ -59,7 +59,7 @@ class WebhookEventsController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(WebhookEvents $webhookEvents)
+    public function destroy(WebhookEvent $WebhookEvent)
     {
         //
     }
