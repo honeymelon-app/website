@@ -5,13 +5,14 @@ namespace App\Models;
 use App\Enums\WebhookEvent as WebhookEventEnum;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class WebhookEvent extends Model implements Filterable
 {
     /** @use HasFactory<\Database\Factories\WebhookEventFactory> */
-    use HasFactory, HasFilters;
+    use HasFactory, HasFilters, HasUuids;
 
     /**
      * The attributes that are mass assignable.

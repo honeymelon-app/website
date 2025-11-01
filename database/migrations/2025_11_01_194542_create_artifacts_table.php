@@ -13,8 +13,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('artifacts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Release::class)->constrained()->cascadeOnDelete();
+            $table->uuid('id');
+            $table->foreignIdFor(Release::class)->cascadeOnDelete();
             $table->string('platform', 64)->index();                // e.g., darwin-aarch64
             $table->string('source', 16)->default('github');        // github | r2 | s3
             $table->string('filename')->nullable();                 // display name

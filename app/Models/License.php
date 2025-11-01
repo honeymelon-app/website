@@ -4,14 +4,16 @@ namespace App\Models;
 
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class License extends Model implements Filterable
 {
     /** @use HasFactory<\Database\Factories\LicenseFactory> */
-    use HasFactory, HasFilters;
+    use HasFactory, HasFilters, HasUuids, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.

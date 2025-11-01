@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('releases', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id');
             $table->string('version', 50)->index();
             $table->string('tag', 50)->index();
             $table->string('commit_hash', 1024)->index();

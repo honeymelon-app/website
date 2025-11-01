@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('orders', function (Blueprint $table) {
+            $table->uuid('id');
             $table->string('provider', 16);                    // ls | stripe
             $table->string('external_id', 64)->index();        // provider-side id
             $table->string('email')->index();
             $table->bigInteger('amount')->nullable();
             $table->string('currency', 8)->nullable();
             $table->json('meta')->nullable();                  // raw webhook attrs
+            $table->softDeletes();
             $table->timestamps();
 
             $table->unique(['provider', 'external_id']);

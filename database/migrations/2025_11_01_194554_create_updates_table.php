@@ -13,8 +13,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('updates', function (Blueprint $table) {
-            $table->id();
-            $table->foreignIdFor(Release::class)->constrained()->cascadeOnDelete();
+            $table->uuid('id');
+            $table->foreignIdFor(Release::class)->cascadeOnDelete();
             $table->string('channel', 16)->index();            // stable | beta
             $table->string('version', 50)->index();            // redundant for quick lookups
             $table->json('manifest');                           // full Tauri manifest JSON

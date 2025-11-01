@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('webhook_events', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id');
             $table->string('provider', 16);                // ls | stripe
             $table->enum('type', WebhookEvent::cases())->index();           // event name
             $table->json('payload');                       // raw webhook JSON
