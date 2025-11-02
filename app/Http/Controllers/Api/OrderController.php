@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Filters\OrderFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderCollection;
 use App\Http\Resources\OrderResource;
@@ -15,11 +16,10 @@ class OrderController extends Controller
     /**
      * Display a listing of orders.
      */
-    public function index(Request $request): OrderCollection
+    public function index(Request $request, OrderFilter $filter): OrderCollection
     {
         $orders = Order::query()
-            ->with('license')
-            ->latest('created_at')
+            ->filter($filter)
             ->paginate($request->input('per_page', 20));
 
         return new OrderCollection($orders);

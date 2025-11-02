@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Enums\WebhookEvent as WebhookEventEnum;
 use App\Http\Controllers\Controller;
 use App\Models\License;
 use App\Models\Order;
 use App\Models\WebhookEvent;
 use App\Services\LicenseService;
+use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Log;
 class WebhookEventController extends Controller
 {
     public function __construct(
-        private readonly LicenseService $licenseService
+        private readonly LicenseService $licenseService,
+        private readonly PaymentProviderFactory $providerFactory
     ) {}
 
     /**
@@ -27,21 +28,38 @@ class WebhookEventController extends Controller
     {
         Log::info('Received Lemon Squeezy webhook', ['payload' => $request->all()]);
 
-        // TODO: Verify webhook signature
+        $provider = $this->providerFactory->make('ls');
+
+        // Verify signature
+        if (! $provider->verifyWebhookSignature($request->getContent(), $request->header('X-Signature', ''))) {
+            Log::warning('Invalid Lemon Squeezy webhook signature');
+
+            return response()->json(['message' => 'Invalid signature'], 401);
+        }
 
         $payload = $request->all();
 
         // Store webhook event
         $event = WebhookEvent::create([
             'provider' => 'ls',
-            'type' => WebhookEventEnum::ORDER_CREATED, // TODO: Map from payload
+            'type' => $this->mapLemonSqueezyEventType($payload),
             'payload' => $payload,
             'processed_at' => null,
         ]);
 
         try {
-            // Process the webhook
-            $this->processLemonSqueezyWebhook($event, $payload);
+            // Parse webhook data
+            $orderData = $provider->parseWebhookPayload($payload);
+
+            if (! $orderData) {
+                Log::info('Non-payment webhook event, skipping', ['event_id' => $event->id]);
+                $event->update(['processed_at' => now()]);
+
+                return response()->json(['message' => 'Event acknowledged']);
+            }
+
+            // Process the payment
+            $this->processPayment($event, $orderData);
 
             $event->update(['processed_at' => now()]);
 
@@ -63,21 +81,38 @@ class WebhookEventController extends Controller
     {
         Log::info('Received Stripe webhook', ['payload' => $request->all()]);
 
-        // TODO: Verify webhook signature
+        $provider = $this->providerFactory->make('stripe');
+
+        // Verify signature
+        if (! $provider->verifyWebhookSignature($request->getContent(), $request->header('Stripe-Signature', ''))) {
+            Log::warning('Invalid Stripe webhook signature');
+
+            return response()->json(['message' => 'Invalid signature'], 401);
+        }
 
         $payload = $request->all();
 
         // Store webhook event
         $event = WebhookEvent::create([
             'provider' => 'stripe',
-            'type' => WebhookEventEnum::ORDER_CREATED, // TODO: Map from payload
+            'type' => $this->mapStripeEventType($payload),
             'payload' => $payload,
             'processed_at' => null,
         ]);
 
         try {
-            // Process the webhook
-            $this->processStripeWebhook($event, $payload);
+            // Parse webhook data
+            $orderData = $provider->parseWebhookPayload($payload);
+
+            if (! $orderData) {
+                Log::info('Non-payment webhook event, skipping', ['event_id' => $event->id]);
+                $event->update(['processed_at' => now()]);
+
+                return response()->json(['message' => 'Event acknowledged']);
+            }
+
+            // Process the payment
+            $this->processPayment($event, $orderData);
 
             $event->update(['processed_at' => now()]);
 
@@ -93,62 +128,70 @@ class WebhookEventController extends Controller
     }
 
     /**
-     * Process a Lemon Squeezy webhook event.
+     * Process payment and issue license.
      */
-    private function processLemonSqueezyWebhook(WebhookEvent $event, array $payload): void
+    private function processPayment(WebhookEvent $event, array $orderData): void
     {
+        // Check if order already exists
+        if (Order::where('external_id', $orderData['external_id'])->exists()) {
+            Log::info('Order already processed', ['external_id' => $orderData['external_id']]);
+
+            return;
+        }
+
         // Create order
         $order = Order::create([
-            'provider' => 'ls',
-            'external_id' => $payload['data']['id'] ?? uniqid('ls-'),
-            'email' => $payload['data']['attributes']['user_email'] ?? 'unknown@example.com',
-            'amount_cents' => $payload['data']['attributes']['total'] ?? 0,
-            'currency' => $payload['data']['attributes']['currency'] ?? 'usd',
-            'meta' => $payload,
+            'provider' => $event->provider,
+            'external_id' => $orderData['external_id'],
+            'email' => $orderData['email'],
+            'amount_cents' => $orderData['amount_cents'],
+            'currency' => $orderData['currency'],
+            'meta' => $orderData['metadata'] ?? [],
         ]);
 
-        // Issue license
-        $license = $this->licenseService->issue([
-            'order_id' => $order->id,
-            'seats' => 1,
-            'entitlements' => ['standard'],
-        ]);
+        // Issue license only if payment successful
+        if ($orderData['status'] === 'paid' || $orderData['status'] === 'completed') {
+            $license = $this->licenseService->issue([
+                'order_id' => $order->id,
+                'seats' => 1,
+                'entitlements' => ['standard'],
+            ]);
 
-        Log::info('License issued from Lemon Squeezy webhook', [
-            'order_id' => $order->id,
-            'license_id' => $license->id,
-        ]);
+            Log::info('License issued from webhook', [
+                'provider' => $event->provider,
+                'order_id' => $order->id,
+                'license_id' => $license->id,
+            ]);
 
-        // TODO: Send email with license key
+            // TODO: Send email with license key
+        }
     }
 
     /**
-     * Process a Stripe webhook event.
+     * Map Lemon Squeezy event types to our enum.
      */
-    private function processStripeWebhook(WebhookEvent $event, array $payload): void
+    private function mapLemonSqueezyEventType(array $payload): string
     {
-        // Create order
-        $order = Order::create([
-            'provider' => 'stripe',
-            'external_id' => $payload['data']['object']['id'] ?? uniqid('pi_'),
-            'email' => $payload['data']['object']['billing_details']['email'] ?? 'unknown@example.com',
-            'amount_cents' => $payload['data']['object']['amount'] ?? 0,
-            'currency' => $payload['data']['object']['currency'] ?? 'usd',
-            'meta' => $payload,
-        ]);
+        $eventName = $payload['meta']['event_name'] ?? 'unknown';
 
-        // Issue license
-        $license = $this->licenseService->issue([
-            'order_id' => $order->id,
-            'seats' => 1,
-            'entitlements' => ['standard'],
-        ]);
+        return match ($eventName) {
+            'order_created' => 'order.created',
+            'subscription_created' => 'subscription.created',
+            default => 'unknown',
+        };
+    }
 
-        Log::info('License issued from Stripe webhook', [
-            'order_id' => $order->id,
-            'license_id' => $license->id,
-        ]);
+    /**
+     * Map Stripe event types to our enum.
+     */
+    private function mapStripeEventType(array $payload): string
+    {
+        $eventType = $payload['type'] ?? 'unknown';
 
-        // TODO: Send email with license key
+        return match ($eventType) {
+            'checkout.session.completed' => 'order.created',
+            'payment_intent.succeeded' => 'order.created',
+            default => 'unknown',
+        };
     }
 }

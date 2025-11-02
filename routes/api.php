@@ -2,30 +2,36 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\Api\ArtifactController;
-use App\Http\Controllers\Api\ReleaseController;
-use App\Http\Controllers\Api\UpdateController;
+use App\Http\Controllers\Api\ArtifactDownloadController;
+use App\Http\Controllers\Api\LatestUpdateController;
+use App\Http\Controllers\Api\PublishReleaseController;
+use App\Http\Controllers\Api\RollbackReleaseController;
+use App\Http\Controllers\Api\UpdateByVersionController;
 use App\Http\Controllers\Api\WebhookEventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // Public API routes
 Route::prefix('updates')->group(function () {
-    Route::get('/{channel}/latest.json', [UpdateController::class, 'latest']);
-    Route::get('/{channel}/{version}.json', [UpdateController::class, 'byVersion']);
+    Route::get('/{channel}/latest.json', LatestUpdateController::class);
+    Route::get('/{channel}/{version}.json', UpdateByVersionController::class);
 });
 
-Route::get('/download', [ArtifactController::class, 'download']);
+Route::get('/download', ArtifactDownloadController::class);
+
+// Checkout routes (public)
+Route::post('/checkout', \App\Http\Controllers\Api\CheckoutController::class);
 
 Route::prefix('webhooks')->group(function () {
     Route::post('/lemonsqueezy', [WebhookEventController::class, 'lemonsqueezy']);
     Route::post('/stripe', [WebhookEventController::class, 'stripe']);
+    Route::post('/github/release', [\App\Http\Controllers\Api\GithubWebhookController::class, 'store']);
 });
 
 // Admin API routes (protected)
 Route::prefix('admin')->middleware('auth:sanctum')->group(function () {
-    Route::post('/releases/publish', [ReleaseController::class, 'publish']);
-    Route::post('/releases/rollback', [ReleaseController::class, 'rollback']);
+    Route::post('/releases/publish', PublishReleaseController::class);
+    Route::post('/releases/rollback', RollbackReleaseController::class);
 
     Route::post('/licenses/revoke', function (Request $request) {
         // TODO: Implement license revocation endpoint

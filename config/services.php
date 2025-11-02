@@ -39,6 +39,20 @@ return [
         'owner' => env('GITHUB_OWNER', 'honeymelon-app'),
         'repo' => env('GITHUB_REPO', 'app-macos'),
         'token' => env('GITHUB_TOKEN'),
+        'webhook_secret' => env('GITHUB_WEBHOOK_SECRET'),
+    ],
+
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+
+    'lemonsqueezy' => [
+        'store_id' => env('LEMONSQUEEZY_STORE_ID'),
+        'api_key' => env('LEMONSQUEEZY_API_KEY'),
+        'webhook_secret' => env('LEMONSQUEEZY_WEBHOOK_SECRET'),
+        'variant_id' => env('LEMONSQUEEZY_VARIANT_ID'),
     ],
 
 ];

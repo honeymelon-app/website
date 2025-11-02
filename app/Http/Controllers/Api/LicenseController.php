@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Filters\LicenseFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LicenseCollection;
 use App\Http\Resources\LicenseResource;
@@ -15,11 +16,10 @@ class LicenseController extends Controller
     /**
      * Display a listing of licenses.
      */
-    public function index(Request $request): LicenseCollection
+    public function index(Request $request, LicenseFilter $filter): LicenseCollection
     {
         $licenses = License::query()
-            ->with('order', 'activations')
-            ->latest('created_at')
+            ->filter($filter)
             ->paginate($request->input('per_page', 20));
 
         return new LicenseCollection($licenses);
