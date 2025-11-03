@@ -1,0 +1,139 @@
+// Pagination metadata from Laravel
+export interface PaginationMeta {
+    current_page: number;
+    from: number | null;
+    last_page: number;
+    per_page: number;
+    to: number | null;
+    total: number;
+}
+
+export interface PaginationLinks {
+    first: string | null;
+    last: string | null;
+    prev: string | null;
+    next: string | null;
+}
+
+// Generic paginated response from Laravel API Resources
+export interface PaginatedResponse<T> {
+    data: T[];
+    meta: PaginationMeta;
+    links: PaginationLinks;
+}
+
+// Release types
+export interface Release {
+    id: string;
+    version: string;
+    tag: string;
+    channel: 'stable' | 'beta';
+    notes: string | null;
+    published_at: string;
+    major: boolean;
+    commit_hash: string;
+    user_id: string | null;
+    created_at: string;
+    updated_at: string;
+    user?: User;
+    artifacts?: Artifact[];
+    updates?: Update[];
+}
+
+// Artifact types
+export interface Artifact {
+    id: string;
+    platform: string;
+    source: 'github' | 'r2' | 's3';
+    filename: string;
+    size: number;
+    sha256: string | null;
+    signature: string | null;
+    notarized: boolean;
+    url: string;
+    path: string | null;
+    release_id: string;
+    created_at: string;
+    updated_at: string;
+    release?: Release;
+}
+
+// Update types
+export interface Update {
+    id: string;
+    channel: 'stable' | 'beta';
+    version: string;
+    manifest: Record<string, any>;
+    is_latest: boolean;
+    published_at: string;
+    release_id: string;
+    created_at: string;
+    updated_at: string;
+    release?: Release;
+}
+
+// License types
+export interface License {
+    id: string;
+    status: 'active' | 'revoked' | 'expired';
+    seats: number;
+    entitlements: string[];
+    updates_until: string | null;
+    order_id: string;
+    created_at: string;
+    updated_at: string;
+    order?: Order;
+    activations?: Activation[];
+}
+
+// Order types
+export interface Order {
+    id: string;
+    provider: 'ls' | 'stripe';
+    external_id: string;
+    email: string;
+    amount_cents: number;
+    currency: string;
+    meta: Record<string, any>;
+    created_at: string;
+    updated_at: string;
+    license?: License;
+}
+
+// Webhook Event types
+export interface WebhookEvent {
+    id: string;
+    provider: 'ls' | 'stripe' | 'github';
+    type: string;
+    payload: Record<string, any>;
+    processed_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+// User type (from index.d.ts)
+export interface User {
+    id: number;
+    name: string;
+    email: string;
+    avatar?: string;
+    email_verified_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Activation {
+    id: string;
+    license_id: string;
+    device_id_hash: string;
+    app_ver: string | null;
+    os_ver: string | null;
+    last_seen_at: string;
+    created_at: string;
+    updated_at: string;
+}
+
+// Filter params
+export interface FilterParams {
+    [key: string]: string | number | boolean | undefined;
+}

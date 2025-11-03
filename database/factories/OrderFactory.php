@@ -32,7 +32,7 @@ class OrderFactory extends Factory
             'provider' => $provider,
             'external_id' => $provider === 'ls' ? fake()->numerify('ls-order-###########') : fake()->regexify('pi_[a-zA-Z0-9]{24}'),
             'email' => fake()->safeEmail(),
-            'amount_cents' => fake()->numberBetween(1900, 9900),
+            'amount' => fake()->numberBetween(1900, 9900),
             'currency' => 'usd',
             'meta' => [
                 'product_name' => 'Honeymelon License',
