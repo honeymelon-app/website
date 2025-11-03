@@ -23,7 +23,7 @@ class ReleaseController extends Controller
             ->latest('published_at')
             ->paginate(20);
 
-        return Inertia::render('Admin/Releases/Index', [
+        return Inertia::render('admin/releases/Index', [
             'releases' => new ReleaseCollection($releases),
         ]);
     }
@@ -33,7 +33,7 @@ class ReleaseController extends Controller
      */
     public function show(Release $release): Response
     {
-        return Inertia::render('Admin/Releases/Show', [
+        return Inertia::render('admin/releases/Show', [
             'release' => new ReleaseResource($release->load('artifacts', 'updates', 'user')),
         ]);
     }

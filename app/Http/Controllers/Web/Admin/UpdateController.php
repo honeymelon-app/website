@@ -23,7 +23,7 @@ class UpdateController extends Controller
             ->latest('published_at')
             ->paginate(20);
 
-        return Inertia::render('Admin/Updates/Index', [
+        return Inertia::render('admin/updates/Index', [
             'updates' => new UpdateCollection($updates),
         ]);
     }
@@ -33,7 +33,7 @@ class UpdateController extends Controller
      */
     public function show(Update $update): Response
     {
-        return Inertia::render('Admin/Updates/Show', [
+        return Inertia::render('admin/updates/Show', [
             'update' => new UpdateResource($update->load('release')),
         ]);
     }

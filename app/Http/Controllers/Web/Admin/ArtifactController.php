@@ -23,7 +23,7 @@ class ArtifactController extends Controller
             ->latest('created_at')
             ->paginate(20);
 
-        return Inertia::render('Admin/Artifacts/Index', [
+        return Inertia::render('admin/artifacts/Index', [
             'artifacts' => new ArtifactCollection($artifacts),
         ]);
     }
@@ -33,7 +33,7 @@ class ArtifactController extends Controller
      */
     public function show(Artifact $artifact): Response
     {
-        return Inertia::render('Admin/Artifacts/Show', [
+        return Inertia::render('admin/artifacts/Show', [
             'artifact' => new ArtifactResource($artifact->load('release')),
         ]);
     }

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed, h, onMounted, ref } from 'vue'
 import { Head, router } from '@inertiajs/vue3'
+import AppLayout from '@/layouts/AppLayout.vue'
+import { dashboard } from '@/routes'
+import updates from '@/routes/admin/updates'
+import type { BreadcrumbItem } from '@/types'
 import { DataTable, TableFilters, type Column, type FilterConfig } from '@/components/data-table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -12,20 +16,31 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Download, Eye, Rocket } from 'lucide-vue-next'
+import { MoreHorizontal, Download, Eye, CheckCircle } from 'lucide-vue-next'
 import { useTableData } from '@/composables/useTableData'
-import type { Release, FilterParams } from '@/types/api'
+import type { Update, FilterParams } from '@/types/api'
+
+const breadcrumbs: BreadcrumbItem[] = [
+  {
+    title: 'Dashboard',
+    href: dashboard().url,
+  },
+  {
+    title: 'Updates',
+    href: updates.index().url,
+  },
+]
 
 // Fetch data
 const {
-  data: releases,
+  data: updatesData,
   meta,
   isLoading,
   fetchData,
   updateFilters,
   goToPage,
   clearFilters,
-} = useTableData<Release>('/api/releases')
+} = useTableData<Update>('/api/updates')
 
 // Filters
 const filterParams = ref<FilterParams>({})
@@ -35,7 +50,7 @@ const filterConfigs: FilterConfig[] = [
     key: 'search',
     type: 'text',
     label: 'Search',
-    placeholder: 'Search versions, tags, or notes...',
+    placeholder: 'Search versions...',
   },
   {
     key: 'channel',
@@ -47,33 +62,28 @@ const filterConfigs: FilterConfig[] = [
     ],
   },
   {
-    key: 'major',
+    key: 'is_latest',
     type: 'select',
-    label: 'Major Releases',
-    options: [{ label: 'Major Only', value: 'true' }],
+    label: 'Latest Only',
+    options: [{ label: 'Latest', value: 'true' }],
   },
 ]
 
 // Column definitions
-const columns: Column<Release>[] = [
+const columns: Column<Update>[] = [
   {
     key: 'version',
     label: 'Version',
     headerClass: 'w-[120px]',
-    render: (row: Release) => {
+    render: (row: Update) => {
       return h('div', { class: 'font-mono font-medium' }, row.version)
     },
-  },
-  {
-    key: 'tag',
-    label: 'Tag',
-    class: 'font-mono text-xs text-muted-foreground',
   },
   {
     key: 'channel',
     label: 'Channel',
     headerClass: 'w-[100px]',
-    render: (row: Release) => {
+    render: (row: Update) => {
       const variant = row.channel === 'stable' ? 'default' : 'secondary'
       return h(
         Badge,
@@ -83,13 +93,13 @@ const columns: Column<Release>[] = [
     },
   },
   {
-    key: 'major',
-    label: 'Major',
+    key: 'is_latest',
+    label: 'Latest',
     headerClass: 'w-[80px] text-center',
     class: 'text-center',
-    render: (row: Release) => {
-      return row.major
-        ? h(Badge, { variant: 'destructive', class: 'text-xs' }, { default: () => 'Major' })
+    render: (row: Update) => {
+      return row.is_latest
+        ? h(CheckCircle, { class: 'h-4 w-4 text-green-600 dark:text-green-500 inline' })
         : h('span', { class: 'text-muted-foreground' }, '—')
     },
   },
@@ -97,7 +107,7 @@ const columns: Column<Release>[] = [
     key: 'published_at',
     label: 'Published',
     headerClass: 'w-[140px]',
-    render: (row: Release) => {
+    render: (row: Update) => {
       const date = new Date(row.published_at)
       return h(
         'div',
@@ -111,10 +121,22 @@ const columns: Column<Release>[] = [
     },
   },
   {
+    key: 'release_id',
+    label: 'Release',
+    headerClass: 'w-[100px]',
+    render: (row: Update) => {
+      return h(
+        'div',
+        { class: 'font-mono text-xs text-muted-foreground truncate' },
+        row.release_id.substring(0, 8)
+      )
+    },
+  },
+  {
     key: 'created_at',
     label: 'Created',
     headerClass: 'w-[140px]',
-    render: (row: Release) => {
+    render: (row: Update) => {
       const date = new Date(row.created_at)
       return h(
         'time',
@@ -134,7 +156,7 @@ const columns: Column<Release>[] = [
     key: 'actions',
     label: '',
     headerClass: 'w-[50px]',
-    render: (row: Release) => {
+    render: (row: Update) => {
       return h(
         DropdownMenu,
         {},
@@ -166,7 +188,7 @@ const columns: Column<Release>[] = [
                   h(
                     DropdownMenuItem,
                     {
-                      onClick: () => viewRelease(row),
+                      onClick: () => viewUpdate(row),
                     },
                     {
                       default: () => [
@@ -178,25 +200,12 @@ const columns: Column<Release>[] = [
                   h(
                     DropdownMenuItem,
                     {
-                      onClick: () => downloadArtifacts(row),
+                      onClick: () => downloadManifest(row),
                     },
                     {
                       default: () => [
                         h(Download, { class: 'mr-2 h-4 w-4' }),
-                        'Download Artifacts',
-                      ],
-                    }
-                  ),
-                  h(DropdownMenuSeparator),
-                  h(
-                    DropdownMenuItem,
-                    {
-                      onClick: () => publishRelease(row),
-                    },
-                    {
-                      default: () => [
-                        h(Rocket, { class: 'mr-2 h-4 w-4' }),
-                        'Publish to Channel',
+                        'Download Manifest',
                       ],
                     }
                   ),
@@ -211,18 +220,13 @@ const columns: Column<Release>[] = [
 ]
 
 // Actions
-const viewRelease = (release: Release): void => {
-  router.visit(`/admin/releases/${release.id}`)
+const viewUpdate = (update: Update): void => {
+  router.visit(`/admin/updates/${update.id}`)
 }
 
-const downloadArtifacts = (release: Release): void => {
-  console.log('Download artifacts for:', release.version)
+const downloadManifest = (update: Update): void => {
+  console.log('Download manifest for:', update.version)
   // Implement download logic
-}
-
-const publishRelease = (release: Release): void => {
-  console.log('Publish release:', release.version)
-  // Implement publish logic
 }
 
 const handleFilterApply = (): void => {
@@ -245,38 +249,36 @@ onMounted(() => {
 </script>
 
 <template>
-  <Head title="Releases" />
+  <Head title="Updates" />
 
-  <div class="space-y-6">
-    <div>
-      <h3 class="text-2xl font-semibold">Releases</h3>
-      <p class="text-sm text-muted-foreground">
-        Manage your application releases and versions.
-      </p>
+  <AppLayout :breadcrumbs="breadcrumbs">
+    <div class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+      <div class="flex flex-col gap-6">
+        <div class="flex flex-col gap-2">
+          <h3 class="text-2xl font-semibold tracking-tight">Updates</h3>
+          <p class="text-sm text-muted-foreground">
+            Manage update manifests for different channels and versions.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-4">
+          <TableFilters
+            v-model="filterParams"
+            :filters="filterConfigs"
+            @apply="handleFilterApply"
+            @clear="handleFilterClear"
+          />
+
+          <DataTable
+            :columns="columns"
+            :data="updatesData"
+            :meta="meta"
+            :is-loading="isLoading"
+            empty-message="No updates found."
+            @page-change="handlePageChange"
+          />
+        </div>
+      </div>
     </div>
-
-    <div class="space-y-4">
-      <TableFilters
-        v-model="filterParams"
-        :filters="filterConfigs"
-        @apply="handleFilterApply"
-        @clear="handleFilterClear"
-      >
-        <template #append>
-          <Button @click="router.visit('/admin/releases/create')">
-            Create Release
-          </Button>
-        </template>
-      </TableFilters>
-
-      <DataTable
-        :columns="columns"
-        :data="releases"
-        :meta="meta"
-        :is-loading="isLoading"
-        empty-message="No releases found. Create your first release to get started."
-        @page-change="handlePageChange"
-      />
-    </div>
-  </div>
+  </AppLayout>
 </template>

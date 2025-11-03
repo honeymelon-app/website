@@ -49,7 +49,7 @@ const rangeText = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-between px-2">
+  <div class="flex items-center justify-between">
     <div class="flex-1 text-sm text-muted-foreground">
       {{ rangeText }}
     </div>
@@ -63,7 +63,7 @@ const rangeText = computed(() => {
         <Button
           variant="outline"
           size="icon"
-          class="h-8 w-8"
+          class="hidden h-8 w-8 lg:flex"
           :disabled="!canGoPrevious || isLoading"
           @click="goToFirstPage"
         >
@@ -93,7 +93,7 @@ const rangeText = computed(() => {
         <Button
           variant="outline"
           size="icon"
-          class="h-8 w-8"
+          class="hidden h-8 w-8 lg:flex"
           :disabled="!canGoNext || isLoading"
           @click="goToLastPage"
         >

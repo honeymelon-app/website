@@ -88,7 +88,9 @@ const hasData = computed(() => props.data && props.data.length > 0)
           <!-- Empty State -->
           <TableRow v-else>
             <TableCell :colspan="columns.length" class="h-24 text-center">
-              {{ emptyMessage || 'No results found.' }}
+              <div class="text-muted-foreground">
+                {{ emptyMessage || 'No results found.' }}
+              </div>
             </TableCell>
           </TableRow>
         </TableBody>
