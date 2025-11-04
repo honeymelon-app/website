@@ -6,38 +6,53 @@ namespace App\Services;
 
 use App\Enums\LicenseStatus;
 use App\Models\License;
+use App\Support\LicenseBundle;
+use App\Support\LicenseCodec;
+use App\Support\LicenseSigner;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Throwable;
 
 class LicenseService
 {
     /**
-     * Issue a new license for an order.
+     * Issue a new signed license for an order.
      *
-     * @param  array{order_id: string, seats?: int, entitlements?: array<string>, updates_until?: \DateTimeInterface}  $orderData
+     * @param  array{order_id: string, max_major_version?: int}  $orderData
      */
     public function issue(array $orderData): License
     {
-        $key = $this->generateKey();
-
-        Log::info('Issuing license', ['key_last4' => substr($key, -4)]);
-
-        $license = License::create([
-            'key' => $key,
+        $license = License::make([
             'status' => LicenseStatus::ACTIVE,
-            'seats' => $orderData['seats'] ?? 1,
-            'entitlements' => $orderData['entitlements'] ?? ['standard'],
-            'updates_until' => $orderData['updates_until'] ?? now()->addYear(),
-            'meta' => [
-                'issued_at' => now()->toIso8601String(),
-            ],
+            'max_major_version' => max(1, (int) ($orderData['max_major_version'] ?? 1)),
             'order_id' => $orderData['order_id'],
         ]);
 
-        Log::info('License issued', ['license_id' => $license->id]);
+        $license->id = (string) Str::uuid();
 
-        return $license;
+        $issuedAt = now();
+
+        $bundle = LicenseBundle::create($license, $issuedAt);
+
+        $license->key_plain = $bundle['key'];
+        $license->key = $this->hashKey($bundle['key']);
+        $license->meta = [
+            'issued_at' => $issuedAt->toIso8601String(),
+            'max_major_version' => $license->max_major_version,
+            'signature' => base64_encode($bundle['signature']),
+            'payload' => base64_encode($bundle['payload']),
+            'version' => 1,
+        ];
+
+        $license->save();
+
+        Log::info('License issued', [
+            'license_id' => $license->id,
+            'key_last_6' => substr($bundle['key'], -6),
+        ]);
+
+        return $license->refresh();
     }
 
     /**
@@ -45,10 +60,13 @@ class LicenseService
      */
     public function isValid(string $key): bool
     {
-        $cacheKey = "license:valid:{$key}";
+        $normalized = LicenseCodec::normalize($key);
+        $hashed = $this->hashKey($normalized);
 
-        return Cache::remember($cacheKey, 300, function () use ($key) {
-            $license = License::where('key', $key)->first();
+        $cacheKey = "license:valid:{$hashed}";
+
+        return Cache::remember($cacheKey, 300, function () use ($key, $hashed) {
+            $license = License::where('key', $hashed)->first();
 
             if (! $license) {
                 return false;
@@ -58,11 +76,26 @@ class LicenseService
                 return false;
             }
 
-            if ($license->updates_until && $license->updates_until->isPast()) {
+            try {
+                $bundle = LicenseBundle::decode($key);
+            } catch (Throwable $exception) {
+                Log::warning('Failed to decode license key', [
+                    'license_id' => $license->id,
+                    'message' => $exception->getMessage(),
+                ]);
+
                 return false;
             }
 
-            return true;
+            $isValid = LicenseSigner::verify($bundle['payload'], $bundle['signature']);
+
+            if (! $isValid) {
+                Log::warning('License signature verification failed', [
+                    'license_id' => $license->id,
+                ]);
+            }
+
+            return $isValid;
         });
     }
 
@@ -75,22 +108,15 @@ class LicenseService
 
         $license->update(['status' => LicenseStatus::REVOKED]);
 
-        // Clear cache
         Cache::forget("license:valid:{$license->key}");
 
         Log::info('License revoked', ['license_id' => $license->id]);
     }
 
-    /**
-     * Generate a license key in format XXXX-XXXX-XXXX-XXXX.
-     */
-    protected function generateKey(): string
+    private function hashKey(string $key): string
     {
-        return strtoupper(implode('-', [
-            Str::random(4),
-            Str::random(4),
-            Str::random(4),
-            Str::random(4),
-        ]));
+        $normalized = LicenseCodec::normalize($key);
+
+        return hash('sha256', $normalized);
     }
 }

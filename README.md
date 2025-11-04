@@ -158,6 +158,22 @@ npm ci && npm run build   # only if using front-end assets
 php artisan serve         # or run via PHP-FPM/Nginx
 ```
 
+### Issuing Licenses
+
+```
+php artisan license:generate-keys
+  # prints a base64 public/private pair for LICENSE_SIGNING_* env vars
+
+php artisan license:issue 8ee1d9d7-... --major=1
+
+php artisan license:issue --email=you@example.com --major=2 --json
+  # creates an ad-hoc order (provider=manual) and emits the signed key as JSON
+```
+
+Set `LICENSE_SIGNING_PUBLIC_KEY` and `LICENSE_SIGNING_PRIVATE_KEY` (base64 Ed25519 values) in your
+environment before issuing licenses. You can generate a pair locally with
+`php artisan license:generate-keys` and copy the output into `.env`.
+
 ### .env Template
 
 ```dotenv

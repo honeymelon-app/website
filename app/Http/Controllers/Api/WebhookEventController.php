@@ -153,8 +153,7 @@ class WebhookEventController extends Controller
         if ($orderData['status'] === 'paid' || $orderData['status'] === 'completed') {
             $license = $this->licenseService->issue([
                 'order_id' => $order->id,
-                'seats' => 1,
-                'entitlements' => ['standard'],
+                'max_major_version' => 1,
             ]);
 
             Log::info('License issued from webhook', [

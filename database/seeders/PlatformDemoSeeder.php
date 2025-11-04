@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
-use App\Models\Activation;
 use App\Models\Artifact;
 use App\Models\License;
 use App\Models\Order;
@@ -115,14 +114,6 @@ class PlatformDemoSeeder extends Seeder
                 ->state(['order_id' => $order->id])
                 ->create();
             $licenses->push($license);
-
-            // Add 0-2 activations per license
-            $activationCount = fake()->numberBetween(0, 2);
-            for ($j = 0; $j < $activationCount; $j++) {
-                Activation::factory()
-                    ->forLicense($license)
-                    ->create();
-            }
         }
 
         // Create 3 webhook events

@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class License extends Model implements Filterable
@@ -26,10 +25,9 @@ class License extends Model implements Filterable
      */
     protected $fillable = [
         'key',
+        'key_plain',
         'status',
-        'seats',
-        'entitlements',
-        'updates_until',
+        'max_major_version',
         'meta',
         'order_id',
     ];
@@ -40,7 +38,7 @@ class License extends Model implements Filterable
      * @var list<string>
      */
     protected $hidden = [
-        'key',
+        'key', // hashed representation
     ];
 
     /**
@@ -52,8 +50,7 @@ class License extends Model implements Filterable
     {
         return [
             'status' => LicenseStatus::class,
-            'entitlements' => 'array',
-            'updates_until' => 'datetime',
+            'max_major_version' => 'integer',
             'meta' => 'array',
         ];
     }
@@ -64,13 +61,5 @@ class License extends Model implements Filterable
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
-    }
-
-    /**
-     * Get the activations for the license.
-     */
-    public function activations(): HasMany
-    {
-        return $this->hasMany(Activation::class);
     }
 }

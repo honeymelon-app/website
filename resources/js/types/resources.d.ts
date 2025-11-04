@@ -45,9 +45,8 @@ export interface License {
     id: string;
     key: string;
     status: string;
-    seats: number;
-    entitlements: string[] | null;
-    updates_until: string | null;
+    max_major_version: number;
+    issued_at?: string | null;
     created_at: string;
 }
 
@@ -70,15 +69,6 @@ export interface WebhookEvent {
     created_at: string;
 }
 
-export interface Activation {
-    id: string;
-    license_id: string;
-    device_id_hash: string;
-    app_version: string | null;
-    os_version: string | null;
-    last_seen_at: string | null;
-    created_at: string;
-}
 
 /**
  * Pagination metadata

@@ -30,6 +30,6 @@ class LicenseController extends Controller
      */
     public function show(License $license): LicenseResource
     {
-        return new LicenseResource($license->load('order', 'activations'));
+        return new LicenseResource($license->load('order'));
     }
 }

@@ -18,11 +18,11 @@ class LicenseResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'key' => $this->key,
+            'key' => $this->key_plain,
+            'key_hash' => $this->key,
             'status' => $this->status->value,
-            'seats' => $this->seats,
-            'entitlements' => $this->entitlements,
-            'updates_until' => $this->updates_until?->toIso8601String(),
+            'max_major_version' => $this->max_major_version ?? 1,
+            'issued_at' => $this->meta['issued_at'] ?? null,
             'created_at' => $this->created_at->toIso8601String(),
         ];
     }

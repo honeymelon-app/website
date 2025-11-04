@@ -14,12 +14,11 @@ return new class extends Migration
     {
         Schema::create('licenses', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('key', 64)->unique();               // e.g., XXXX-XXXX-XXXX-XXXX
-            $table->enum('status', LicenseStatus::cases())->default(LicenseStatus::ACTIVE->value);   // active | revoked | expired
-            $table->unsignedInteger('seats')->default(1);
-            $table->json('entitlements')->nullable();          // ["pro", "hevc", ...]
-            $table->timestamp('updates_until')->nullable();    // perpetual license w/ maintenance
-            $table->json('meta')->nullable();                  // store signed payload, etc.
+            $table->string('key', 64)->unique();               // hashed
+            $table->string('key_plain', 255)->nullable()->unique();      // human-readable license key
+            $table->enum('status', LicenseStatus::cases())->default(LicenseStatus::ACTIVE->value);
+            $table->unsignedTinyInteger('max_major_version')->default(1);
+            $table->json('meta')->nullable();
             $table->foreignUuid('order_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();

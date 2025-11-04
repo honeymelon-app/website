@@ -1,8 +1,4 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
-
-Artisan::command('inspire', function () {
-    $this->comment(Inspiring::quote());
-})->purpose('Display an inspiring quote');
+// Console routes are no longer needed as all commands have been moved to app/Console/Commands.
+// Commands in app/Console/Commands are automatically registered in Laravel 12.

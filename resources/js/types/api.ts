@@ -76,14 +76,12 @@ export interface Update {
 export interface License {
     id: string;
     status: 'active' | 'revoked' | 'expired';
-    seats: number;
-    entitlements: string[];
-    updates_until: string | null;
+    max_major_version: number;
+    issued_at: string | null;
     order_id: string;
     created_at: string;
     updated_at: string;
     order?: Order;
-    activations?: Activation[];
 }
 
 // Order types
@@ -118,17 +116,6 @@ export interface User {
     email: string;
     avatar?: string;
     email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
-}
-
-export interface Activation {
-    id: string;
-    license_id: string;
-    device_id_hash: string;
-    app_ver: string | null;
-    os_ver: string | null;
-    last_seen_at: string;
     created_at: string;
     updated_at: string;
 }

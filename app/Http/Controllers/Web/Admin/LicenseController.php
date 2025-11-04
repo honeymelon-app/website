@@ -19,7 +19,7 @@ class LicenseController extends Controller
     public function index(): Response
     {
         $licenses = License::query()
-            ->with('order', 'activations')
+            ->with('order')
             ->latest('created_at')
             ->paginate(20);
 
@@ -34,7 +34,7 @@ class LicenseController extends Controller
     public function show(License $license): Response
     {
         return Inertia::render('Admin/Licenses/Show', [
-            'license' => new LicenseResource($license->load('order', 'activations')),
+            'license' => new LicenseResource($license->load('order')),
         ]);
     }
 }

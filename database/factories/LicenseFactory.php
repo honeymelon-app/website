@@ -7,6 +7,8 @@ namespace Database\Factories;
 use App\Enums\LicenseStatus;
 use App\Models\License;
 use App\Models\Order;
+use App\Support\LicenseBundle;
+use App\Support\LicenseCodec;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -16,60 +18,64 @@ use Illuminate\Support\Str;
 class LicenseFactory extends Factory
 {
     /**
-     * The name of the factory's corresponding model.
-     *
      * @var class-string<License>
      */
     protected $model = License::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
     public function definition(): array
     {
-        // Generate a license key like XXXX-XXXX-XXXX-XXXX
-        $key = strtoupper(implode('-', [
-            Str::random(4),
-            Str::random(4),
-            Str::random(4),
-            Str::random(4),
-        ]));
-
         return [
-            'key' => $key,
+            'key' => null,
+            'key_plain' => null,
             'status' => LicenseStatus::ACTIVE,
-            'seats' => fake()->randomElement([1, 2, 5]),
-            'entitlements' => fake()->randomElement([
-                ['pro'],
-                ['pro', 'hevc'],
-                ['standard'],
-            ]),
-            'updates_until' => fake()->dateTimeBetween('now', '+2 years'),
-            'meta' => [
-                'issued_at' => now()->toIso8601String(),
-            ],
+            'max_major_version' => 1,
+            'meta' => null,
             'order_id' => Order::factory(),
         ];
     }
 
-    /**
-     * Configure the factory for a revoked license.
-     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (License $license): void {
+            if (! config('license.signing.private_key') || ! config('license.signing.public_key')) {
+                if (! function_exists('sodium_crypto_sign_keypair')) {
+                    throw new \RuntimeException('Signing keys are not configured and sodium is unavailable to generate a fallback keypair.');
+                }
+
+                $keypair = sodium_crypto_sign_keypair();
+                config()->set('license.signing.private_key', base64_encode($keypair));
+                config()->set('license.signing.public_key', base64_encode(sodium_crypto_sign_publickey($keypair)));
+            }
+
+            if (! $license->order_id) {
+                $license->order_id = Order::factory()->create()->getKey();
+            }
+
+            if (! $license->getKey()) {
+                $license->id = (string) Str::uuid();
+            }
+
+            $issuedAt = now();
+            $bundle = LicenseBundle::create($license, $issuedAt);
+            $license->key_plain = $bundle['key'];
+            $license->key = hash('sha256', LicenseCodec::normalize($bundle['key']));
+            $license->meta = [
+                'issued_at' => $issuedAt->toIso8601String(),
+                'max_major_version' => $license->max_major_version ?? 1,
+                'signature' => base64_encode($bundle['signature']),
+                'payload' => base64_encode($bundle['payload']),
+                'version' => 1,
+            ];
+        });
+    }
+
     public function revoked(): self
     {
         return $this->state(fn () => ['status' => LicenseStatus::REVOKED]);
     }
 
-    /**
-     * Configure the factory for an expired license.
-     */
     public function expired(): self
     {
-        return $this->state(fn () => [
-            'status' => LicenseStatus::EXPIRED,
-            'updates_until' => fake()->dateTimeBetween('-2 years', '-1 day'),
-        ]);
+        return $this->state(fn () => ['status' => LicenseStatus::EXPIRED]);
     }
 }

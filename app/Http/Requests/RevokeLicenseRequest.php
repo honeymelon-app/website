@@ -24,7 +24,7 @@ class RevokeLicenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'key' => ['required', 'string', 'regex:/^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/'],
+            'key' => ['required', 'string', 'regex:/^[A-Z2-9]{5}(?:-[A-Z2-9]{5}){5,40}$/'],
         ];
     }
 
@@ -37,7 +37,7 @@ class RevokeLicenseRequest extends FormRequest
     {
         return [
             'key.required' => 'A license key is required',
-            'key.regex' => 'License key must be in format XXXX-XXXX-XXXX-XXXX',
+            'key.regex' => 'License key must use groups of five characters (A-Z, 2-9).',
         ];
     }
 }
