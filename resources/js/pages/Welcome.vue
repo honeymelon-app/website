@@ -115,6 +115,17 @@ const keyFeatures = keyFeaturesData;
                         >Privacy-First</Badge
                     >
                 </div>
+
+                <!-- App Screenshot -->
+                <div class="mt-20">
+                    <div class="relative mx-auto max-w-6xl">
+                        <img
+                            src="/images/screens/Pending-Files-Active-Files-Completed-Files-Light-Mode.png"
+                            alt="Honeymelon App Interface"
+                            class="w-full rounded-xl"
+                        />
+                    </div>
+                </div>
             </template>
         </PageHero>
 
@@ -150,6 +161,177 @@ const keyFeatures = keyFeaturesData;
                             >
                         </CardContent>
                     </Card>
+                </div>
+            </div>
+        </section>
+
+        <!-- App Screenshots Showcase -->
+        <section class="border-b border-border/40 py-28">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <SectionHeader
+                    badge="Interface"
+                    title="Beautiful & Intuitive"
+                    description="Designed for macOS with native performance and elegant UI"
+                />
+
+                <div class="space-y-32">
+                    <!-- Queue Management -->
+                    <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+                        <div class="order-2 lg:order-1">
+                            <Badge variant="outline" class="mb-4 px-3 py-1"
+                                >Queue Management</Badge
+                            >
+                            <h3 class="mb-4 text-3xl font-bold tracking-tight">
+                                Effortless File Processing
+                            </h3>
+                            <p class="mb-6 text-lg leading-relaxed text-muted-foreground">
+                                Drop your files and watch them process automatically.
+                                Track pending, active, and completed conversions all
+                                in one clean interface.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >Real-time progress tracking</span
+                                    >
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >Batch processing support</span
+                                    >
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >Automatic error handling</span
+                                    >
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="order-1 lg:order-2">
+                            <img
+                                src="/images/screens/Pending-Files-Queue-Light-Mode.png"
+                                alt="Queue Management"
+                                class="w-full rounded-xl"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Dark Mode Support -->
+                    <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+                        <div>
+                            <img
+                                src="/images/screens/Pending-Files-Active-Files-Completed-Files-Dark-Mode.png"
+                                alt="Dark Mode Interface"
+                                class="w-full rounded-xl"
+                            />
+                        </div>
+                        <div>
+                            <Badge variant="outline" class="mb-4 px-3 py-1"
+                                >Dark Mode</Badge
+                            >
+                            <h3 class="mb-4 text-3xl font-bold tracking-tight">
+                                Easy on the Eyes
+                            </h3>
+                            <p class="mb-6 text-lg leading-relaxed text-muted-foreground">
+                                Beautiful dark mode that automatically adapts to your
+                                system preferences. Perfect for long conversion
+                                sessions.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >System preference sync</span
+                                    >
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >Carefully crafted color palette</span
+                                    >
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >Reduced eye strain</span
+                                    >
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Destination Selection -->
+                    <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+                        <div class="order-2 lg:order-1">
+                            <Badge variant="outline" class="mb-4 px-3 py-1"
+                                >Smart Output</Badge
+                            >
+                            <h3 class="mb-4 text-3xl font-bold tracking-tight">
+                                Flexible Output Options
+                            </h3>
+                            <p class="mb-6 text-lg leading-relaxed text-muted-foreground">
+                                Choose where your converted files go. Save to custom
+                                directories or let Honeymelon organize them for you.
+                            </p>
+                            <ul class="space-y-3">
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >Custom output directories</span
+                                    >
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >Automatic file organization</span
+                                    >
+                                </li>
+                                <li class="flex items-start gap-3">
+                                    <Check
+                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
+                                        :stroke-width="3"
+                                    />
+                                    <span class="text-base"
+                                        >Original file preservation</span
+                                    >
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="order-1 lg:order-2">
+                            <img
+                                src="/images/screens/Destination-Directory-Chosen-Light-Mode.png"
+                                alt="Destination Selection"
+                                class="w-full rounded-xl"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
