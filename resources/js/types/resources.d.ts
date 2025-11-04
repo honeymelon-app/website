@@ -69,7 +69,6 @@ export interface WebhookEvent {
     created_at: string;
 }
 
-
 /**
  * Pagination metadata
  */

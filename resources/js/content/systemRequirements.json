@@ -1,0 +1,14 @@
+{
+    "minimum": [
+        { "label": "OS", "value": "macOS 13 (Ventura)" },
+        { "label": "Chip", "value": "Apple Silicon (M1+)" },
+        { "label": "RAM", "value": "4 GB" },
+        { "label": "Disk", "value": "50 MB + output space" }
+    ],
+    "recommended": [
+        { "label": "OS", "value": "macOS 14 (Sonoma) or later" },
+        { "label": "Chip", "value": "M2 Pro/Max or M3+" },
+        { "label": "RAM", "value": "16 GB" },
+        { "label": "Disk", "value": "≥ 500 MB free" }
+    ]
+}

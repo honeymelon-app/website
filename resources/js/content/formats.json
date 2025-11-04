@@ -1,0 +1,5 @@
+{
+    "video": ["MP4", "MOV", "MKV", "WebM", "GIF"],
+    "audio": ["M4A", "MP3", "FLAC", "WAV", "Opus"],
+    "image": ["PNG", "JPEG", "WebP"]
+}

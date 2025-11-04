@@ -1,0 +1,34 @@
+[
+    {
+        "question": "What are the system requirements?",
+        "answer": "Honeymelon requires macOS 13 (Ventura) or later and an Apple Silicon chip (M1 or newer). Intel-based Macs are not supported. For optimal performance, we recommend macOS 14 (Sonoma), 16GB RAM, and at least 500MB of free disk space."
+    },
+    {
+        "question": "Is Honeymelon free?",
+        "answer": "Honeymelon offers a free trial with limited conversions. For unlimited conversions and advanced features, a one-time license purchase is required. Visit our pricing page for more details."
+    },
+    {
+        "question": "Does Honeymelon work offline?",
+        "answer": "Yes! Honeymelon is designed for offline use. All media processing happens locally on your Mac with no cloud uploads or internet connection required. Your privacy is our priority."
+    },
+    {
+        "question": "What file formats are supported?",
+        "answer": "Honeymelon supports a wide range of formats including MP4, MOV, MKV, WebM, and GIF for video; M4A, MP3, FLAC, WAV, and Opus for audio; and PNG, JPEG, and WebP for images. Powered by FFmpeg, we offer comprehensive codec compatibility."
+    },
+    {
+        "question": "How does remux-first intelligence work?",
+        "answer": "Our smart conversion engine analyzes your media files and automatically determines the best approach. When possible, it copies streams directly without re-encoding (remuxing), which preserves quality and maximizes speed. Only when necessary does it transcode, ensuring optimal results every time."
+    },
+    {
+        "question": "Can I batch process multiple files?",
+        "answer": "Absolutely! Honeymelon supports batch processing with concurrent job management. Add multiple files, configure your conversion settings, and let Honeymelon handle them all with real-time progress tracking and accurate ETAs."
+    },
+    {
+        "question": "Does Honeymelon use hardware acceleration?",
+        "answer": "Yes! Honeymelon is optimized for Apple Silicon with native ARM64 support and leverages hardware acceleration on M-series chips for maximum performance."
+    },
+    {
+        "question": "How do I get support?",
+        "answer": "Visit our documentation for guides and tutorials. For technical support, check our GitHub repository or contact our support team through the help center."
+    }
+]

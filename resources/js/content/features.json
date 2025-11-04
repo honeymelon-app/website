@@ -1,0 +1,32 @@
+[
+    {
+        "title": "Remux-First Intelligence",
+        "description": "Automatically detects when to copy streams vs. transcode, preserving quality while maximizing speed.",
+        "icon": "Zap"
+    },
+    {
+        "title": "Privacy by Design",
+        "description": "All processing happens locally on your Mac. No telemetry, no cloud, no internet required.",
+        "icon": "Lock"
+    },
+    {
+        "title": "Professional Workflow",
+        "description": "Batch processing, concurrent jobs, real-time progress tracking with accurate ETA calculations.",
+        "icon": "Settings"
+    },
+    {
+        "title": "Multi-Format Support",
+        "description": "Convert video, audio, and images with dynamic presets for every container pair.",
+        "icon": "Film"
+    },
+    {
+        "title": "Apple Silicon Optimized",
+        "description": "Native ARM64 binary with hardware acceleration support for maximum performance.",
+        "icon": "Rocket"
+    },
+    {
+        "title": "FFmpeg Powered",
+        "description": "Industry-standard codec support with comprehensive format compatibility and LGPL compliance.",
+        "icon": "Wrench"
+    }
+]

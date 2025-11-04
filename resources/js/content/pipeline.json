@@ -1,0 +1,17 @@
+[
+    {
+        "number": "1",
+        "title": "Probe",
+        "description": "Analyzes media files to extract metadata, codecs, resolution, and color information."
+    },
+    {
+        "number": "2",
+        "title": "Plan",
+        "description": "Intelligently chooses the best conversion strategy: copy, transcode, or hybrid approach."
+    },
+    {
+        "number": "3",
+        "title": "Execute",
+        "description": "Converts with real-time progress tracking, concurrent job management, and accurate ETAs."
+    }
+]
