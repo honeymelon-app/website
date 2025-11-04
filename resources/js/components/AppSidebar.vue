@@ -12,12 +12,19 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import artifacts from '@/routes/admin/artifacts';
 import releases from '@/routes/admin/releases';
 import updates from '@/routes/admin/updates';
-import artifacts from '@/routes/admin/artifacts';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
-import { BookOpen, Folder, LayoutGrid, Package, RefreshCw, FileArchive } from 'lucide-vue-next';
+import {
+    BookOpen,
+    FileArchive,
+    Folder,
+    LayoutGrid,
+    Package,
+    RefreshCw,
+} from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
 const mainNavItems: NavItem[] = [
