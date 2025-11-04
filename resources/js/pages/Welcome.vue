@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { Head } from '@inertiajs/vue3';
+import { Zap, Lock, Settings, Film, Rocket, Wrench, ArrowRight, BookOpen, Check, Video, Music, Image } from 'lucide-vue-next';
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
@@ -18,32 +19,32 @@ const features = [
     {
         title: 'Remux-First Intelligence',
         description: 'Automatically detects when to copy streams vs. transcode, preserving quality while maximizing speed.',
-        icon: '⚡',
+        icon: Zap,
     },
     {
         title: 'Privacy by Design',
         description: 'All processing happens locally on your Mac. No telemetry, no cloud, no internet required.',
-        icon: '🔒',
+        icon: Lock,
     },
     {
         title: 'Professional Workflow',
         description: 'Batch processing, concurrent jobs, real-time progress tracking with accurate ETA calculations.',
-        icon: '⚙️',
+        icon: Settings,
     },
     {
         title: 'Multi-Format Support',
         description: 'Convert video, audio, and images with dynamic presets for every container pair.',
-        icon: '🎬',
+        icon: Film,
     },
     {
         title: 'Apple Silicon Optimized',
         description: 'Native ARM64 binary with hardware acceleration support for maximum performance.',
-        icon: '🚀',
+        icon: Rocket,
     },
     {
         title: 'FFmpeg Powered',
         description: 'Industry-standard codec support with comprehensive format compatibility and LGPL compliance.',
-        icon: '🛠️',
+        icon: Wrench,
     },
 ];
 
@@ -129,7 +130,7 @@ const keyFeatures = [
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col items-center text-center">
                     <Badge variant="outline" class="mb-6 animate-fade-in border-primary/50 text-base">
-                        <span class="mr-2">🍈</span>
+                        <AppLogoIcon class="mr-2 h-4 w-4" />
                         Native macOS Media Converter
                     </Badge>
                     <h1 class="mb-6 max-w-4xl bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-6xl md:text-7xl">
@@ -143,12 +144,12 @@ const keyFeatures = [
                         <Button as-child size="lg" class="text-base">
                             <a href="https://github.com" target="_blank" rel="noopener">
                                 Download for macOS
-                                <span class="ml-2">→</span>
+                                <ArrowRight class="ml-2 h-4 w-4" />
                             </a>
                         </Button>
                         <Button as-child variant="outline" size="lg" class="text-base">
                             <a href="https://github.com" target="_blank" rel="noopener">
-                                <span class="mr-2">📖</span>
+                                <BookOpen class="mr-2 h-4 w-4" />
                                 Documentation
                             </a>
                         </Button>
@@ -181,7 +182,7 @@ const keyFeatures = [
                 <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                     <Card v-for="feature in features" :key="feature.title">
                         <CardHeader>
-                            <div class="mb-3 text-4xl">{{ feature.icon }}</div>
+                            <component :is="feature.icon" class="mb-3 h-10 w-10 text-primary" :stroke-width="1.5" />
                             <CardTitle class="text-xl">{{ feature.title }}</CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -241,7 +242,7 @@ const keyFeatures = [
                 <div class="grid gap-8 md:grid-cols-3">
                     <Card>
                         <CardHeader>
-                            <div class="mb-3 text-4xl">🎬</div>
+                            <Video class="mb-3 h-12 w-12 text-primary" :stroke-width="1.5" />
                             <CardTitle class="text-2xl">Video</CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -253,7 +254,7 @@ const keyFeatures = [
 
                     <Card>
                         <CardHeader>
-                            <div class="mb-3 text-4xl">🎵</div>
+                            <Music class="mb-3 h-12 w-12 text-primary" :stroke-width="1.5" />
                             <CardTitle class="text-2xl">Audio</CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -265,7 +266,7 @@ const keyFeatures = [
 
                     <Card>
                         <CardHeader>
-                            <div class="mb-3 text-4xl">🖼️</div>
+                            <Image class="mb-3 h-12 w-12 text-primary" :stroke-width="1.5" />
                             <CardTitle class="text-2xl">Images</CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -346,8 +347,8 @@ const keyFeatures = [
                         <CardContent class="pt-6">
                             <ul class="space-y-4">
                                 <li v-for="feature in keyFeatures" :key="feature" class="flex items-start gap-3">
-                                    <Badge class="mt-0.5 h-6 w-6 flex-shrink-0 rounded-full p-0">
-                                        <span class="flex h-full w-full items-center justify-center text-xs">✓</span>
+                                    <Badge class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full p-0">
+                                        <Check class="h-3 w-3" :stroke-width="3" />
                                     </Badge>
                                     <span class="text-base leading-relaxed">{{ feature }}</span>
                                 </li>
@@ -375,12 +376,12 @@ const keyFeatures = [
                             <Button as-child size="lg" class="text-base">
                                 <a href="https://github.com" target="_blank" rel="noopener">
                                     Download for macOS
-                                    <span class="ml-2">→</span>
+                                    <ArrowRight class="ml-2 h-4 w-4" />
                                 </a>
                             </Button>
                             <Button as-child variant="outline" size="lg" class="text-base">
                                 <a href="https://github.com" target="_blank" rel="noopener">
-                                    <span class="mr-2">📚</span>
+                                    <BookOpen class="mr-2 h-4 w-4" />
                                     View Documentation
                                 </a>
                             </Button>
@@ -422,9 +423,9 @@ const keyFeatures = [
                     <div>
                         <h3 class="mb-4 text-sm font-semibold">Legal</h3>
                         <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="#" class="hover:text-foreground">Privacy Policy</a></li>
-                            <li><a href="#" class="hover:text-foreground">Terms of Service</a></li>
-                            <li><a href="#" class="hover:text-foreground">License</a></li>
+                            <li><a href="/privacy" class="hover:text-foreground">Privacy Policy</a></li>
+                            <li><a href="/terms" class="hover:text-foreground">Terms of Use</a></li>
+                            <li><a href="/download" class="hover:text-foreground">License</a></li>
                         </ul>
                     </div>
                 </div>

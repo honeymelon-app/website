@@ -10,6 +10,18 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+Route::get('/download', function () {
+    return Inertia::render('Download');
+})->name('download');
+
+Route::get('/privacy', function () {
+    return Inertia::render('Privacy');
+})->name('privacy');
+
+Route::get('/terms', function () {
+    return Inertia::render('Terms');
+})->name('terms');
+
 Route::get('dashboard', function () {
     return Inertia::render('admin/Index');
 })->middleware(['auth', 'verified'])->name('dashboard');
