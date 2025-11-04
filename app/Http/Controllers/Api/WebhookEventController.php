@@ -130,7 +130,7 @@ class WebhookEventController extends Controller
     /**
      * Process payment and issue license.
      */
-    private function processPayment(WebhookEvent $event, array $orderData): void
+    protected function processPayment(WebhookEvent $event, array $orderData): void
     {
         // Check if order already exists
         if (Order::where('external_id', $orderData['external_id'])->exists()) {
@@ -169,7 +169,7 @@ class WebhookEventController extends Controller
     /**
      * Map Lemon Squeezy event types to our enum.
      */
-    private function mapLemonSqueezyEventType(array $payload): string
+    protected function mapLemonSqueezyEventType(array $payload): string
     {
         $eventName = $payload['meta']['event_name'] ?? 'unknown';
 
@@ -183,7 +183,7 @@ class WebhookEventController extends Controller
     /**
      * Map Stripe event types to our enum.
      */
-    private function mapStripeEventType(array $payload): string
+    protected function mapStripeEventType(array $payload): string
     {
         $eventType = $payload['type'] ?? 'unknown';
 

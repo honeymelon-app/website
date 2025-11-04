@@ -151,7 +151,7 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
     /**
      * Extract the tag name from the GitHub webhook payload.
      */
-    private function extractTagFromPayload(): ?string
+    protected function extractTagFromPayload(): ?string
     {
         $tag = data_get($this->all(), 'release.tag_name');
 
@@ -183,7 +183,7 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
     /**
      * Normalize the Git tag into a version string.
      */
-    private function normalizeVersion(?string $tag): ?string
+    protected function normalizeVersion(?string $tag): ?string
     {
         if ($tag === null || $tag === '') {
             return null;
@@ -205,7 +205,7 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
     /**
      * Determine the release channel from the tag name.
      */
-    private function determineChannel(?string $tag): ?string
+    protected function determineChannel(?string $tag): ?string
     {
         if ($tag === null || $tag === '') {
             return null;
@@ -223,7 +223,7 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
     /**
      * Extract the commit hash referenced by the webhook.
      */
-    private function extractCommitHash(): ?string
+    protected function extractCommitHash(): ?string
     {
         $headCommit = data_get($this->all(), 'head_commit.id');
 

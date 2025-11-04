@@ -113,7 +113,7 @@ class LicenseService
         Log::info('License revoked', ['license_id' => $license->id]);
     }
 
-    private function hashKey(string $key): string
+    protected function hashKey(string $key): string
     {
         $normalized = LicenseCodec::normalize($key);
 
