@@ -14,6 +14,7 @@ import {
 import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
 import releases from '@/routes/admin/releases';
+import licenses from '@/routes/admin/licenses';
 import updates from '@/routes/admin/updates';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
@@ -24,6 +25,7 @@ import {
     LayoutGrid,
     Package,
     RefreshCw,
+    Shield,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -37,6 +39,11 @@ const mainNavItems: NavItem[] = [
         title: 'Releases',
         href: releases.index(),
         icon: Package,
+    },
+    {
+        title: 'Licenses',
+        href: licenses.index(),
+        icon: Shield,
     },
     {
         title: 'Updates',
@@ -53,12 +60,12 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [
     {
         title: 'Github Repo',
-        href: 'https://github.com/laravel/vue-starter-kit',
+        href: 'https://github.com/honeymelon-app/honeymelon',
         icon: Folder,
     },
     {
         title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#vue',
+        href: 'https://docs.honeymelon.app',
         icon: BookOpen,
     },
 ];

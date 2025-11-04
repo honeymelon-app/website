@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\LicenseCollection;
+use App\Http\Requests\StoreLicenseRequest;
 use App\Http\Resources\LicenseResource;
 use App\Models\License;
+use App\Models\Order;
+use App\Services\LicenseService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,9 +27,56 @@ class LicenseController extends Controller
             ->latest('created_at')
             ->paginate(20);
 
-        return Inertia::render('Admin/Licenses/Index', [
-            'licenses' => new LicenseCollection($licenses),
+        return Inertia::render('admin/licenses/Index', [
+            'licenses' => [
+                'data' => LicenseResource::collection($licenses->items())->resolve(),
+                'meta' => [
+                    'current_page' => $licenses->currentPage(),
+                    'from' => $licenses->firstItem(),
+                    'last_page' => $licenses->lastPage(),
+                    'per_page' => $licenses->perPage(),
+                    'to' => $licenses->lastItem(),
+                    'total' => $licenses->total(),
+                ],
+                'links' => [
+                    'first' => $licenses->url(1),
+                    'last' => $licenses->url($licenses->lastPage()),
+                    'prev' => $licenses->previousPageUrl(),
+                    'next' => $licenses->nextPageUrl(),
+                ],
+            ],
         ]);
+    }
+
+    /**
+     * Store a newly created license.
+     */
+    public function store(StoreLicenseRequest $request, LicenseService $licenseService): RedirectResponse
+    {
+        // Create a manual order for admin-issued licenses
+        $order = Order::create([
+            'id' => (string) Str::uuid(),
+            'provider' => 'manual',
+            'external_id' => 'admin-'.now()->timestamp,
+            'email' => $request->validated('email'),
+            'amount' => 0,
+            'currency' => 'USD',
+            'meta' => [
+                'issued_by' => 'admin',
+                'issued_at' => now()->toIso8601String(),
+            ],
+        ]);
+
+        // Issue the license
+        $license = $licenseService->issue([
+            'order_id' => $order->id,
+            'max_major_version' => $request->validated('max_major_version'),
+        ]);
+
+        return redirect()
+            ->route('admin.licenses.index')
+            ->with('license_key', $license->key_plain)
+            ->with('license_email', $request->validated('email'));
     }
 
     /**
@@ -33,7 +84,7 @@ class LicenseController extends Controller
      */
     public function show(License $license): Response
     {
-        return Inertia::render('Admin/Licenses/Show', [
+        return Inertia::render('admin/licenses/Show', [
             'license' => new LicenseResource($license->load('order')),
         ]);
     }

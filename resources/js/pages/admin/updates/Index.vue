@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-    DataTable,
-    TableFilters,
-    type Column,
-    type FilterConfig,
-} from '@/components/data-table';
+import { DataTable, type Column } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,15 +9,20 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTableData } from '@/composables/useTableData';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import updates from '@/routes/admin/updates';
 import type { BreadcrumbItem } from '@/types';
-import type { FilterParams, Update } from '@/types/api';
+import type { PaginatedResponse, Update } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import { CheckCircle, Download, Eye, MoreHorizontal } from 'lucide-vue-next';
-import { h, onMounted, ref } from 'vue';
+import { h } from 'vue';
+
+interface Props {
+    updates: PaginatedResponse<Update>;
+}
+
+const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -32,44 +32,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Updates',
         href: updates.index().url,
-    },
-];
-
-// Fetch data
-const {
-    data: updatesData,
-    meta,
-    isLoading,
-    fetchData,
-    updateFilters,
-    goToPage,
-    clearFilters,
-} = useTableData<Update>('/api/updates');
-
-// Filters
-const filterParams = ref<FilterParams>({});
-
-const filterConfigs: FilterConfig[] = [
-    {
-        key: 'search',
-        type: 'text',
-        label: 'Search',
-        placeholder: 'Search versions...',
-    },
-    {
-        key: 'channel',
-        type: 'select',
-        label: 'Channel',
-        options: [
-            { label: 'Stable', value: 'stable' },
-            { label: 'Beta', value: 'beta' },
-        ],
-    },
-    {
-        key: 'is_latest',
-        type: 'select',
-        label: 'Latest Only',
-        options: [{ label: 'Latest', value: 'true' }],
     },
 ];
 
@@ -254,23 +216,13 @@ const downloadManifest = (update: Update): void => {
     // Implement download logic
 };
 
-const handleFilterApply = (): void => {
-    updateFilters(filterParams.value);
-};
-
-const handleFilterClear = (): void => {
-    filterParams.value = {};
-    clearFilters();
-};
-
 const handlePageChange = (page: number): void => {
-    goToPage(page);
+    router.visit(updates.index().url, {
+        data: { page },
+        preserveState: true,
+        preserveScroll: true,
+    });
 };
-
-// Fetch data on mount
-onMounted(() => {
-    fetchData();
-});
 </script>
 
 <template>
@@ -291,23 +243,13 @@ onMounted(() => {
                     </p>
                 </div>
 
-                <div class="flex flex-col gap-4">
-                    <TableFilters
-                        v-model="filterParams"
-                        :filters="filterConfigs"
-                        @apply="handleFilterApply"
-                        @clear="handleFilterClear"
-                    />
-
-                    <DataTable
-                        :columns="columns"
-                        :data="updatesData"
-                        :meta="meta"
-                        :is-loading="isLoading"
-                        empty-message="No updates found."
-                        @page-change="handlePageChange"
-                    />
-                </div>
+                <DataTable
+                    :columns="columns"
+                    :data="props.updates.data"
+                    :meta="props.updates.meta"
+                    empty-message="No updates found."
+                    @page-change="handlePageChange"
+                />
             </div>
         </div>
     </AppLayout>

@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-    DataTable,
-    TableFilters,
-    type Column,
-    type FilterConfig,
-} from '@/components/data-table';
+import { DataTable, type Column } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,15 +10,20 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTableData } from '@/composables/useTableData';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import releases from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
-import type { FilterParams, Release } from '@/types/api';
+import type { PaginatedResponse, Release } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import { Download, Eye, MoreHorizontal, Rocket } from 'lucide-vue-next';
-import { h, onMounted, ref } from 'vue';
+import { h } from 'vue';
+
+interface Props {
+    releases: PaginatedResponse<Release>;
+}
+
+const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -33,44 +33,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Releases',
         href: releases.index().url,
-    },
-];
-
-// Fetch data
-const {
-    data: releasesData,
-    meta,
-    isLoading,
-    fetchData,
-    updateFilters,
-    goToPage,
-    clearFilters,
-} = useTableData<Release>('/api/releases');
-
-// Filters
-const filterParams = ref<FilterParams>({});
-
-const filterConfigs: FilterConfig[] = [
-    {
-        key: 'search',
-        type: 'text',
-        label: 'Search',
-        placeholder: 'Search versions, tags, or notes...',
-    },
-    {
-        key: 'channel',
-        type: 'select',
-        label: 'Channel',
-        options: [
-            { label: 'Stable', value: 'stable' },
-            { label: 'Beta', value: 'beta' },
-        ],
-    },
-    {
-        key: 'major',
-        type: 'select',
-        label: 'Major Releases',
-        options: [{ label: 'Major Only', value: 'true' }],
     },
 ];
 
@@ -270,23 +232,13 @@ const publishRelease = (release: Release): void => {
     // Implement publish logic
 };
 
-const handleFilterApply = (): void => {
-    updateFilters(filterParams.value);
-};
-
-const handleFilterClear = (): void => {
-    filterParams.value = {};
-    clearFilters();
-};
-
 const handlePageChange = (page: number): void => {
-    goToPage(page);
+    router.visit(releases.index().url, {
+        data: { page },
+        preserveState: true,
+        preserveScroll: true,
+    });
 };
-
-// Fetch data on mount
-onMounted(() => {
-    fetchData();
-});
 </script>
 
 <template>
@@ -297,40 +249,28 @@ onMounted(() => {
             class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
         >
             <div class="flex flex-col gap-6">
-                <div class="flex flex-col gap-2">
-                    <h3 class="text-2xl font-semibold tracking-tight">
-                        Releases
-                    </h3>
-                    <p class="text-sm text-muted-foreground">
-                        Manage your application releases and versions.
-                    </p>
+                <div class="flex items-center justify-between">
+                    <div class="flex flex-col gap-2">
+                        <h3 class="text-2xl font-semibold tracking-tight">
+                            Releases
+                        </h3>
+                        <p class="text-sm text-muted-foreground">
+                            Manage your application releases and versions.
+                        </p>
+                    </div>
+
+                    <Button @click="router.visit('/admin/releases/create')">
+                        Create Release
+                    </Button>
                 </div>
 
-                <div class="flex flex-col gap-4">
-                    <TableFilters
-                        v-model="filterParams"
-                        :filters="filterConfigs"
-                        @apply="handleFilterApply"
-                        @clear="handleFilterClear"
-                    >
-                        <template #append>
-                            <Button
-                                @click="router.visit('/admin/releases/create')"
-                            >
-                                Create Release
-                            </Button>
-                        </template>
-                    </TableFilters>
-
-                    <DataTable
-                        :columns="columns"
-                        :data="releasesData"
-                        :meta="meta"
-                        :is-loading="isLoading"
-                        empty-message="No releases found. Create your first release to get started."
-                        @page-change="handlePageChange"
-                    />
-                </div>
+                <DataTable
+                    :columns="columns"
+                    :data="props.releases.data"
+                    :meta="props.releases.meta"
+                    empty-message="No releases found. Create your first release to get started."
+                    @page-change="handlePageChange"
+                />
             </div>
         </div>
     </AppLayout>

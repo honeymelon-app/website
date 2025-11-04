@@ -44,9 +44,10 @@ export interface Update {
 export interface License {
     id: string;
     key: string;
+    key_hash: string;
     status: string;
     max_major_version: number;
-    issued_at?: string | null;
+    issued_at: string | null;
     created_at: string;
 }
 

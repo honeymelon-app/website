@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ArtifactCollection;
 use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
 use Inertia\Inertia;
@@ -24,7 +23,23 @@ class ArtifactController extends Controller
             ->paginate(20);
 
         return Inertia::render('admin/artifacts/Index', [
-            'artifacts' => new ArtifactCollection($artifacts),
+            'artifacts' => [
+                'data' => ArtifactResource::collection($artifacts->items())->resolve(),
+                'meta' => [
+                    'current_page' => $artifacts->currentPage(),
+                    'from' => $artifacts->firstItem(),
+                    'last_page' => $artifacts->lastPage(),
+                    'per_page' => $artifacts->perPage(),
+                    'to' => $artifacts->lastItem(),
+                    'total' => $artifacts->total(),
+                ],
+                'links' => [
+                    'first' => $artifacts->url(1),
+                    'last' => $artifacts->url($artifacts->lastPage()),
+                    'prev' => $artifacts->previousPageUrl(),
+                    'next' => $artifacts->nextPageUrl(),
+                ],
+            ],
         ]);
     }
 

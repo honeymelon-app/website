@@ -36,8 +36,10 @@ export function useTableData<T>(
 
         try {
             const response = await fetch(`${endpoint}?${query}`, {
+                credentials: 'include',
                 headers: {
                     Accept: 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                 },
             });
 
