@@ -14,7 +14,7 @@ defineProps<Props>();
 
 <template>
     <section
-        class="relative overflow-hidden border-b border-border/40 py-32 sm:py-40"
+        class="relative overflow-hidden border-b border-border/40 py-20 sm:py-24"
     >
         <div
             class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.DEFAULT/20%),transparent)]"
@@ -24,17 +24,17 @@ defineProps<Props>();
                 <Badge
                     v-if="badge"
                     variant="outline"
-                    class="mb-8 border-primary/50 px-4 py-1.5 text-sm"
+                    class="mb-6 border-primary/50 px-4 py-1.5 text-sm"
                 >
                     <component
                         v-if="badgeIcon"
                         :is="badgeIcon"
-                        class="mr-2 h-3.5 w-3.5"
+                        class="mr-0.5 size-5"
                     />
                     {{ badge }}
                 </Badge>
                 <h1
-                    class="mb-8 max-w-4xl bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-4xl leading-tight font-bold tracking-tight text-transparent sm:text-5xl md:text-6xl lg:text-7xl lg:leading-tight"
+                    class="mb-6 max-w-4xl bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-4xl leading-tight font-bold tracking-tight text-transparent sm:text-5xl md:text-6xl lg:text-7xl lg:leading-tight"
                 >
                     {{ title }}
                     <span
@@ -44,7 +44,7 @@ defineProps<Props>();
                     >
                 </h1>
                 <p
-                    class="mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
+                    class="mb-8 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
                 >
                     {{ description }}
                 </p>

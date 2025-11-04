@@ -62,11 +62,11 @@ import { Head } from '@inertiajs/vue3';
                     <Separator />
 
                     <section>
-                        <h2 class="mb-4 text-2xl font-bold">License Types</h2>
+                        <h2 class="mb-4 text-2xl font-bold">License Details</h2>
 
                         <div class="mb-6">
                             <h3 class="mb-2 text-xl font-semibold">
-                                Standard License
+                                Lifetime License - $29 USD
                             </h3>
                             <ul
                                 class="space-y-2 text-base text-muted-foreground"
@@ -77,49 +77,13 @@ import { Head } from '@inertiajs/vue3';
                                     devices owned by the license holder
                                 </li>
                                 <li>
-                                    • Includes one (1) year of updates and
-                                    support
+                                    • Includes lifetime updates for all future
+                                    versions
                                 </li>
-                            </ul>
-                        </div>
-
-                        <div class="mb-6">
-                            <h3 class="mb-2 text-xl font-semibold">
-                                Pro License
-                            </h3>
-                            <ul
-                                class="space-y-2 text-base text-muted-foreground"
-                            >
-                                <li>• Valid for one (1) user</li>
+                                <li>• One-time payment, no recurring fees</li>
                                 <li>
-                                    • Can be installed on up to five (5) Mac
-                                    devices owned by the license holder
-                                </li>
-                                <li>
-                                    • Includes lifetime updates and priority
-                                    support
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div>
-                            <h3 class="mb-2 text-xl font-semibold">
-                                Team License
-                            </h3>
-                            <ul
-                                class="space-y-2 text-base text-muted-foreground"
-                            >
-                                <li>
-                                    • Valid for up to ten (10) users within the
-                                    same organization
-                                </li>
-                                <li>
-                                    • Can be installed on unlimited Mac devices
-                                    owned by the organization
-                                </li>
-                                <li>
-                                    • Includes lifetime updates and dedicated
-                                    support
+                                    • 30-day money-back guarantee, no questions
+                                    asked
                                 </li>
                             </ul>
                         </div>

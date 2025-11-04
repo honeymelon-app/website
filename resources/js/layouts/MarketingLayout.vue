@@ -24,7 +24,7 @@ import Separator from '@/components/ui/separator/Separator.vue';
                             <a href="/#features">Features</a>
                         </Button>
                         <Button as-child variant="ghost">
-                            <a href="/#pricing">Pricing</a>
+                            <a href="/pricing">Pricing</a>
                         </Button>
                         <Button as-child>
                             <a href="/download">Download</a>
@@ -66,14 +66,16 @@ import Separator from '@/components/ui/separator/Separator.vue';
                             </li>
                             <li>
                                 <a
-                                    href="/#pricing"
+                                    href="/pricing"
                                     class="transition-colors hover:text-foreground"
                                     >Pricing</a
                                 >
                             </li>
                             <li>
                                 <a
-                                    href="#"
+                                    href="https://docs.honeymelon.app"
+                                    target="_blank"
+                                    rel="noopener"
                                     class="transition-colors hover:text-foreground"
                                     >Documentation</a
                                 >
@@ -85,25 +87,18 @@ import Separator from '@/components/ui/separator/Separator.vue';
                         <ul class="space-y-3 text-sm text-muted-foreground">
                             <li>
                                 <a
-                                    href="https://github.com"
+                                    href="https://docs.honeymelon.app"
                                     target="_blank"
                                     rel="noopener"
                                     class="transition-colors hover:text-foreground"
-                                    >GitHub</a
+                                    >Documentation</a
                                 >
                             </li>
                             <li>
                                 <a
-                                    href="#"
+                                    href="/download"
                                     class="transition-colors hover:text-foreground"
-                                    >API Reference</a
-                                >
-                            </li>
-                            <li>
-                                <a
-                                    href="#"
-                                    class="transition-colors hover:text-foreground"
-                                    >Support</a
+                                    >Download</a
                                 >
                             </li>
                         </ul>
@@ -127,9 +122,9 @@ import Separator from '@/components/ui/separator/Separator.vue';
                             </li>
                             <li>
                                 <a
-                                    href="/download"
+                                    href="/terms"
                                     class="transition-colors hover:text-foreground"
-                                    >License</a
+                                    >License Agreement</a
                                 >
                             </li>
                         </ul>

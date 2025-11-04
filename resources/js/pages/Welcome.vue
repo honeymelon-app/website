@@ -72,11 +72,7 @@ const keyFeatures = keyFeaturesData;
                         size="lg"
                         class="text-base shadow-lg shadow-primary/20"
                     >
-                        <a
-                            href="https://github.com"
-                            target="_blank"
-                            rel="noopener"
-                        >
+                        <a href="/download">
                             Download for macOS
                             <ArrowRight class="ml-2 h-4 w-4" />
                         </a>
@@ -88,7 +84,7 @@ const keyFeatures = keyFeaturesData;
                         class="text-base"
                     >
                         <a
-                            href="https://github.com"
+                            href="https://docs.honeymelon.app"
                             target="_blank"
                             rel="noopener"
                         >
@@ -607,11 +603,7 @@ const keyFeatures = keyFeaturesData;
                                 size="lg"
                                 class="text-base shadow-lg shadow-primary/20"
                             >
-                                <a
-                                    href="https://github.com"
-                                    target="_blank"
-                                    rel="noopener"
-                                >
+                                <a href="/download">
                                     Download for macOS
                                     <ArrowRight class="ml-2 h-4 w-4" />
                                 </a>
@@ -623,7 +615,7 @@ const keyFeatures = keyFeaturesData;
                                 class="text-base"
                             >
                                 <a
-                                    href="https://github.com"
+                                    href="https://docs.honeymelon.app"
                                     target="_blank"
                                     rel="noopener"
                                 >

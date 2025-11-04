@@ -14,6 +14,10 @@ Route::get('/download', function () {
     return Inertia::render('Download');
 })->name('download');
 
+Route::get('/pricing', function () {
+    return Inertia::render('Pricing');
+})->name('pricing');
+
 Route::get('/privacy', function () {
     return Inertia::render('Privacy');
 })->name('privacy');

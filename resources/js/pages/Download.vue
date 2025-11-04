@@ -17,7 +17,7 @@ import CardHeader from '@/components/ui/card/CardHeader.vue';
 import CardTitle from '@/components/ui/card/CardTitle.vue';
 import MarketingLayout from '@/layouts/MarketingLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { BookOpen, Download as DownloadIcon, FileText } from 'lucide-vue-next';
+import { BookOpen, Download as DownloadIcon, FileText, Key } from 'lucide-vue-next';
 
 import faqsData from '@/content/faqs.json';
 
@@ -35,6 +35,28 @@ const faqs = faqsData;
             highlighted-text="Honeymelon"
             description="Download the latest version of Honeymelon and start converting your media with intelligent, privacy-first technology."
         />
+
+        <!-- License Required Notice -->
+        <section class="border-b border-border/40 py-16">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <Alert class="border-2 border-primary/30 bg-primary/5">
+                    <Key class="h-5 w-5 text-primary" />
+                    <AlertDescription class="ml-2 text-base">
+                        <strong class="font-semibold">License Required:</strong>
+                        Honeymelon is free to download, but requires a valid
+                        license key to use. After downloading, you'll need to
+                        <a
+                            href="/pricing"
+                            class="font-semibold text-primary underline underline-offset-4 hover:no-underline"
+                        >
+                            purchase a license
+                        </a>
+                        to activate the app. One-time payment of $29, no
+                        subscription required.
+                    </AlertDescription>
+                </Alert>
+            </div>
+        </section>
 
         <!-- Download Cards -->
         <section class="border-b border-border/40 py-28">
@@ -193,14 +215,21 @@ const faqs = faqsData;
                                     </div>
                                     <div class="pt-1">
                                         <h3 class="mb-2 font-semibold">
-                                            Launch & Enjoy
+                                            Activate with License Key
                                         </h3>
                                         <p
                                             class="text-sm leading-relaxed text-muted-foreground"
                                         >
-                                            Open Honeymelon from your
-                                            Applications folder and start
-                                            converting!
+                                            Open Honeymelon and enter your
+                                            license key when prompted. Don't have
+                                            one?
+                                            <a
+                                                href="/pricing"
+                                                class="font-medium text-primary underline underline-offset-2"
+                                            >
+                                                Purchase a license
+                                            </a>
+                                            to activate.
                                         </p>
                                     </div>
                                 </li>
@@ -383,12 +412,19 @@ const faqs = faqsData;
                                 Download Now
                             </Button>
                             <Button
+                                as-child
                                 variant="outline"
                                 size="lg"
                                 class="text-base"
                             >
-                                <BookOpen class="mr-2 h-4 w-4" />
-                                Read Documentation
+                                <a
+                                    href="https://docs.honeymelon.app"
+                                    target="_blank"
+                                    rel="noopener"
+                                >
+                                    <BookOpen class="mr-2 h-4 w-4" />
+                                    Read Documentation
+                                </a>
                             </Button>
                         </div>
                     </CardContent>
