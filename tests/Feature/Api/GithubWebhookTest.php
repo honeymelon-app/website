@@ -17,13 +17,30 @@ class GithubWebhookTest extends TestCase
 
     protected function getWebhookPayload(array $overrides = []): array
     {
-        return array_merge([
-            'tag' => 'v1.0.0',
-            'version' => '1.0.0',
-            'channel' => 'stable',
-            'commit_hash' => 'abc123def456789',
-            'is_major' => false,
-        ], $overrides);
+        $payload = [
+            'ref' => 'refs/tags/v1.0.0',
+            'before' => str_repeat('0', 40),
+            'after' => 'da6e8af2ec526b2fcbddad336e5a0a0f779a63df',
+            'repository' => [
+                'id' => 1085183151,
+                'full_name' => 'honeymelon-app/honeymelon',
+                'default_branch' => 'main',
+            ],
+            'head_commit' => [
+                'id' => 'da6e8af2ec526b2fcbddad336e5a0a0f779a63df',
+                'message' => 'feat: improve artifact preparation by dynamically locating bundle directory',
+            ],
+            'sender' => [
+                'login' => 'Thavarshan',
+                'id' => 10804999,
+            ],
+        ];
+
+        foreach ($overrides as $key => $value) {
+            data_set($payload, $key, $value);
+        }
+
+        return $payload;
     }
 
     protected function generateGithubSignature(string $payload, string $secret): string
@@ -58,7 +75,7 @@ class GithubWebhookTest extends TestCase
             return $job->tag === 'v1.0.0'
                 && $job->version === '1.0.0'
                 && $job->channel === ReleaseChannel::STABLE
-                && $job->commitHash === 'abc123def456789'
+                && $job->commitHash === 'da6e8af2ec526b2fcbddad336e5a0a0f779a63df'
                 && $job->isMajor === false;
         });
     }
@@ -174,7 +191,7 @@ class GithubWebhookTest extends TestCase
 
         $user = User::factory()->create();
 
-        $payload = $this->getWebhookPayload(['channel' => 'beta']);
+        $payload = $this->getWebhookPayload(['ref' => 'refs/tags/v1.0.0-beta.1']);
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/webhooks/github/release', $payload);

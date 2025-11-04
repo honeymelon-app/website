@@ -21,14 +21,9 @@ class GithubWebhookController extends Controller
      * 2. Dispatch a job to fetch release data from GitHub
      * 3. Create Release, Artifact, and Update records
      *
-     * Expected payload:
-     * {
-     *   "tag": "v1.0.0",
-     *   "version": "1.0.0",
-     *   "channel": "stable",
-     *   "commit_hash": "abc123def456",
-     *   "is_major": false
-     * }
+     * The controller now accepts native GitHub tag push payloads. Required
+     * release metadata such as tag, version, channel, and commit hash are
+     * normalized inside the form request before validation.
      */
     public function store(StoreGithubReleaseWebhookRequest $request): JsonResponse
     {
