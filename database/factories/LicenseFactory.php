@@ -28,7 +28,7 @@ class LicenseFactory extends Factory
             'key' => null,
             'key_plain' => null,
             'status' => LicenseStatus::ACTIVE,
-            'max_major_version' => 1,
+            'max_major_version' => fake()->numberBetween(1, 2),
             'meta' => null,
             'order_id' => Order::factory(),
         ];

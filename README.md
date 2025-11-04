@@ -16,6 +16,7 @@ Control plane for Honeymelon: marketing pages, update manifests for the Tauri ap
 - [Client (Tauri) Configuration](#client-tauri-configuration)
 - [Requirements](#requirements)
 - [Setup](#setup)
+  - [Issuing Licenses](#issuing-licenses)
   - [.env Template](#env-template)
 - [Release Workflow](#release-workflow)
 - [Admin UI](#admin-ui)
@@ -33,7 +34,7 @@ Control plane for Honeymelon: marketing pages, update manifests for the Tauri ap
 ## Features
 
 - Updates API for the Tauri auto-updater.
-- License-gated downloads with 302 redirects to GitHub assets (or signed R2/S3 URLs).
+- License-gated downloads with 302 redirects to GitHub assets (or signed R2/S3 URLs). Licenses are offline and perpetual for a major version (no phone-home).
 - Release administration (channels, notes, rollback).
 - Payments and licensing via Lemon Squeezy or Stripe webhooks.
 - Marketing and legal pages (Blade/Inertia) or proxied statics.
@@ -167,6 +168,10 @@ php artisan license:generate-keys
 php artisan license:issue 8ee1d9d7-... --major=1
 
 php artisan license:issue --email=you@example.com --major=2 --json
+
+Each license embeds the allowed major version (e.g. 1 covers every 1.x release). There are no
+activations or entitlement flags—the desktop app validates the signature locally and never contacts
+this service.
   # creates an ad-hoc order (provider=manual) and emits the signed key as JSON
 ```
 

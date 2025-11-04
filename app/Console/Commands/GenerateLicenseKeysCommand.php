@@ -33,7 +33,7 @@ class GenerateLicenseKeysCommand extends Command
 
         $keypair = sodium_crypto_sign_keypair();
         $public = base64_encode(sodium_crypto_sign_publickey($keypair));
-        $secret = base64_encode($keypair);
+        $secret = base64_encode(sodium_crypto_sign_secretkey($keypair));
 
         $this->info('Store these values in your environment (never commit them):');
         $this->newLine();

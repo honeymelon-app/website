@@ -36,7 +36,8 @@ final class LicenseBundleTest extends TestCase
 
         $license->id = Str::uuid()->toString();
 
-        $bundle = LicenseBundle::create($license, now());
+        $issuedAt = now();
+        $bundle = LicenseBundle::create($license, $issuedAt);
 
         $this->assertArrayHasKey('key', $bundle);
         $this->assertArrayHasKey('payload', $bundle);
@@ -47,5 +48,11 @@ final class LicenseBundleTest extends TestCase
         $this->assertSame($bundle['payload'], $decoded['payload']);
         $this->assertSame($bundle['signature'], $decoded['signature']);
         $this->assertTrue(LicenseSigner::verify($decoded['payload'], $decoded['signature']));
+
+        $decodedPayload = \App\Support\LicensePayload::decode($decoded['payload']);
+        $this->assertSame($license->id, $decodedPayload['license_id']);
+        $this->assertSame($license->order_id, $decodedPayload['order_id']);
+        $this->assertSame($license->max_major_version ?? 1, $decodedPayload['max_major_version']);
+        $this->assertSame($issuedAt->unix(), $decodedPayload['issued_at']);
     }
 }

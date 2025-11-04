@@ -13,7 +13,6 @@ use App\Support\LicensePayload;
 use App\Support\LicenseSigner;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Str;
 use Tests\TestCase;
 
 final class LicenseServiceTest extends TestCase
@@ -54,6 +53,11 @@ final class LicenseServiceTest extends TestCase
 
         $bundle = LicenseBundle::decode($license->key_plain);
         $this->assertTrue(LicenseSigner::verify($bundle['payload'], $bundle['signature']));
+
+        $payload = LicensePayload::decode($bundle['payload']);
+        $this->assertSame($license->id, $payload['license_id']);
+        $this->assertSame($license->order_id, $payload['order_id']);
+        $this->assertSame(2, $payload['max_major_version']);
     }
 
     public function test_is_valid_checks_signature(): void
