@@ -125,23 +125,23 @@ const keyFeatures = [
         </header>
 
         <!-- Hero Section with gradient -->
-        <section class="relative overflow-hidden border-b border-border/40 py-24 sm:py-32">
+        <section class="relative overflow-hidden border-b border-border/40 py-32 sm:py-40">
             <div class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.DEFAULT/20%),transparent)]" />
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col items-center text-center">
-                    <Badge variant="outline" class="mb-6 animate-fade-in border-primary/50 text-base">
-                        <AppLogoIcon class="mr-2 h-4 w-4" />
+                    <Badge variant="outline" class="mb-8 border-primary/50 px-4 py-1.5 text-sm">
+                        <AppLogoIcon class="mr-2 h-3.5 w-3.5" />
                         Native macOS Media Converter
                     </Badge>
-                    <h1 class="mb-6 max-w-4xl bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-6xl md:text-7xl">
-                        Smart Media Conversion<br />for
+                    <h1 class="mb-8 max-w-4xl bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-5xl font-bold leading-tight tracking-tight text-transparent sm:text-6xl md:text-7xl lg:leading-tight">
+                        Smart Media Conversion for
                         <span class="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text">Apple Silicon Macs</span>
                     </h1>
-                    <p class="mb-10 max-w-2xl text-xl leading-relaxed text-muted-foreground sm:text-2xl">
+                    <p class="mb-12 max-w-3xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
                         Remux-first, privacy-minded media converter that intelligently preserves quality while maximizing speed. Built exclusively for macOS Apple Silicon.
                     </p>
-                    <div class="flex flex-col gap-4 sm:flex-row">
-                        <Button as-child size="lg" class="text-base">
+                    <div class="flex flex-col gap-3 sm:flex-row">
+                        <Button as-child size="lg" class="text-base shadow-lg shadow-primary/20">
                             <a href="https://github.com" target="_blank" rel="noopener">
                                 Download for macOS
                                 <ArrowRight class="ml-2 h-4 w-4" />
@@ -156,33 +156,33 @@ const keyFeatures = [
                     </div>
 
                     <!-- System Requirements Badge -->
-                    <div class="mt-16 flex flex-wrap items-center justify-center gap-3">
+                    <div class="mt-20 flex flex-wrap items-center justify-center gap-3">
                         <span class="text-sm font-medium text-muted-foreground">Requirements:</span>
-                        <Badge variant="secondary" class="text-sm font-semibold">macOS 13+</Badge>
-                        <Badge variant="secondary" class="text-sm font-semibold">Apple Silicon (M1+)</Badge>
-                        <Badge variant="secondary" class="text-sm font-semibold">Privacy-First</Badge>
+                        <Badge variant="secondary" class="px-3 py-1">macOS 13+</Badge>
+                        <Badge variant="secondary" class="px-3 py-1">Apple Silicon</Badge>
+                        <Badge variant="secondary" class="px-3 py-1">Privacy-First</Badge>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Features Section with hover effects -->
-        <section id="features" class="border-b border-border/40 py-24">
+        <section id="features" class="border-b border-border/40 py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-16 text-center">
-                    <Badge variant="outline" class="mb-4">Features</Badge>
-                    <h2 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+                <div class="mb-20 text-center">
+                    <Badge variant="outline" class="mb-6 px-3 py-1">Features</Badge>
+                    <h2 class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl">
                         Everything You Need
                     </h2>
-                    <p class="mx-auto max-w-2xl text-xl text-muted-foreground">
+                    <p class="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground">
                         Built with modern technologies and best practices for production-ready deployments.
                     </p>
                 </div>
 
-                <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    <Card v-for="feature in features" :key="feature.title">
-                        <CardHeader>
-                            <component :is="feature.icon" class="mb-3 h-10 w-10 text-primary" :stroke-width="1.5" />
+                <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                    <Card v-for="feature in features" :key="feature.title" class="transition-shadow hover:shadow-lg">
+                        <CardHeader class="pb-4">
+                            <component :is="feature.icon" class="mb-4 h-12 w-12 text-primary" :stroke-width="1.5" />
                             <CardTitle class="text-xl">{{ feature.title }}</CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -194,23 +194,23 @@ const keyFeatures = [
         </section>
 
         <!-- How It Works Pipeline -->
-        <section class="border-b border-border/40 bg-muted/30 py-24">
+        <section class="border-b border-border/40 bg-muted/30 py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-16 text-center">
-                    <Badge variant="outline" class="mb-4">Process</Badge>
-                    <h2 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+                <div class="mb-20 text-center">
+                    <Badge variant="outline" class="mb-6 px-3 py-1">Process</Badge>
+                    <h2 class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl">
                         How It Works
                     </h2>
-                    <p class="mx-auto max-w-2xl text-xl text-muted-foreground">
+                    <p class="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground">
                         Three-stage intelligent conversion pipeline
                     </p>
                 </div>
 
                 <div class="grid gap-8 md:grid-cols-3">
                     <div v-for="stage in pipeline" :key="stage.number" class="relative">
-                        <Card class="h-full border-2">
-                            <CardHeader>
-                                <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary text-2xl font-bold text-primary-foreground">
+                        <Card class="h-full border-2 transition-shadow hover:shadow-lg">
+                            <CardHeader class="pb-4">
+                                <div class="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-3xl font-bold text-primary-foreground shadow-lg shadow-primary/20">
                                     {{ stage.number }}
                                 </div>
                                 <CardTitle class="text-2xl">{{ stage.title }}</CardTitle>
@@ -227,51 +227,51 @@ const keyFeatures = [
         </section>
 
         <!-- Supported Formats -->
-        <section class="border-b border-border/40 py-24">
+        <section class="border-b border-border/40 py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-16 text-center">
-                    <Badge variant="outline" class="mb-4">Compatibility</Badge>
-                    <h2 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+                <div class="mb-20 text-center">
+                    <Badge variant="outline" class="mb-6 px-3 py-1">Compatibility</Badge>
+                    <h2 class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl">
                         Supported Formats
                     </h2>
-                    <p class="mx-auto max-w-2xl text-xl text-muted-foreground">
+                    <p class="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground">
                         Comprehensive format support powered by FFmpeg
                     </p>
                 </div>
 
                 <div class="grid gap-8 md:grid-cols-3">
-                    <Card>
-                        <CardHeader>
-                            <Video class="mb-3 h-12 w-12 text-primary" :stroke-width="1.5" />
+                    <Card class="transition-shadow hover:shadow-lg">
+                        <CardHeader class="pb-4">
+                            <Video class="mb-4 h-14 w-14 text-primary" :stroke-width="1.5" />
                             <CardTitle class="text-2xl">Video</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div class="flex flex-wrap gap-2">
-                                <Badge v-for="format in formats.video" :key="format">{{ format }}</Badge>
+                                <Badge v-for="format in formats.video" :key="format" variant="secondary" class="px-3 py-1">{{ format }}</Badge>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <Music class="mb-3 h-12 w-12 text-primary" :stroke-width="1.5" />
+                    <Card class="transition-shadow hover:shadow-lg">
+                        <CardHeader class="pb-4">
+                            <Music class="mb-4 h-14 w-14 text-primary" :stroke-width="1.5" />
                             <CardTitle class="text-2xl">Audio</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div class="flex flex-wrap gap-2">
-                                <Badge v-for="format in formats.audio" :key="format">{{ format }}</Badge>
+                                <Badge v-for="format in formats.audio" :key="format" variant="secondary" class="px-3 py-1">{{ format }}</Badge>
                             </div>
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
-                            <Image class="mb-3 h-12 w-12 text-primary" :stroke-width="1.5" />
+                    <Card class="transition-shadow hover:shadow-lg">
+                        <CardHeader class="pb-4">
+                            <Image class="mb-4 h-14 w-14 text-primary" :stroke-width="1.5" />
                             <CardTitle class="text-2xl">Images</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div class="flex flex-wrap gap-2">
-                                <Badge v-for="format in formats.image" :key="format">{{ format }}</Badge>
+                                <Badge v-for="format in formats.image" :key="format" variant="secondary" class="px-3 py-1">{{ format }}</Badge>
                             </div>
                         </CardContent>
                     </Card>
@@ -280,24 +280,24 @@ const keyFeatures = [
         </section>
 
         <!-- System Requirements -->
-        <section class="border-b border-border/40 bg-muted/30 py-24">
+        <section class="border-b border-border/40 bg-muted/30 py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="mb-16 text-center">
-                    <Badge variant="outline" class="mb-4">Requirements</Badge>
-                    <h2 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+                <div class="mb-20 text-center">
+                    <Badge variant="outline" class="mb-6 px-3 py-1">Requirements</Badge>
+                    <h2 class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl">
                         System Requirements
                     </h2>
                 </div>
 
                 <div class="grid gap-8 lg:grid-cols-2">
-                    <Card>
-                        <CardHeader>
+                    <Card class="transition-shadow hover:shadow-lg">
+                        <CardHeader class="pb-4">
                             <CardTitle class="text-2xl">Minimum</CardTitle>
-                            <CardDescription>Basic requirements to run Honeymelon</CardDescription>
+                            <CardDescription class="text-base">Basic requirements to run Honeymelon</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div class="space-y-4">
-                                <div v-for="req in systemRequirements.minimum" :key="req.label" class="flex justify-between border-b border-border/50 pb-3">
+                                <div v-for="req in systemRequirements.minimum" :key="req.label" class="flex justify-between border-b border-border/50 pb-4">
                                     <span class="font-semibold">{{ req.label }}</span>
                                     <span class="text-muted-foreground">{{ req.value }}</span>
                                 </div>
@@ -305,14 +305,14 @@ const keyFeatures = [
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardHeader>
+                    <Card class="transition-shadow hover:shadow-lg">
+                        <CardHeader class="pb-4">
                             <CardTitle class="text-2xl">Recommended</CardTitle>
-                            <CardDescription>Optimal performance for heavy workloads</CardDescription>
+                            <CardDescription class="text-base">Optimal performance for heavy workloads</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div class="space-y-4">
-                                <div v-for="req in systemRequirements.recommended" :key="req.label" class="flex justify-between border-b border-border/50 pb-3">
+                                <div v-for="req in systemRequirements.recommended" :key="req.label" class="flex justify-between border-b border-border/50 pb-4">
                                     <span class="font-semibold">{{ req.label }}</span>
                                     <span class="text-muted-foreground">{{ req.value }}</span>
                                 </div>
@@ -321,7 +321,7 @@ const keyFeatures = [
                     </Card>
                 </div>
 
-                <Alert class="mt-8">
+                <Alert class="mt-10">
                     <AlertDescription class="text-base">
                         <strong>Important:</strong> Honeymelon is compiled exclusively for Apple Silicon (ARM64 architecture). Intel-based Macs are not supported.
                     </AlertDescription>
@@ -330,25 +330,25 @@ const keyFeatures = [
         </section>
 
         <!-- Key Features Checklist -->
-        <section class="border-b border-border/40 py-24">
+        <section class="border-b border-border/40 py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
+                <div class="grid gap-16 lg:grid-cols-2 lg:items-center">
                     <div>
-                        <Badge variant="outline" class="mb-4">Technical Excellence</Badge>
+                        <Badge variant="outline" class="mb-6 px-3 py-1">Technical Excellence</Badge>
                         <h2 class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl">
                             Powerful Features
                         </h2>
-                        <p class="text-xl leading-relaxed text-muted-foreground">
+                        <p class="text-lg leading-relaxed text-muted-foreground">
                             Built for professionals who need speed, quality, and privacy. Optimized for Apple Silicon with intelligent conversion strategies.
                         </p>
                     </div>
 
-                    <Card>
-                        <CardContent class="pt-6">
-                            <ul class="space-y-4">
-                                <li v-for="feature in keyFeatures" :key="feature" class="flex items-start gap-3">
+                    <Card class="transition-shadow hover:shadow-lg">
+                        <CardContent class="pt-8">
+                            <ul class="space-y-5">
+                                <li v-for="feature in keyFeatures" :key="feature" class="flex items-start gap-4">
                                     <Badge class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full p-0">
-                                        <Check class="h-3 w-3" :stroke-width="3" />
+                                        <Check class="h-3.5 w-3.5" :stroke-width="3" />
                                     </Badge>
                                     <span class="text-base leading-relaxed">{{ feature }}</span>
                                 </li>
@@ -360,20 +360,20 @@ const keyFeatures = [
         </section>
 
         <!-- CTA Section with gradient -->
-        <section class="py-24">
+        <section class="py-28">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <Card class="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-background">
+                <Card class="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-background shadow-xl">
                     <div class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.DEFAULT/10%),transparent)]" />
-                    <CardContent class="flex flex-col items-center gap-8 py-16 text-center">
-                        <Badge variant="secondary" class="text-base">Get Started Today</Badge>
+                    <CardContent class="flex flex-col items-center gap-8 py-20 text-center">
+                        <Badge variant="secondary" class="px-4 py-1.5">Get Started Today</Badge>
                         <h2 class="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl">
                             Ready to Transform Your Media Workflow?
                         </h2>
-                        <p class="max-w-2xl text-xl leading-relaxed text-muted-foreground">
+                        <p class="max-w-2xl text-lg leading-relaxed text-muted-foreground">
                             Download Honeymelon today and experience intelligent, privacy-first media conversion on your Mac.
                         </p>
-                        <div class="flex flex-col gap-4 sm:flex-row">
-                            <Button as-child size="lg" class="text-base">
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <Button as-child size="lg" class="text-base shadow-lg shadow-primary/20">
                                 <a href="https://github.com" target="_blank" rel="noopener">
                                     Download for macOS
                                     <ArrowRight class="ml-2 h-4 w-4" />
@@ -392,52 +392,52 @@ const keyFeatures = [
         </section>
 
         <!-- Footer -->
-        <footer class="border-t border-border/40 bg-muted/50 py-12">
+        <footer class="border-t border-border/40 bg-muted/50 py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
                     <div>
-                        <div class="mb-4 flex items-center gap-3">
+                        <div class="mb-6 flex items-center gap-3">
                             <AppLogoIcon class="h-8 w-8" />
                             <span class="text-lg font-bold">Honeymelon</span>
                         </div>
-                        <p class="text-sm text-muted-foreground">
+                        <p class="text-sm leading-relaxed text-muted-foreground">
                             Smart media converter for macOS Apple Silicon. Convert video, audio, and images with remux-first intelligence.
                         </p>
                     </div>
                     <div>
                         <h3 class="mb-4 text-sm font-semibold">Product</h3>
-                        <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="#" class="hover:text-foreground">Features</a></li>
-                            <li><a href="#" class="hover:text-foreground">Pricing</a></li>
-                            <li><a href="#" class="hover:text-foreground">Documentation</a></li>
+                        <ul class="space-y-3 text-sm text-muted-foreground">
+                            <li><a href="#" class="transition-colors hover:text-foreground">Features</a></li>
+                            <li><a href="#" class="transition-colors hover:text-foreground">Pricing</a></li>
+                            <li><a href="#" class="transition-colors hover:text-foreground">Documentation</a></li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="mb-4 text-sm font-semibold">Resources</h3>
-                        <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="https://github.com" target="_blank" rel="noopener" class="hover:text-foreground">GitHub</a></li>
-                            <li><a href="#" class="hover:text-foreground">API Reference</a></li>
-                            <li><a href="#" class="hover:text-foreground">Support</a></li>
+                        <ul class="space-y-3 text-sm text-muted-foreground">
+                            <li><a href="https://github.com" target="_blank" rel="noopener" class="transition-colors hover:text-foreground">GitHub</a></li>
+                            <li><a href="#" class="transition-colors hover:text-foreground">API Reference</a></li>
+                            <li><a href="#" class="transition-colors hover:text-foreground">Support</a></li>
                         </ul>
                     </div>
                     <div>
                         <h3 class="mb-4 text-sm font-semibold">Legal</h3>
-                        <ul class="space-y-2 text-sm text-muted-foreground">
-                            <li><a href="/privacy" class="hover:text-foreground">Privacy Policy</a></li>
-                            <li><a href="/terms" class="hover:text-foreground">Terms of Use</a></li>
-                            <li><a href="/download" class="hover:text-foreground">License</a></li>
+                        <ul class="space-y-3 text-sm text-muted-foreground">
+                            <li><a href="/privacy" class="transition-colors hover:text-foreground">Privacy Policy</a></li>
+                            <li><a href="/terms" class="transition-colors hover:text-foreground">Terms of Use</a></li>
+                            <li><a href="/download" class="transition-colors hover:text-foreground">License</a></li>
                         </ul>
                     </div>
                 </div>
-                <Separator class="my-8" />
+                <Separator class="my-10" />
                 <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
                     <p class="text-sm text-muted-foreground">
                         © 2025 Honeymelon. Privacy-first media conversion for Mac.
                     </p>
-                    <div class="flex gap-4">
-                        <Badge variant="outline">macOS 13+</Badge>
-                        <Badge variant="outline">Apple Silicon</Badge>
-                        <Badge variant="outline">Privacy-First</Badge>
+                    <div class="flex gap-3">
+                        <Badge variant="outline" class="px-3 py-1">macOS 13+</Badge>
+                        <Badge variant="outline" class="px-3 py-1">Apple Silicon</Badge>
+                        <Badge variant="outline" class="px-3 py-1">Privacy-First</Badge>
                     </div>
                 </div>
             </div>
