@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Web\DownloadController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -10,9 +11,7 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('/download', function () {
-    return Inertia::render('Download');
-})->name('download');
+Route::get('/download', DownloadController::class)->name('download');
 
 Route::get('/pricing', function () {
     return Inertia::render('Pricing');

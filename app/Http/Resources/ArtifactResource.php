@@ -29,6 +29,9 @@ class ArtifactResource extends JsonResource
             'url' => $this->url,
             'path' => $this->path,
             'created_at' => $this->created_at->toIso8601String(),
+            'release' => $this->when($this->relationLoaded('release'), function () {
+                return (new ReleaseResource($this->release))->resolve();
+            }),
         ];
     }
 }

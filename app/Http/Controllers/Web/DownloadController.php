@@ -1,50 +1,35 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers\Web;
 
+use App\Enums\ReleaseChannel;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
-use App\Models\Release;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DownloadController extends Controller
 {
     /**
-     * Display the download page with the latest artifacts.
+     * Display the download page with the latest darwin-aarch64 artifact.
      */
-    public function index(): Response
+    public function __invoke(): Response
     {
-        $latestRelease = Release::query()
-            ->with('artifacts')
-            ->whereNotNull('published_at')
-            ->latest('published_at')
+        $latestArtifact = Artifact::query()
+            ->with('release')
+            ->whereHas('release', function ($query) {
+                $query->where('channel', ReleaseChannel::STABLE)
+                    ->whereNotNull('published_at');
+            })
+            ->where('platform', 'darwin-aarch64')
+            ->latest('created_at')
             ->first();
 
-        $artifacts = $latestRelease?->artifacts->map(function (Artifact $artifact) {
-            return [
-                'id' => $artifact->id,
-                'platform' => $artifact->platform,
-                'filename' => $artifact->filename,
-                'size' => $artifact->size,
-                'sha256' => $artifact->sha256,
-                'signature' => $artifact->signature,
-                'notarized' => $artifact->notarized,
-                'url' => $artifact->url,
-                'created_at' => $artifact->created_at?->toIso8601String(),
-            ];
-        }) ?? collect();
-
         return Inertia::render('Download', [
-            'release' => $latestRelease ? [
-                'id' => $latestRelease->id,
-                'version' => $latestRelease->version,
-                'tag' => $latestRelease->tag,
-                'channel' => $latestRelease->channel->value,
-                'notes' => $latestRelease->notes,
-                'published_at' => $latestRelease->published_at?->toIso8601String(),
-            ] : null,
-            'artifacts' => $artifacts,
+            'artifact' => $latestArtifact ? (new ArtifactResource($latestArtifact))->resolve() : null,
         ]);
     }
 }

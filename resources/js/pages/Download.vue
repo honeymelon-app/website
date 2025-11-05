@@ -25,13 +25,29 @@ import { Artifact } from '@/types/api';
 const faqs = faqsData;
 
 const props = defineProps<{
-    artifact: Artifact;
+    artifact: Artifact | null;
 }>();
 
 function triggerDownload() {
-    if (props.artifact && props.artifact.url) {
+    if (props.artifact?.url) {
         window.location.href = props.artifact.url;
     }
+}
+
+function formatBytes(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
+}
+
+function formatDate(dateString: string): string {
+    return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    });
 }
 </script>
 
@@ -80,56 +96,72 @@ function triggerDownload() {
                         <CardHeader class="pb-4">
                             <div class="mb-4 flex items-center gap-2">
                                 <Badge class="px-3 py-1">Latest Release</Badge>
-                                <Badge variant="outline" class="px-3 py-1"
-                                    >v1.0.0</Badge
+                                <Badge
+                                    v-if="artifact?.release"
+                                    variant="outline"
+                                    class="px-3 py-1"
                                 >
+                                    v{{ artifact.release.version }}
+                                </Badge>
                             </div>
-                            <CardTitle class="text-2xl"
-                                >Honeymelon for macOS</CardTitle
-                            >
+                            <CardTitle class="text-2xl">
+                                Honeymelon for macOS
+                            </CardTitle>
                             <CardDescription class="text-base">
                                 Apple Silicon (M1, M2, M3, M4)
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="space-y-6">
-                            <div class="space-y-3">
+                            <div v-if="artifact" class="space-y-3">
                                 <div
                                     class="flex items-center justify-between border-b border-border/50 pb-3 text-sm"
                                 >
-                                    <span class="text-muted-foreground"
-                                        >Released</span
-                                    >
-                                    <span class="font-medium"
-                                        >January 15, 2025</span
-                                    >
+                                    <span class="text-muted-foreground">
+                                        Released
+                                    </span>
+                                    <span class="font-medium">
+                                        {{
+                                            artifact.release?.published_at
+                                                ? formatDate(
+                                                      artifact.release
+                                                          .published_at,
+                                                  )
+                                                : 'N/A'
+                                        }}
+                                    </span>
                                 </div>
                                 <div
                                     class="flex items-center justify-between border-b border-border/50 pb-3 text-sm"
                                 >
-                                    <span class="text-muted-foreground"
-                                        >Size</span
-                                    >
-                                    <span class="font-medium">42.3 MB</span>
+                                    <span class="text-muted-foreground">
+                                        Size
+                                    </span>
+                                    <span class="font-medium">
+                                        {{ formatBytes(artifact.size) }}
+                                    </span>
                                 </div>
                                 <div
                                     class="flex items-center justify-between border-b border-border/50 pb-3 text-sm"
                                 >
-                                    <span class="text-muted-foreground"
-                                        >Requires</span
-                                    >
+                                    <span class="text-muted-foreground">
+                                        Requires
+                                    </span>
                                     <span class="font-medium">macOS 13+</span>
                                 </div>
                             </div>
 
                             <div class="space-y-3">
                                 <Button
+                                    :disabled="!artifact?.url"
                                     size="lg"
-                                    class="w-full text-base shadow-lg shadow-primary/20"
+                                    class="w-full text-base shadow-lg shadow-primary/20 cursor-pointer"
+                                    @click="triggerDownload"
                                 >
                                     <DownloadIcon class="mr-2 h-4 w-4" />
                                     Download for Apple Silicon
                                 </Button>
                                 <Button
+                                    v-if="artifact?.release?.notes"
                                     variant="outline"
                                     size="lg"
                                     class="w-full text-base"
