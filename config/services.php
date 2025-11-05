@@ -37,7 +37,7 @@ return [
 
     'github' => [
         'owner' => env('GITHUB_OWNER', 'honeymelon-app'),
-        'repo' => env('GITHUB_REPO', 'app-macos'),
+        'repo' => env('GITHUB_REPO', 'honeymelon'),
         'token' => env('GITHUB_TOKEN'),
         'webhook_secret' => env('GITHUB_WEBHOOK_SECRET'),
     ],
