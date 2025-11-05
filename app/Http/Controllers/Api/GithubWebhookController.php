@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ReleaseChannel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreGithubReleaseWebhookRequest;
 use App\Jobs\ProcessGithubReleaseJob;
@@ -17,14 +18,16 @@ class GithubWebhookController extends Controller
      */
     public function store(StoreGithubReleaseWebhookRequest $request): JsonResponse
     {
-        ProcessGithubReleaseJob::dispatch(
-            tag: $request->input('tag'),
-            channel: $request->input('channel'),
-            version: $request->input('version'),
-            commitHash: $request->input('commit_hash'),
-            isMajor: $request->input('major', false),
-            userId: auth()->id(),
-        );
+        tap($request->validated(), function (array $data): void {
+            ProcessGithubReleaseJob::dispatch(
+                tag: $data['tag'],
+                channel: ReleaseChannel::from($data['channel']),
+                version: $data['version'],
+                commitHash: $data['commit_hash'],
+                isMajor: $data['major'],
+                userId: auth()->id(),
+            );
+        });
 
         return response()->json([], 201);
     }
