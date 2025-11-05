@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Api\ArtifactController;
 use App\Http\Controllers\Api\ArtifactDownloadController;
+use App\Http\Controllers\Api\CheckoutController;
+use App\Http\Controllers\Api\GithubWebhookController;
 use App\Http\Controllers\Api\LatestUpdateController;
 use App\Http\Controllers\Api\LicenseController;
 use App\Http\Controllers\Api\PublishReleaseController;
@@ -24,13 +26,13 @@ Route::prefix('updates')->group(function () {
 Route::get('/download', ArtifactDownloadController::class);
 
 // Checkout routes (public)
-Route::post('/checkout', \App\Http\Controllers\Api\CheckoutController::class);
+Route::post('/checkout', CheckoutController::class);
 
 Route::prefix('webhooks')->group(function () {
     Route::post('/lemonsqueezy', [WebhookEventController::class, 'lemonsqueezy']);
     Route::post('/stripe', [WebhookEventController::class, 'stripe']);
-    Route::post('/github/release', [\App\Http\Controllers\Api\GithubWebhookController::class, 'store']);
-});
+    Route::post('/github/release', [GithubWebhookController::class, 'store']);
+})->middleware('auth:sanctum');
 
 // Resource API routes (protected)
 Route::middleware('auth:sanctum')->group(function () {
