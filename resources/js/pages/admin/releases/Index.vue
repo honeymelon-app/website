@@ -3,13 +3,6 @@ import { DataTable, type Column } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
@@ -24,8 +17,7 @@ import type { BreadcrumbItem } from '@/types';
 import type { PaginatedResponse, Release } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import { Download, Eye, MoreHorizontal, Rocket } from 'lucide-vue-next';
-import { marked } from 'marked';
-import { computed, h, ref } from 'vue';
+import { h } from 'vue';
 
 interface Props {
     releases: PaginatedResponse<Release>;
@@ -44,17 +36,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Release details modal state
-const isDetailsDialogOpen = ref(false);
-const selectedRelease = ref<Release | null>(null);
-
-// Computed property to parse markdown notes
-const parsedNotes = computed(() => {
-    if (!selectedRelease.value?.notes) return '';
-    return marked(selectedRelease.value.notes);
-});
-
-// Column definitions
+// Helper to format file size
 const columns: Column<Release>[] = [
     {
         key: 'version',
@@ -244,8 +226,7 @@ const columns: Column<Release>[] = [
 
 // Actions
 const viewRelease = (release: Release): void => {
-    selectedRelease.value = release;
-    isDetailsDialogOpen.value = true;
+    router.visit(releasesRoute.show(release.id).url);
 };
 
 const downloadArtifacts = (release: Release): void => {
@@ -299,189 +280,5 @@ const handlePageChange = (page: number): void => {
                 />
             </div>
         </div>
-
-        <!-- Release Details Modal -->
-        <Dialog v-model:open="isDetailsDialogOpen">
-            <DialogContent class="max-w-2xl">
-                <DialogHeader>
-                    <DialogTitle>Release Details</DialogTitle>
-                    <DialogDescription>
-                        Detailed information about the selected release.
-                    </DialogDescription>
-                </DialogHeader>
-
-                <div
-                    v-if="selectedRelease"
-                    class="grid gap-6 py-4"
-                >
-                    <!-- Version -->
-                    <div class="grid grid-cols-3 items-start gap-4">
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Version
-                        </div>
-                        <div class="col-span-2">
-                            <span class="font-mono font-medium text-lg">
-                                {{ selectedRelease.version }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Tag -->
-                    <div class="grid grid-cols-3 items-start gap-4">
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Git Tag
-                        </div>
-                        <div class="col-span-2">
-                            <code
-                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
-                            >
-                                {{ selectedRelease.tag }}
-                            </code>
-                        </div>
-                    </div>
-
-                    <!-- Channel -->
-                    <div class="grid grid-cols-3 items-start gap-4">
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Channel
-                        </div>
-                        <div class="col-span-2">
-                            <Badge
-                                :variant="selectedRelease.channel === 'stable'
-                                        ? 'default'
-                                        : 'secondary'
-                                    "
-                                class="capitalize"
-                            >
-                                {{ selectedRelease.channel }}
-                            </Badge>
-                        </div>
-                    </div>
-
-                    <!-- Major Release -->
-                    <div class="grid grid-cols-3 items-start gap-4">
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Major Release
-                        </div>
-                        <div class="col-span-2">
-                            <Badge
-                                v-if="selectedRelease.major"
-                                variant="destructive"
-                                class="text-xs"
-                            >
-                                Major
-                            </Badge>
-                            <span
-                                v-else
-                                class="text-sm text-muted-foreground"
-                            >
-                                Minor/Patch
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Commit Hash -->
-                    <div class="grid grid-cols-3 items-start gap-4">
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Commit Hash
-                        </div>
-                        <div class="col-span-2">
-                            <code
-                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
-                            >
-                                {{ selectedRelease.commit_hash }}
-                            </code>
-                        </div>
-                    </div>
-
-                    <!-- Published At -->
-                    <div class="grid grid-cols-3 items-start gap-4">
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Published At
-                        </div>
-                        <div class="col-span-2 text-sm text-muted-foreground">
-                            <span v-if="selectedRelease.published_at">
-                                {{
-                                    new Date(
-                                        selectedRelease.published_at,
-                                    ).toLocaleString('en-US', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                    })
-                                }}
-                            </span>
-                            <span v-else> Not published yet </span>
-                        </div>
-                    </div>
-
-                    <!-- Created By -->
-                    <div
-                        v-if="selectedRelease.created_by"
-                        class="grid grid-cols-3 items-start gap-4"
-                    >
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Created By
-                        </div>
-                        <div class="col-span-2 text-sm">
-                            {{ selectedRelease.created_by }}
-                        </div>
-                    </div>
-
-                    <!-- Created At -->
-                    <div class="grid grid-cols-3 items-start gap-4">
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Created At
-                        </div>
-                        <div class="col-span-2 text-sm text-muted-foreground">
-                            {{
-                                new Date(
-                                    selectedRelease.created_at,
-                                ).toLocaleString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                })
-                            }}
-                        </div>
-                    </div>
-
-                    <!-- Release Notes -->
-                    <div
-                        v-if="selectedRelease.notes"
-                        class="grid grid-cols-3 items-start gap-4"
-                    >
-                        <div class="text-sm font-medium text-muted-foreground">
-                            Release Notes
-                        </div>
-                        <div class="col-span-2">
-                            <div
-                                class="prose prose-sm dark:prose-invert max-w-none rounded bg-muted p-4"
-                                v-html="parsedNotes"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Actions -->
-                    <div class="flex justify-end gap-2 pt-4">
-                        <Button
-                            variant="outline"
-                            @click="downloadArtifacts(selectedRelease)"
-                        >
-                            <Download class="mr-2 h-4 w-4" />
-                            Download Artifacts
-                        </Button>
-                        <Button @click="publishRelease(selectedRelease)">
-                            <Rocket class="mr-2 h-4 w-4" />
-                            Publish to Channel
-                        </Button>
-                    </div>
-                </div>
-            </DialogContent>
-        </Dialog>
     </AppLayout>
 </template>
