@@ -24,8 +24,6 @@ return new class extends Migration
             $table->string('url')->nullable();                      // for github source
             $table->string('path')->nullable();                     // for r2/s3 source
             $table->timestamps();
-
-            $table->unique(['release_id', 'platform']);
         });
     }
 
