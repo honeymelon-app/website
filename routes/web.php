@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\DownloadController;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -36,5 +37,8 @@ Route::prefix('admin')->middleware(['auth', 'verified'])->name('admin.')->group(
     Route::resource('orders', \App\Http\Controllers\Web\Admin\OrderController::class)->only(['index', 'show']);
     Route::resource('updates', \App\Http\Controllers\Web\Admin\UpdateController::class)->only(['index', 'show']);
 });
+
+Route::get('/register', fn (): RedirectResponse => redirect()->route('login'))->name('register');
+Route::post('/register', fn (): RedirectResponse => redirect()->route('login'));
 
 require __DIR__.'/settings.php';
