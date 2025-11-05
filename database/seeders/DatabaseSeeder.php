@@ -22,9 +22,9 @@ class DatabaseSeeder extends Seeder
             'email' => 'tjthavarshan@gmail.com',
         ]);
 
-        $this->call([
-            ReleaseSeeder::class,
-            PlatformDemoSeeder::class,
-        ]);
+        // $this->call([
+        //     ReleaseSeeder::class,
+        //     PlatformDemoSeeder::class,
+        // ]);
     }
 }
