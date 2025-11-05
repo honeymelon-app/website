@@ -20,8 +20,19 @@ import { Head } from '@inertiajs/vue3';
 import { BookOpen, Download as DownloadIcon, FileText, Key } from 'lucide-vue-next';
 
 import faqsData from '@/content/faqs.json';
+import { Artifact } from '@/types/api';
 
 const faqs = faqsData;
+
+const props = defineProps<{
+    artifact: Artifact;
+}>();
+
+function triggerDownload() {
+    if (props.artifact && props.artifact.url) {
+        window.location.href = props.artifact.url;
+    }
+}
 </script>
 
 <template>
@@ -406,7 +417,8 @@ const faqs = faqsData;
                         <div class="flex flex-col gap-3 sm:flex-row">
                             <Button
                                 size="lg"
-                                class="text-base shadow-lg shadow-primary/20"
+                                class="text-base shadow-lg shadow-primary/20 cursor-pointer"
+                                @click="triggerDownload"
                             >
                                 <DownloadIcon class="mr-2 h-4 w-4" />
                                 Download Now
@@ -415,7 +427,7 @@ const faqs = faqsData;
                                 as-child
                                 variant="outline"
                                 size="lg"
-                                class="text-base"
+                                class="text-base cursor-pointer"
                             >
                                 <a
                                     href="https://docs.honeymelon.app"
