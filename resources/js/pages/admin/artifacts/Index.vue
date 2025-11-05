@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import {
-    DataTable,
-    TableFilters,
-    type Column,
-    type FilterConfig,
-} from '@/components/data-table';
+import { DataTable, type Column } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -14,12 +16,11 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { useTableData } from '@/composables/useTableData';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
-import artifacts from '@/routes/admin/artifacts';
+import artifactsRoute from '@/routes/admin/artifacts';
 import type { BreadcrumbItem } from '@/types';
-import type { Artifact, FilterParams } from '@/types/api';
+import type { Artifact, PaginatedResponse } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import {
     Download,
@@ -28,7 +29,13 @@ import {
     MoreHorizontal,
     ShieldCheck,
 } from 'lucide-vue-next';
-import { h, onMounted, ref } from 'vue';
+import { h, ref } from 'vue';
+
+interface Props {
+    artifacts: PaginatedResponse<Artifact>;
+}
+
+const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -37,57 +44,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Artifacts',
-        href: artifacts.index().url,
-    },
-];
-
-// Fetch data
-const {
-    data: artifactsData,
-    meta,
-    isLoading,
-    fetchData,
-    updateFilters,
-    goToPage,
-    clearFilters,
-} = useTableData<Artifact>('/api/artifacts');
-
-// Filters
-const filterParams = ref<FilterParams>({});
-
-const filterConfigs: FilterConfig[] = [
-    {
-        key: 'search',
-        type: 'text',
-        label: 'Search',
-        placeholder: 'Search filenames...',
-    },
-    {
-        key: 'platform',
-        type: 'select',
-        label: 'Platform',
-        options: [
-            { label: 'Darwin ARM64', value: 'darwin-aarch64' },
-            { label: 'Darwin x86_64', value: 'darwin-x86_64' },
-            { label: 'Windows x86_64', value: 'windows-x86_64' },
-            { label: 'Linux x86_64', value: 'linux-x86_64' },
-        ],
-    },
-    {
-        key: 'source',
-        type: 'select',
-        label: 'Source',
-        options: [
-            { label: 'GitHub', value: 'github' },
-            { label: 'R2', value: 'r2' },
-            { label: 'S3', value: 's3' },
-        ],
-    },
-    {
-        key: 'notarized',
-        type: 'select',
-        label: 'Notarized',
-        options: [{ label: 'Notarized Only', value: 'true' }],
+        href: artifactsRoute.index().url,
     },
 ];
 
@@ -114,7 +71,7 @@ const columns: Column<Artifact>[] = [
                 h(
                     'span',
                     { class: 'font-mono text-xs truncate' },
-                    row.filename,
+                    row.filename || 'N/A',
                 ),
             ]);
         },
@@ -162,7 +119,7 @@ const columns: Column<Artifact>[] = [
             return h(
                 'div',
                 { class: 'text-sm text-muted-foreground' },
-                formatFileSize(row.size),
+                row.size ? formatFileSize(row.size) : 'N/A',
             );
         },
     },
@@ -174,8 +131,8 @@ const columns: Column<Artifact>[] = [
         render: (row: Artifact) => {
             return row.notarized
                 ? h(ShieldCheck, {
-                      class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
-                  })
+                    class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
+                })
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -297,32 +254,29 @@ const columns: Column<Artifact>[] = [
     },
 ];
 
+// Artifact details modal state
+const isDetailsDialogOpen = ref(false);
+const selectedArtifact = ref<Artifact | null>(null);
+
 // Actions
 const viewArtifact = (artifact: Artifact): void => {
-    router.visit(`/admin/artifacts/${artifact.id}`);
+    selectedArtifact.value = artifact;
+    isDetailsDialogOpen.value = true;
 };
 
 const downloadArtifact = (artifact: Artifact): void => {
-    window.open(artifact.url, '_blank');
-};
-
-const handleFilterApply = (): void => {
-    updateFilters(filterParams.value);
-};
-
-const handleFilterClear = (): void => {
-    filterParams.value = {};
-    clearFilters();
+    if (artifact.url) {
+        window.open(artifact.url, '_blank');
+    }
 };
 
 const handlePageChange = (page: number): void => {
-    goToPage(page);
+    router.visit(artifactsRoute.index().url, {
+        data: { page },
+        preserveState: true,
+        preserveScroll: true,
+    });
 };
-
-// Fetch data on mount
-onMounted(() => {
-    fetchData();
-});
 </script>
 
 <template>
@@ -343,24 +297,240 @@ onMounted(() => {
                     </p>
                 </div>
 
-                <div class="flex flex-col gap-4">
-                    <TableFilters
-                        v-model="filterParams"
-                        :filters="filterConfigs"
-                        @apply="handleFilterApply"
-                        @clear="handleFilterClear"
-                    />
-
-                    <DataTable
-                        :columns="columns"
-                        :data="artifactsData"
-                        :meta="meta"
-                        :is-loading="isLoading"
-                        empty-message="No artifacts found."
-                        @page-change="handlePageChange"
-                    />
-                </div>
+                <DataTable
+                    :columns="columns"
+                    :data="props.artifacts.data"
+                    :meta="props.artifacts.meta"
+                    empty-message="No artifacts found."
+                    @page-change="handlePageChange"
+                />
             </div>
         </div>
+
+        <!-- Artifact Details Modal -->
+        <Dialog v-model:open="isDetailsDialogOpen">
+            <DialogContent class="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>Artifact Details</DialogTitle>
+                    <DialogDescription>
+                        Detailed information about the selected artifact.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div
+                    v-if="selectedArtifact"
+                    class="grid gap-6 py-4"
+                >
+                    <!-- Filename -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Filename
+                        </div>
+                        <div class="col-span-2 flex items-center gap-2">
+                            <FileArchive
+                                class="h-4 w-4 text-muted-foreground flex-shrink-0"
+                            />
+                            <span class="font-mono text-sm break-all">
+                                {{ selectedArtifact.filename || 'N/A' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Platform -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Platform
+                        </div>
+                        <div class="col-span-2">
+                            <Badge
+                                variant="outline"
+                                class="font-mono text-xs"
+                            >
+                                {{ selectedArtifact.platform }}
+                            </Badge>
+                        </div>
+                    </div>
+
+                    <!-- Source -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Source
+                        </div>
+                        <div class="col-span-2">
+                            <Badge
+                                :variant="selectedArtifact.source === 'github'
+                                        ? 'default'
+                                        : selectedArtifact.source === 'r2'
+                                            ? 'secondary'
+                                            : 'outline'
+                                    "
+                                class="uppercase"
+                            >
+                                {{ selectedArtifact.source }}
+                            </Badge>
+                        </div>
+                    </div>
+
+                    <!-- Size -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Size
+                        </div>
+                        <div class="col-span-2 text-sm">
+                            {{
+                                selectedArtifact.size
+                                    ? formatFileSize(selectedArtifact.size)
+                                    : 'N/A'
+                            }}
+                        </div>
+                    </div>
+
+                    <!-- Notarized -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Notarized
+                        </div>
+                        <div class="col-span-2 flex items-center gap-2">
+                            <ShieldCheck
+                                v-if="selectedArtifact.notarized"
+                                class="h-4 w-4 text-green-600 dark:text-green-500"
+                            />
+                            <span
+                                :class="selectedArtifact.notarized
+                                        ? 'text-green-600 dark:text-green-500'
+                                        : 'text-muted-foreground'
+                                    "
+                                class="text-sm"
+                            >
+                                {{
+                                    selectedArtifact.notarized ? 'Yes' : 'No'
+                                }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- SHA256 -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            SHA256
+                        </div>
+                        <div class="col-span-2">
+                            <code
+                                v-if="selectedArtifact.sha256"
+                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                            >
+                                {{ selectedArtifact.sha256 }}
+                            </code>
+                            <span
+                                v-else
+                                class="text-sm text-muted-foreground"
+                            >
+                                N/A
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Signature -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Signature
+                        </div>
+                        <div class="col-span-2">
+                            <code
+                                v-if="selectedArtifact.signature"
+                                class="block max-h-32 overflow-y-auto break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                            >
+                                {{ selectedArtifact.signature }}
+                            </code>
+                            <span
+                                v-else
+                                class="text-sm text-muted-foreground"
+                            >
+                                N/A
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Release ID -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Release ID
+                        </div>
+                        <div class="col-span-2 font-mono text-xs text-muted-foreground">
+                            {{ selectedArtifact.release_id }}
+                        </div>
+                    </div>
+
+                    <!-- Path -->
+                    <div
+                        v-if="selectedArtifact.path"
+                        class="grid grid-cols-3 items-start gap-4"
+                    >
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Path
+                        </div>
+                        <div class="col-span-2">
+                            <code
+                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                            >
+                                {{ selectedArtifact.path }}
+                            </code>
+                        </div>
+                    </div>
+
+                    <!-- URL -->
+                    <div
+                        v-if="selectedArtifact.url"
+                        class="grid grid-cols-3 items-start gap-4"
+                    >
+                        <div class="text-sm font-medium text-muted-foreground">
+                            URL
+                        </div>
+                        <div class="col-span-2">
+                            <a
+                                :href="selectedArtifact.url"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="block break-all font-mono text-xs text-primary hover:underline"
+                            >
+                                {{ selectedArtifact.url }}
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Created At -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Created At
+                        </div>
+                        <div class="col-span-2 text-sm text-muted-foreground">
+                            {{
+                                new Date(
+                                    selectedArtifact.created_at,
+                                ).toLocaleString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })
+                            }}
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex justify-end gap-2 pt-4">
+                        <Button
+                            v-if="selectedArtifact.url"
+                            variant="outline"
+                            @click="downloadArtifact(selectedArtifact)"
+                        >
+                            <Download class="mr-2 h-4 w-4" />
+                            Download
+                        </Button>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
     </AppLayout>
 </template>

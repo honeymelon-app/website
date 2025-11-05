@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/select';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
-import licenses from '@/routes/admin/licenses';
+import licensesRoute from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
 import type { License, PaginatedResponse } from '@/types/resources';
 import { Head, router, useForm } from '@inertiajs/vue3';
@@ -52,12 +52,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Licenses',
-        href: licenses.index().url,
+        href: licensesRoute.index().url,
     },
 ];
 
 // Issue license modal state
 const isIssueDialogOpen = ref(false);
+
+// License details modal state
+const isDetailsDialogOpen = ref(false);
+const selectedLicense = ref<License | null>(null);
 
 // Success modal state
 const isSuccessDialogOpen = ref(!!props.license_key);
@@ -249,21 +253,21 @@ const columns: Column<License>[] = [
                                         : null,
                                     row.status === 'active'
                                         ? h(
-                                              DropdownMenuItem,
-                                              {
-                                                  onClick: () =>
-                                                      revokeLicense(row),
-                                                  class: 'text-destructive focus:text-destructive',
-                                              },
-                                              {
-                                                  default: () => [
-                                                      h(ShieldOff, {
-                                                          class: 'mr-2 h-4 w-4',
-                                                      }),
-                                                      'Revoke License',
-                                                  ],
-                                              },
-                                          )
+                                            DropdownMenuItem,
+                                            {
+                                                onClick: () =>
+                                                    revokeLicense(row),
+                                                class: 'text-destructive focus:text-destructive',
+                                            },
+                                            {
+                                                default: () => [
+                                                    h(ShieldOff, {
+                                                        class: 'mr-2 h-4 w-4',
+                                                    }),
+                                                    'Revoke License',
+                                                ],
+                                            },
+                                        )
                                         : null,
                                 ].filter(Boolean),
                             },
@@ -277,7 +281,8 @@ const columns: Column<License>[] = [
 
 // Actions
 const viewLicense = (license: License): void => {
-    router.visit(licenses.show(license.id).url);
+    selectedLicense.value = license;
+    isDetailsDialogOpen.value = true;
 };
 
 const revokeLicense = (license: License): void => {
@@ -297,7 +302,7 @@ const revokeLicense = (license: License): void => {
 };
 
 const handleIssueLicense = (): void => {
-    issueForm.post(licenses.store().url, {
+    issueForm.post(licensesRoute.store().url, {
         preserveScroll: true,
         onSuccess: () => {
             isIssueDialogOpen.value = false;
@@ -307,7 +312,7 @@ const handleIssueLicense = (): void => {
 };
 
 const handlePageChange = (page: number): void => {
-    router.visit(licenses.index().url, {
+    router.visit(licensesRoute.index().url, {
         data: { page },
         preserveState: true,
         preserveScroll: true,
@@ -501,5 +506,153 @@ const handlePageChange = (page: number): void => {
                 />
             </div>
         </div>
+
+        <!-- License Details Modal -->
+        <Dialog v-model:open="isDetailsDialogOpen">
+            <DialogContent class="max-w-2xl">
+                <DialogHeader>
+                    <DialogTitle>License Details</DialogTitle>
+                    <DialogDescription>
+                        Detailed information about the selected license.
+                    </DialogDescription>
+                </DialogHeader>
+
+                <div
+                    v-if="selectedLicense"
+                    class="grid gap-6 py-4"
+                >
+                    <!-- License ID -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            License ID
+                        </div>
+                        <div class="col-span-2">
+                            <code
+                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                            >
+                                {{ selectedLicense.id }}
+                            </code>
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Status
+                        </div>
+                        <div class="col-span-2">
+                            <Badge
+                                :variant="getStatusVariant(selectedLicense.status)"
+                                class="capitalize"
+                            >
+                                {{ selectedLicense.status }}
+                            </Badge>
+                        </div>
+                    </div>
+
+                    <!-- License Key -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            License Key
+                        </div>
+                        <div class="col-span-2">
+                            <code
+                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                            >
+                                {{ selectedLicense.key }}
+                            </code>
+                        </div>
+                    </div>
+
+                    <!-- Key Hash -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Key Hash
+                        </div>
+                        <div class="col-span-2">
+                            <code
+                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                            >
+                                {{ selectedLicense.key_hash }}
+                            </code>
+                        </div>
+                    </div>
+
+                    <!-- Max Major Version -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Max Major Version
+                        </div>
+                        <div class="col-span-2 text-sm">
+                            {{
+                                selectedLicense.max_major_version === 999
+                                    ? 'Lifetime (All versions)'
+                                    : `v${selectedLicense.max_major_version}.x`
+                            }}
+                        </div>
+                    </div>
+
+                    <!-- Issued At -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Issued At
+                        </div>
+                        <div class="col-span-2 text-sm text-muted-foreground">
+                            <span v-if="selectedLicense.issued_at">
+                                {{
+                                    new Date(
+                                        selectedLicense.issued_at,
+                                    ).toLocaleString('en-US', {
+                                        year: 'numeric',
+                                        month: 'long',
+                                        day: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                    })
+                                }}
+                            </span>
+                            <span v-else> Not issued yet </span>
+                        </div>
+                    </div>
+
+                    <!-- Created At -->
+                    <div class="grid grid-cols-3 items-start gap-4">
+                        <div class="text-sm font-medium text-muted-foreground">
+                            Created At
+                        </div>
+                        <div class="col-span-2 text-sm text-muted-foreground">
+                            {{
+                                new Date(
+                                    selectedLicense.created_at,
+                                ).toLocaleString('en-US', {
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                })
+                            }}
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div
+                        v-if="selectedLicense.status === 'active'"
+                        class="flex justify-end gap-2 pt-4"
+                    >
+                        <Button
+                            variant="destructive"
+                            @click="
+                                revokeLicense(selectedLicense);
+                            isDetailsDialogOpen = false;
+                            "
+                        >
+                            <ShieldOff class="mr-2 h-4 w-4" />
+                            Revoke License
+                        </Button>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
     </AppLayout>
 </template>
