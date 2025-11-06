@@ -141,12 +141,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/cerberus-iam/laravel-sdk.git",
-                "reference": "e921fc7fa9ec6f41f34da67f33bce521383eacb8"
+                "reference": "2e7d4db77934f9382fc3542b07c409340150bb98"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cerberus-iam/laravel-sdk/zipball/e921fc7fa9ec6f41f34da67f33bce521383eacb8",
-                "reference": "e921fc7fa9ec6f41f34da67f33bce521383eacb8",
+                "url": "https://api.github.com/repos/cerberus-iam/laravel-sdk/zipball/2e7d4db77934f9382fc3542b07c409340150bb98",
+                "reference": "2e7d4db77934f9382fc3542b07c409340150bb98",
                 "shasum": ""
             },
             "require": {
@@ -157,7 +157,6 @@
                 "illuminate/routing": "^10.0|^11.0|^12",
                 "illuminate/session": "^10.0|^11.0|^12",
                 "illuminate/support": "^10.0|^11.0|^12",
-                "jerome/fetch-php": "^3.2",
                 "jerome/filterable": "^2.0",
                 "php": "^8.3"
             },
@@ -210,7 +209,7 @@
                 "issues": "https://github.com/cerberus-iam/laravel-iam/issues",
                 "source": "https://github.com/cerberus-iam/laravel-iam"
             },
-            "time": "2025-11-06T11:50:18+00:00"
+            "time": "2025-11-06T23:30:51+00:00"
         },
         {
             "name": "clue/stream-filter",
@@ -1489,77 +1488,6 @@
             "time": "2025-09-28T21:21:36+00:00"
         },
         {
-            "name": "jerome/fetch-php",
-            "version": "3.2.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Thavarshan/fetch-php.git",
-                "reference": "f440cfd4d2fecc844dd87d870632845f8e2aab13"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Thavarshan/fetch-php/zipball/f440cfd4d2fecc844dd87d870632845f8e2aab13",
-                "reference": "f440cfd4d2fecc844dd87d870632845f8e2aab13",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "^7.9",
-                "guzzlehttp/psr7": "^2.7",
-                "jerome/matrix": "^3.3",
-                "php": "^8.2",
-                "psr/http-message": "^1.0|^2.0",
-                "psr/log": "^1.0|^2.0|^3.0",
-                "react/event-loop": "^1.5",
-                "react/promise": "^3.2"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.64",
-                "laravel/pint": "^1.21",
-                "mockery/mockery": "^1.6",
-                "phpstan/phpstan": "^1.11.5",
-                "phpunit/phpunit": "^11.5",
-                "squizlabs/php_codesniffer": "^3.7",
-                "symfony/var-dumper": "^6.0|^7.2",
-                "tightenco/duster": "^3.2"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/Fetch/Support/helpers.php"
-                ],
-                "psr-4": {
-                    "Fetch\\": "src/Fetch/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "Jerome Thayananthajothy",
-                    "email": "tjthavarshan@gmail.com"
-                }
-            ],
-            "description": "The JavaScript fetch API for PHP.",
-            "homepage": "https://fetch-php.thavarshan.com",
-            "support": {
-                "issues": "https://github.com/Thavarshan/fetch-php/issues",
-                "source": "https://github.com/Thavarshan/fetch-php"
-            },
-            "funding": [
-                {
-                    "url": "https://www.buymeacoffee.com/thavarshan",
-                    "type": "buy_me_a_coffee"
-                },
-                {
-                    "url": "https://github.com/thavarshan",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-05-24T20:23:11+00:00"
-        },
-        {
             "name": "jerome/filterable",
             "version": "2.1.0",
             "source": {
@@ -1641,77 +1569,6 @@
                 }
             ],
             "time": "2025-10-14T10:22:54+00:00"
-        },
-        {
-            "name": "jerome/matrix",
-            "version": "3.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Thavarshan/matrix.git",
-                "reference": "c484cc6d012dae0497dc223f0c596410ff1d7eb1"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Thavarshan/matrix/zipball/c484cc6d012dae0497dc223f0c596410ff1d7eb1",
-                "reference": "c484cc6d012dae0497dc223f0c596410ff1d7eb1",
-                "shasum": ""
-            },
-            "require": {
-                "ext-pcntl": "*",
-                "ext-posix": "*",
-                "php": "^8.2",
-                "react/event-loop": "^1.5",
-                "react/promise": "^3.2"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "^3.65",
-                "guzzlehttp/guzzle": "^7.0",
-                "laravel/pint": "^1.18",
-                "mockery/mockery": "^1.6",
-                "php-mock/php-mock": "^2.5",
-                "php-mock/php-mock-mockery": "^1.4",
-                "phpstan/phpstan": "^1.11.5",
-                "phpunit/phpunit": "^11.5",
-                "squizlabs/php_codesniffer": "^3.11",
-                "symfony/var-dumper": "^7.2",
-                "tightenco/duster": "^3.2"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/Matrix/Support/helpers.php"
-                ],
-                "psr-4": {
-                    "Matrix\\": "src/Matrix/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jerome Thayananthajothy",
-                    "email": "tjthavarshan@gmail.com"
-                }
-            ],
-            "description": "An unparalleled PHP asynchronous experience, offering genuine concurrency and fiber-based task management.",
-            "homepage": "https://thavarshan.com",
-            "support": {
-                "issues": "https://github.com/Thavarshan/matrix/issues",
-                "source": "https://github.com/Thavarshan/matrix"
-            },
-            "funding": [
-                {
-                    "url": "https://www.buymeacoffee.com/thavarshan",
-                    "type": "buy_me_a_coffee"
-                },
-                {
-                    "url": "https://github.com/thavarshan",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-05-11T10:48:30+00:00"
         },
         {
             "name": "knplabs/github-api",
@@ -4853,151 +4710,6 @@
             "time": "2025-09-04T20:59:21+00:00"
         },
         {
-            "name": "react/event-loop",
-            "version": "v1.5.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/reactphp/event-loop.git",
-                "reference": "bbe0bd8c51ffc05ee43f1729087ed3bdf7d53354"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/event-loop/zipball/bbe0bd8c51ffc05ee43f1729087ed3bdf7d53354",
-                "reference": "bbe0bd8c51ffc05ee43f1729087ed3bdf7d53354",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^9.6 || ^5.7 || ^4.8.36"
-            },
-            "suggest": {
-                "ext-pcntl": "For signal handling support when using the StreamSelectLoop"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "React\\EventLoop\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Christian Lück",
-                    "email": "christian@clue.engineering",
-                    "homepage": "https://clue.engineering/"
-                },
-                {
-                    "name": "Cees-Jan Kiewiet",
-                    "email": "reactphp@ceesjankiewiet.nl",
-                    "homepage": "https://wyrihaximus.net/"
-                },
-                {
-                    "name": "Jan Sorgalla",
-                    "email": "jsorgalla@gmail.com",
-                    "homepage": "https://sorgalla.com/"
-                },
-                {
-                    "name": "Chris Boden",
-                    "email": "cboden@gmail.com",
-                    "homepage": "https://cboden.dev/"
-                }
-            ],
-            "description": "ReactPHP's core reactor event loop that libraries can use for evented I/O.",
-            "keywords": [
-                "asynchronous",
-                "event-loop"
-            ],
-            "support": {
-                "issues": "https://github.com/reactphp/event-loop/issues",
-                "source": "https://github.com/reactphp/event-loop/tree/v1.5.0"
-            },
-            "funding": [
-                {
-                    "url": "https://opencollective.com/reactphp",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2023-11-13T13:48:05+00:00"
-        },
-        {
-            "name": "react/promise",
-            "version": "v3.3.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/reactphp/promise.git",
-                "reference": "23444f53a813a3296c1368bb104793ce8d88f04a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/promise/zipball/23444f53a813a3296c1368bb104793ce8d88f04a",
-                "reference": "23444f53a813a3296c1368bb104793ce8d88f04a",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.1.0"
-            },
-            "require-dev": {
-                "phpstan/phpstan": "1.12.28 || 1.4.10",
-                "phpunit/phpunit": "^9.6 || ^7.5"
-            },
-            "type": "library",
-            "autoload": {
-                "files": [
-                    "src/functions_include.php"
-                ],
-                "psr-4": {
-                    "React\\Promise\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Jan Sorgalla",
-                    "email": "jsorgalla@gmail.com",
-                    "homepage": "https://sorgalla.com/"
-                },
-                {
-                    "name": "Christian Lück",
-                    "email": "christian@clue.engineering",
-                    "homepage": "https://clue.engineering/"
-                },
-                {
-                    "name": "Cees-Jan Kiewiet",
-                    "email": "reactphp@ceesjankiewiet.nl",
-                    "homepage": "https://wyrihaximus.net/"
-                },
-                {
-                    "name": "Chris Boden",
-                    "email": "cboden@gmail.com",
-                    "homepage": "https://cboden.dev/"
-                }
-            ],
-            "description": "A lightweight implementation of CommonJS Promises/A for PHP",
-            "keywords": [
-                "promise",
-                "promises"
-            ],
-            "support": {
-                "issues": "https://github.com/reactphp/promise/issues",
-                "source": "https://github.com/reactphp/promise/tree/v3.3.0"
-            },
-            "funding": [
-                {
-                    "url": "https://opencollective.com/reactphp",
-                    "type": "open_collective"
-                }
-            ],
-            "time": "2025-08-19T18:57:03+00:00"
-        },
-        {
             "name": "spatie/laravel-package-tools",
             "version": "1.92.7",
             "source": {
@@ -5119,16 +4831,16 @@
         },
         {
             "name": "symfony/cache",
-            "version": "v7.3.5",
+            "version": "v7.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/cache.git",
-                "reference": "4a55feb59664f49042a0824c0f955e2f4c1412ad"
+                "reference": "1277a1ec61c8d93ea61b2a59738f1deb9bfb6701"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/cache/zipball/4a55feb59664f49042a0824c0f955e2f4c1412ad",
-                "reference": "4a55feb59664f49042a0824c0f955e2f4c1412ad",
+                "url": "https://api.github.com/repos/symfony/cache/zipball/1277a1ec61c8d93ea61b2a59738f1deb9bfb6701",
+                "reference": "1277a1ec61c8d93ea61b2a59738f1deb9bfb6701",
                 "shasum": ""
             },
             "require": {
@@ -5197,7 +4909,7 @@
                 "psr6"
             ],
             "support": {
-                "source": "https://github.com/symfony/cache/tree/v7.3.5"
+                "source": "https://github.com/symfony/cache/tree/v7.3.6"
             },
             "funding": [
                 {
@@ -5217,7 +4929,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-16T13:55:38+00:00"
+            "time": "2025-10-30T13:22:58+00:00"
         },
         {
             "name": "symfony/cache-contracts",
@@ -5469,16 +5181,16 @@
         },
         {
             "name": "symfony/css-selector",
-            "version": "v7.3.0",
+            "version": "v7.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/css-selector.git",
-                "reference": "601a5ce9aaad7bf10797e3663faefce9e26c24e2"
+                "reference": "84321188c4754e64273b46b406081ad9b18e8614"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/css-selector/zipball/601a5ce9aaad7bf10797e3663faefce9e26c24e2",
-                "reference": "601a5ce9aaad7bf10797e3663faefce9e26c24e2",
+                "url": "https://api.github.com/repos/symfony/css-selector/zipball/84321188c4754e64273b46b406081ad9b18e8614",
+                "reference": "84321188c4754e64273b46b406081ad9b18e8614",
                 "shasum": ""
             },
             "require": {
@@ -5514,7 +5226,7 @@
             "description": "Converts CSS selectors to XPath expressions",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/css-selector/tree/v7.3.0"
+                "source": "https://github.com/symfony/css-selector/tree/v7.3.6"
             },
             "funding": [
                 {
@@ -5526,11 +5238,15 @@
                     "type": "github"
                 },
                 {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-09-25T14:21:43+00:00"
+            "time": "2025-10-29T17:24:25+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
@@ -5601,16 +5317,16 @@
         },
         {
             "name": "symfony/error-handler",
-            "version": "v7.3.4",
+            "version": "v7.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/error-handler.git",
-                "reference": "99f81bc944ab8e5dae4f21b4ca9972698bbad0e4"
+                "reference": "bbe40bfab84323d99dab491b716ff142410a92a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/error-handler/zipball/99f81bc944ab8e5dae4f21b4ca9972698bbad0e4",
-                "reference": "99f81bc944ab8e5dae4f21b4ca9972698bbad0e4",
+                "url": "https://api.github.com/repos/symfony/error-handler/zipball/bbe40bfab84323d99dab491b716ff142410a92a8",
+                "reference": "bbe40bfab84323d99dab491b716ff142410a92a8",
                 "shasum": ""
             },
             "require": {
@@ -5658,7 +5374,7 @@
             "description": "Provides tools to manage errors and ease debugging PHP code",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/error-handler/tree/v7.3.4"
+                "source": "https://github.com/symfony/error-handler/tree/v7.3.6"
             },
             "funding": [
                 {
@@ -5678,7 +5394,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-11T10:12:26+00:00"
+            "time": "2025-10-31T19:12:50+00:00"
         },
         {
             "name": "symfony/event-dispatcher",
@@ -5910,16 +5626,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v7.3.5",
+            "version": "v7.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "ce31218c7cac92eab280762c4375fb70a6f4f897"
+                "reference": "6379e490d6ecfc5c4224ff3a754b90495ecd135c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/ce31218c7cac92eab280762c4375fb70a6f4f897",
-                "reference": "ce31218c7cac92eab280762c4375fb70a6f4f897",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/6379e490d6ecfc5c4224ff3a754b90495ecd135c",
+                "reference": "6379e490d6ecfc5c4224ff3a754b90495ecd135c",
                 "shasum": ""
             },
             "require": {
@@ -5969,7 +5685,7 @@
             "description": "Defines an object-oriented layer for the HTTP specification",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/http-foundation/tree/v7.3.5"
+                "source": "https://github.com/symfony/http-foundation/tree/v7.3.6"
             },
             "funding": [
                 {
@@ -5989,7 +5705,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-10-24T21:42:11+00:00"
+            "time": "2025-11-06T11:05:57+00:00"
         },
         {
             "name": "symfony/http-kernel",
@@ -7248,16 +6964,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v7.3.4",
+            "version": "v7.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "8dc648e159e9bac02b703b9fbd937f19ba13d07c"
+                "reference": "c97abe725f2a1a858deca629a6488c8fc20c3091"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/8dc648e159e9bac02b703b9fbd937f19ba13d07c",
-                "reference": "8dc648e159e9bac02b703b9fbd937f19ba13d07c",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/c97abe725f2a1a858deca629a6488c8fc20c3091",
+                "reference": "c97abe725f2a1a858deca629a6488c8fc20c3091",
                 "shasum": ""
             },
             "require": {
@@ -7309,7 +7025,7 @@
                 "url"
             ],
             "support": {
-                "source": "https://github.com/symfony/routing/tree/v7.3.4"
+                "source": "https://github.com/symfony/routing/tree/v7.3.6"
             },
             "funding": [
                 {
@@ -7329,7 +7045,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-11T10:12:26+00:00"
+            "time": "2025-11-05T07:57:47+00:00"
         },
         {
             "name": "symfony/service-contracts",
