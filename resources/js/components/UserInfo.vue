@@ -13,6 +13,9 @@ const props = withDefaults(defineProps<Props>(), {
     showEmail: false,
 });
 
+console.log(props.user);
+
+
 const { getInitials } = useInitials();
 
 // Compute whether we should show the avatar image
