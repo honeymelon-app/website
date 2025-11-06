@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import TextLink from '@/components/TextLink.vue';
-import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { logout } from '@/routes';
-import { send } from '@/routes/verification';
-import { Form, Head } from '@inertiajs/vue3';
+import { home } from '@/routes';
+import { Head } from '@inertiajs/vue3';
 
 defineProps<{
     status?: string;
@@ -14,36 +11,28 @@ defineProps<{
 
 <template>
     <AuthLayout
-        title="Verify email"
-        description="Please verify your email address by clicking on the link we just emailed to you."
+        title="Email Verification"
+        description="Email verification is managed through Cerberus IAM"
     >
-        <Head title="Email verification" />
+        <Head title="Email Verification" />
 
-        <div
-            v-if="status === 'verification-link-sent'"
-            class="mb-4 text-center text-sm font-medium text-green-600"
-        >
-            A new verification link has been sent to the email address you
-            provided during registration.
+        <div class="space-y-6">
+            <div class="rounded-lg border bg-muted/50 p-6 text-center">
+                <p class="text-sm text-muted-foreground">
+                    Email verification is now managed through Cerberus IAM.
+                    Please check your email or contact your administrator.
+                </p>
+            </div>
+
+            <div class="text-center">
+                <TextLink
+                    :href="home()"
+                    as="button"
+                    class="text-sm"
+                >
+                    Log out
+                </TextLink>
+            </div>
         </div>
-
-        <Form
-            v-bind="send.form()"
-            class="space-y-6 text-center"
-            v-slot="{ processing }"
-        >
-            <Button :disabled="processing" variant="secondary">
-                <Spinner v-if="processing" />
-                Resend verification email
-            </Button>
-
-            <TextLink
-                :href="logout()"
-                as="button"
-                class="mx-auto block text-sm"
-            >
-                Log out
-            </TextLink>
-        </Form>
     </AuthLayout>
 </template>

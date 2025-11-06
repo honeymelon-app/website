@@ -3,19 +3,25 @@
 namespace App\Http\Requests\Settings;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Laravel\Fortify\Features;
-use Laravel\Fortify\InteractsWithTwoFactorState;
 
 class TwoFactorAuthenticationRequest extends FormRequest
 {
-    use InteractsWithTwoFactorState;
-
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * Note: Two-factor authentication is now managed by Cerberus IAM.
      */
     public function authorize(): bool
     {
-        return Features::enabled(Features::twoFactorAuthentication());
+        return true;
+    }
+
+    /**
+     * Ensure the state is valid (stub for compatibility).
+     */
+    public function ensureStateIsValid(): void
+    {
+        // No-op: 2FA state is managed by Cerberus IAM
     }
 
     /**

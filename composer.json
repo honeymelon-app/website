@@ -10,10 +10,10 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "cerberus-iam/laravel-sdk": "dev-main",
         "graham-campbell/github": "^13.0",
         "inertiajs/inertia-laravel": "^2.0",
         "jerome/filterable": "^2.1",
-        "laravel/fortify": "^1.30",
         "laravel/framework": "^12.0",
         "laravel/nightwatch": "^1.17",
         "laravel/sanctum": "^4.0",

@@ -1,89 +1,34 @@
 <script setup lang="ts">
-import InputError from '@/components/InputError.vue';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Spinner } from '@/components/ui/spinner';
+import TextLink from '@/components/TextLink.vue';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { update } from '@/routes/password';
-import { Form, Head } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { home } from '@/routes';
+import { Head } from '@inertiajs/vue3';
 
-const props = defineProps<{
+defineProps<{
     token: string;
     email: string;
 }>();
-
-const inputEmail = ref(props.email);
 </script>
 
 <template>
     <AuthLayout
-        title="Reset password"
-        description="Please enter your new password below"
+        title="Password Reset"
+        description="Password reset is managed through Cerberus IAM"
     >
-        <Head title="Reset password" />
+        <Head title="Password Reset" />
 
-        <Form
-            v-bind="update.form()"
-            :transform="(data) => ({ ...data, token, email })"
-            :reset-on-success="['password', 'password_confirmation']"
-            v-slot="{ errors, processing }"
-        >
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <Label for="email">Email</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        name="email"
-                        autocomplete="email"
-                        v-model="inputEmail"
-                        class="mt-1 block w-full"
-                        readonly
-                    />
-                    <InputError :message="errors.email" class="mt-2" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label for="password">Password</Label>
-                    <Input
-                        id="password"
-                        type="password"
-                        name="password"
-                        autocomplete="new-password"
-                        class="mt-1 block w-full"
-                        autofocus
-                        placeholder="Password"
-                    />
-                    <InputError :message="errors.password" />
-                </div>
-
-                <div class="grid gap-2">
-                    <Label for="password_confirmation">
-                        Confirm Password
-                    </Label>
-                    <Input
-                        id="password_confirmation"
-                        type="password"
-                        name="password_confirmation"
-                        autocomplete="new-password"
-                        class="mt-1 block w-full"
-                        placeholder="Confirm password"
-                    />
-                    <InputError :message="errors.password_confirmation" />
-                </div>
-
-                <Button
-                    type="submit"
-                    class="mt-4 w-full"
-                    :disabled="processing"
-                    data-test="reset-password-button"
-                >
-                    <Spinner v-if="processing" />
-                    Reset password
-                </Button>
+        <div class="space-y-6">
+            <div class="rounded-lg border bg-muted/50 p-6 text-center">
+                <p class="text-sm text-muted-foreground">
+                    Password reset functionality is now managed through Cerberus IAM.
+                    Please contact your administrator or use the Cerberus IAM portal to reset your password.
+                </p>
             </div>
-        </Form>
+
+            <div class="space-x-1 text-center text-sm text-muted-foreground">
+                <span>Return to</span>
+                <TextLink :href="home()">log in</TextLink>
+            </div>
+        </div>
     </AuthLayout>
 </template>

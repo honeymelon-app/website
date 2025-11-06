@@ -37,8 +37,9 @@ return [
 
     'guards' => [
         'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
+            'driver' => 'cerberus',
+            'provider' => 'cerberus-users',
+            'scopes' => ['openid', 'profile', 'email'],
         ],
     ],
 
@@ -60,15 +61,9 @@ return [
     */
 
     'providers' => [
-        'users' => [
-            'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', App\Models\User::class),
+        'cerberus-users' => [
+            'driver' => 'cerberus',
         ],
-
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
     ],
 
     /*

@@ -1,17 +1,12 @@
-import { qrCode, recoveryCodes, secretKey } from '@/routes/two-factor';
 import { computed, ref } from 'vue';
 
-const fetchJson = async <T>(url: string): Promise<T> => {
-    const response = await fetch(url, {
-        headers: { Accept: 'application/json' },
-    });
-
-    if (!response.ok) {
-        throw new Error(`Failed to fetch: ${response.status}`);
-    }
-
-    return response.json();
-};
+/**
+ * Two-factor authentication composable
+ *
+ * Note: Two-factor authentication is now managed by Cerberus IAM.
+ * This composable is kept for compatibility but returns stub data.
+ * Users should configure 2FA through the Cerberus IAM dashboard.
+ */
 
 const errors = ref<string[]>([]);
 const manualSetupKey = ref<string | null>(null);
@@ -24,29 +19,15 @@ const hasSetupData = computed<boolean>(
 
 export const useTwoFactorAuth = () => {
     const fetchQrCode = async (): Promise<void> => {
-        try {
-            const { svg } = await fetchJson<{ svg: string; url: string }>(
-                qrCode.url(),
-            );
-
-            qrCodeSvg.value = svg;
-        } catch {
-            errors.value.push('Failed to fetch QR code');
-            qrCodeSvg.value = null;
-        }
+        // 2FA is managed by Cerberus IAM
+        errors.value.push('Two-factor authentication is managed through Cerberus IAM');
+        qrCodeSvg.value = null;
     };
 
     const fetchSetupKey = async (): Promise<void> => {
-        try {
-            const { secretKey: key } = await fetchJson<{ secretKey: string }>(
-                secretKey.url(),
-            );
-
-            manualSetupKey.value = key;
-        } catch {
-            errors.value.push('Failed to fetch a setup key');
-            manualSetupKey.value = null;
-        }
+        // 2FA is managed by Cerberus IAM
+        errors.value.push('Two-factor authentication is managed through Cerberus IAM');
+        manualSetupKey.value = null;
     };
 
     const clearSetupData = (): void => {
@@ -66,25 +47,16 @@ export const useTwoFactorAuth = () => {
     };
 
     const fetchRecoveryCodes = async (): Promise<void> => {
-        try {
-            clearErrors();
-            recoveryCodesList.value = await fetchJson<string[]>(
-                recoveryCodes.url(),
-            );
-        } catch {
-            errors.value.push('Failed to fetch recovery codes');
-            recoveryCodesList.value = [];
-        }
+        // 2FA is managed by Cerberus IAM
+        errors.value.push('Two-factor authentication is managed through Cerberus IAM');
+        recoveryCodesList.value = [];
     };
 
     const fetchSetupData = async (): Promise<void> => {
-        try {
-            clearErrors();
-            await Promise.all([fetchQrCode(), fetchSetupKey()]);
-        } catch {
-            qrCodeSvg.value = null;
-            manualSetupKey.value = null;
-        }
+        // 2FA is managed by Cerberus IAM
+        clearErrors();
+        qrCodeSvg.value = null;
+        manualSetupKey.value = null;
     };
 
     return {

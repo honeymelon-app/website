@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthBase from '@/layouts/AuthLayout.vue';
-import { login } from '@/routes';
+import { home } from '@/routes';
 // import { store } from '@/routes/register';
 import { Form, Head } from '@inertiajs/vue3';
 
@@ -106,7 +106,7 @@ const store = {
             <div class="text-center text-sm text-muted-foreground">
                 Already have an account?
                 <TextLink
-                    :href="login()"
+                    :href="home()"
                     class="underline underline-offset-4"
                     :tabindex="6"
                     >Log in</TextLink
