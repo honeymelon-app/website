@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\User;
+
+$portalBase = rtrim(env('CERBERUS_IAM_PORTAL_URL', env('CERBERUS_IAM_URL', '')), '/');
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -59,11 +63,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Timeout Settings
+    | HTTP Client Settings
     |--------------------------------------------------------------------------
     |
-    | Customize HTTP client behaviour. The package uses jerome/fetch-php under
-    | the hood which ultimately proxies to Guzzle, so the keys map directly.
+    | Configure the built-in Laravel HTTP client that powers every request the
+    | Cerberus SDK makes. You can fine tune timeouts and retry policies here.
     |
     */
 
@@ -72,7 +76,23 @@ return [
         'retry' => [
             'enabled' => env('CERBERUS_IAM_HTTP_RETRY', true),
             'max_attempts' => env('CERBERUS_IAM_HTTP_RETRY_ATTEMPTS', 2),
+            'delay' => env('CERBERUS_IAM_HTTP_RETRY_DELAY', 100),
         ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cerberus Portal URLs
+    |--------------------------------------------------------------------------
+    |
+    | These URLs power the "Manage in Cerberus" links shown throughout the UI.
+    | Override them if your Cerberus deployment uses custom domains.
+    |
+    */
+
+    'management_urls' => [
+        'profile' => env('CERBERUS_IAM_PROFILE_URL', $portalBase ? "{$portalBase}/me/profile" : null),
+        'security' => env('CERBERUS_IAM_SECURITY_URL', $portalBase ? "{$portalBase}/me/security" : null),
     ],
 
     /*
@@ -111,4 +131,18 @@ return [
     */
 
     'redirect_after_login' => env('CERBERUS_IAM_REDIRECT_AFTER_LOGIN', '/'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Model (Optional)
+    |--------------------------------------------------------------------------
+    |
+    | Provide a fully-qualified Eloquent model name to keep a lightweight
+    | mirror of Cerberus users inside your database. This enables first-class
+    | relationships (releases -> user, etc.) while still delegating all
+    | authentication to Cerberus IAM.
+    |
+    */
+
+    'user_model' => env('CERBERUS_IAM_USER_MODEL', User::class),
 ];

@@ -1,15 +1,17 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/vue-starter-kit",
+    "name": "honeymelon-app/platform",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Control plane for Honeymelon MacOS desktop application",
     "keywords": [
-        "laravel",
-        "framework"
+        "honeymelon",
+        "platform",
+        "control-plane",
+        "application"
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.2",
+        "php": "^8.3",
         "cerberus-iam/laravel-sdk": "dev-main",
         "graham-campbell/github": "^13.0",
         "inertiajs/inertia-laravel": "^2.0",

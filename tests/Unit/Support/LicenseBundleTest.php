@@ -22,8 +22,11 @@ final class LicenseBundleTest extends TestCase
         }
 
         $keypair = sodium_crypto_sign_keypair();
-        config()->set('license.signing.private_key', base64_encode($keypair));
-        config()->set('license.signing.public_key', base64_encode(sodium_crypto_sign_publickey($keypair)));
+        $secret = sodium_crypto_sign_secretkey($keypair);
+        $public = sodium_crypto_sign_publickey($keypair);
+
+        config()->set('license.signing.private_key', base64_encode($secret));
+        config()->set('license.signing.public_key', base64_encode($public));
     }
 
     public function test_bundle_round_trip(): void

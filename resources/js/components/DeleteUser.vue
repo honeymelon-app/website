@@ -1,115 +1,60 @@
 <script setup lang="ts">
-import ProfileController from '@/actions/App/Http/Controllers/Web/Settings/ProfileController';
-import { Form } from '@inertiajs/vue3';
-import { useTemplateRef } from 'vue';
-
-// Components
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogClose,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import type { AppPageProps } from '@/types';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
-const passwordInput = useTemplateRef('passwordInput');
+const page = usePage<AppPageProps>();
+const securityUrl = computed(() => page.props.cerberus.securityUrl);
 </script>
 
 <template>
     <div class="space-y-6">
         <HeadingSmall
-            title="Delete account"
-            description="Delete your account and all of its resources"
+            title="Account management"
+            description="Account deletion is handled exclusively by Cerberus IAM"
         />
+
         <div
-            class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
+            class="space-y-3 rounded-lg border border-red-100 bg-red-50 p-4 text-sm leading-relaxed text-red-700 dark:border-red-200/10 dark:bg-red-700/10 dark:text-red-100"
         >
-            <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
-                <p class="font-medium">Warning</p>
-                <p class="text-sm">
-                    Please proceed with caution, this cannot be undone.
-                </p>
-            </div>
-            <Dialog>
-                <DialogTrigger as-child>
-                    <Button variant="destructive" data-test="delete-user-button"
-                        >Delete account</Button
-                    >
-                </DialogTrigger>
-                <DialogContent>
-                    <Form
-                        v-bind="ProfileController.destroy.form()"
-                        reset-on-success
-                        @error="() => passwordInput?.$el?.focus()"
-                        :options="{
-                            preserveScroll: true,
-                        }"
-                        class="space-y-6"
-                        v-slot="{ errors, processing, reset, clearErrors }"
-                    >
-                        <DialogHeader class="space-y-3">
-                            <DialogTitle
-                                >Are you sure you want to delete your
-                                account?</DialogTitle
-                            >
-                            <DialogDescription>
-                                Once your account is deleted, all of its
-                                resources and data will also be permanently
-                                deleted. Please enter your password to confirm
-                                you would like to permanently delete your
-                                account.
-                            </DialogDescription>
-                        </DialogHeader>
+            <p>
+                Honeymelon delegates account lifecycle tasks (account deletion,
+                team membership, SSO, etc.) to Cerberus IAM. This keeps access
+                control consistent across every product connected to your
+                organisation.
+            </p>
 
-                        <div class="grid gap-2">
-                            <Label for="password" class="sr-only"
-                                >Password</Label
-                            >
-                            <Input
-                                id="password"
-                                type="password"
-                                name="password"
-                                ref="passwordInput"
-                                placeholder="Password"
-                            />
-                            <InputError :message="errors.password" />
-                        </div>
+            <p>
+                Use the Cerberus dashboard to deactivate or delete your
+                account. Once removed there, this application will automatically
+                sync the change and revoke your sessions.
+            </p>
 
-                        <DialogFooter class="gap-2">
-                            <DialogClose as-child>
-                                <Button
-                                    variant="secondary"
-                                    @click="
-                                        () => {
-                                            clearErrors();
-                                            reset();
-                                        }
-                                    "
-                                >
-                                    Cancel
-                                </Button>
-                            </DialogClose>
+            <Button
+                v-if="securityUrl"
+                variant="destructive"
+                class="mt-4 w-full sm:w-auto"
+                as-child
+            >
+                <a
+                    :href="securityUrl"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    Open Cerberus security settings
+                </a>
+            </Button>
 
-                            <Button
-                                type="submit"
-                                variant="destructive"
-                                :disabled="processing"
-                                data-test="confirm-delete-user-button"
-                            >
-                                Delete account
-                            </Button>
-                        </DialogFooter>
-                    </Form>
-                </DialogContent>
-            </Dialog>
+            <Button
+                v-else
+                variant="outline"
+                class="mt-4 w-full sm:w-auto"
+                disabled
+            >
+                Cerberus security URL not configured
+            </Button>
         </div>
     </div>
 </template>

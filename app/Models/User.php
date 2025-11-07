@@ -22,6 +22,13 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'cerberus_id',
+        'first_name',
+        'last_name',
+        'avatar_url',
+        'organisation_id',
+        'organisation_slug',
+        'organisation_name',
     ];
 
     /**
@@ -34,6 +41,7 @@ class User extends Authenticatable
         'two_factor_secret',
         'two_factor_recovery_codes',
         'remember_token',
+        'cerberus_id',
     ];
 
     /**

@@ -9,6 +9,13 @@ class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->markTestSkipped('Registration is handled by Cerberus IAM.');
+    }
+
     public function test_registration_screen_can_be_rendered()
     {
         $response = $this->get(route('register'));

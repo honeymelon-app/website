@@ -1,24 +1,31 @@
 <script setup lang="ts">
-import ProfileController from '@/actions/App/Http/Controllers/Web/Settings/ProfileController';
-import { edit } from '@/routes/profile';
-import { Form, Head, usePage } from '@inertiajs/vue3';
-
 import DeleteUser from '@/components/DeleteUser.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import InputError from '@/components/InputError.vue';
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { type BreadcrumbItem } from '@/types';
+import { edit } from '@/routes/profile';
+import type { AppPageProps, BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 interface Props {
-    mustVerifyEmail: boolean;
-    status?: string;
+    manageProfileUrl?: string | null;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const page = usePage<AppPageProps>();
+const user = computed(() => page.props.auth.user);
+const manageProfileUrl = computed(
+    () => props.manageProfileUrl ?? page.props.cerberus.profileUrl,
+);
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -27,8 +34,22 @@ const breadcrumbItems: BreadcrumbItem[] = [
     },
 ];
 
-const page = usePage();
-const user = page.props.auth.user;
+const profileDetails = computed(() => {
+    if (!user.value) {
+        return [];
+    }
+
+    return [
+        { label: 'Full name', value: user.value.name },
+        { label: 'First name', value: user.value.first_name ?? '—' },
+        { label: 'Last name', value: user.value.last_name ?? '—' },
+        { label: 'Email', value: user.value.email },
+        {
+            label: 'Organisation',
+            value: user.value.organisation?.name ?? '—',
+        },
+    ];
+});
 </script>
 
 <template>
@@ -39,71 +60,64 @@ const user = page.props.auth.user;
             <div class="flex flex-col space-y-6">
                 <HeadingSmall
                     title="Profile information"
-                    description="Update your name and email address"
+                    description="Profile updates are managed in Cerberus IAM"
                 />
 
-                <Form
-                    v-bind="ProfileController.update.form()"
-                    class="space-y-6"
-                    v-slot="{ errors, processing, recentlySuccessful }"
-                >
-                    <div class="grid gap-2">
-                        <Label for="name">Name</Label>
-                        <Input
-                            id="name"
-                            class="mt-1 block w-full"
-                            name="name"
-                            :default-value="user.name"
-                            required
-                            autocomplete="name"
-                            placeholder="Full name"
-                        />
-                        <InputError class="mt-2" :message="errors.name" />
-                    </div>
-
-                    <div class="grid gap-2">
-                        <Label for="email">Email address</Label>
-                        <Input
-                            id="email"
-                            type="email"
-                            class="mt-1 block w-full"
-                            name="email"
-                            :default-value="user.email"
-                            required
-                            autocomplete="username"
-                            placeholder="Email address"
-                        />
-                        <InputError class="mt-2" :message="errors.email" />
-                    </div>
-
-                    <div v-if="mustVerifyEmail && !user.email_verified_at">
-                        <p class="-mt-4 text-sm text-muted-foreground">
-                            Email verification is managed through Cerberus IAM.
+                <Card>
+                    <CardHeader class="space-y-2">
+                        <CardTitle class="text-base font-semibold">
+                            Synced details
+                        </CardTitle>
+                        <p class="text-sm text-muted-foreground">
+                            We mirror a subset of your Cerberus profile so
+                            relationships (releases, licenses, etc.) continue to
+                            work inside Honeymelon.
                         </p>
-                    </div>
+                    </CardHeader>
+                    <CardContent>
+                        <dl class="divide-y divide-border/60 text-sm">
+                            <template v-if="user">
+                                <div
+                                    v-for="item in profileDetails"
+                                    :key="item.label"
+                                    class="flex flex-col gap-1 py-3 first:pt-0 last:pb-0 md:flex-row md:items-center md:justify-between"
+                                >
+                                    <dt class="font-medium text-muted-foreground">
+                                        {{ item.label }}
+                                    </dt>
+                                    <dd class="text-base">
+                                        {{ item.value }}
+                                    </dd>
+                                </div>
+                            </template>
+                            <template v-else>
+                                <div class="py-3 text-muted-foreground">
+                                    Profile data will be available once you sign
+                                    in through Cerberus.
+                                </div>
+                            </template>
+                        </dl>
 
-                    <div class="flex items-center gap-4">
-                        <Button
-                            :disabled="processing"
-                            data-test="update-profile-button"
-                            >Save</Button
-                        >
-
-                        <Transition
-                            enter-active-class="transition ease-in-out"
-                            enter-from-class="opacity-0"
-                            leave-active-class="transition ease-in-out"
-                            leave-to-class="opacity-0"
-                        >
-                            <p
-                                v-show="recentlySuccessful"
-                                class="text-sm text-neutral-600"
+                        <div class="mt-6">
+                            <Button
+                                v-if="manageProfileUrl"
+                                as-child
+                                class="w-full sm:w-auto"
                             >
-                                Saved.
-                            </p>
-                        </Transition>
-                    </div>
-                </Form>
+                                <a
+                                    :href="manageProfileUrl"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Manage profile in Cerberus
+                                </a>
+                            </Button>
+                            <Button v-else disabled class="w-full sm:w-auto">
+                                Cerberus portal URL not configured
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             <DeleteUser />
