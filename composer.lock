@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7d717420b4b8762d076ea96b9e97b713",
+    "content-hash": "e81931e48388ef99ec40674838566a8e",
     "packages": [
         {
             "name": "brick/math",
@@ -141,12 +141,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/cerberus-iam/laravel-sdk.git",
-                "reference": "2e7d4db77934f9382fc3542b07c409340150bb98"
+                "reference": "06253bda49682faef523b433281203956aa4ebca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cerberus-iam/laravel-sdk/zipball/2e7d4db77934f9382fc3542b07c409340150bb98",
-                "reference": "2e7d4db77934f9382fc3542b07c409340150bb98",
+                "url": "https://api.github.com/repos/cerberus-iam/laravel-sdk/zipball/06253bda49682faef523b433281203956aa4ebca",
+                "reference": "06253bda49682faef523b433281203956aa4ebca",
                 "shasum": ""
             },
             "require": {
@@ -181,7 +181,33 @@
                     "CerberusIAM\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "CerberusIAM\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "pest"
+                ],
+                "test:coverage": [
+                    "pest --coverage"
+                ],
+                "lint": [
+                    "pint"
+                ],
+                "lint:test": [
+                    "pint --test"
+                ],
+                "analyse": [
+                    "phpstan analyse"
+                ],
+                "ci": [
+                    "@lint:test",
+                    "@analyse",
+                    "@test"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -194,8 +220,8 @@
             "description": "Laravel bridge for the Cerberus IAM platform providing guard, middleware, and HTTP client integration.",
             "homepage": "https://github.com/cerberus-iam/laravel-iam",
             "keywords": [
-                "Authentication",
                 "access-control",
+                "authentication",
                 "authorization",
                 "cerberus",
                 "iam",
@@ -209,7 +235,7 @@
                 "issues": "https://github.com/cerberus-iam/laravel-iam/issues",
                 "source": "https://github.com/cerberus-iam/laravel-iam"
             },
-            "time": "2025-11-06T23:30:51+00:00"
+            "time": "2025-11-07T01:07:19+00:00"
         },
         {
             "name": "clue/stream-filter",

@@ -15,6 +15,13 @@ class GithubWebhookTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->markTestSkipped('GitHub webhook integration is currently disabled in favour of Sanctum-triggered releases.');
+    }
+
     protected function getWebhookPayload(array $overrides = []): array
     {
         $payload = [

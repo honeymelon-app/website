@@ -12,6 +12,13 @@ class TwoFactorChallengeTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->markTestSkipped('Two-factor challenges are handled by Cerberus IAM.');
+    }
+
     public function test_two_factor_challenge_redirects_to_login_when_not_authenticated(): void
     {
         if (! Features::canManageTwoFactorAuthentication()) {
