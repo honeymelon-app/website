@@ -141,12 +141,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/cerberus-iam/laravel-sdk.git",
-                "reference": "e98a1f01fd09903bedbe3bc91810dd7b34804aad"
+                "reference": "e36212370488a4e8cc2449f77c927acbc5d420d9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cerberus-iam/laravel-sdk/zipball/e98a1f01fd09903bedbe3bc91810dd7b34804aad",
-                "reference": "e98a1f01fd09903bedbe3bc91810dd7b34804aad",
+                "url": "https://api.github.com/repos/cerberus-iam/laravel-sdk/zipball/e36212370488a4e8cc2449f77c927acbc5d420d9",
+                "reference": "e36212370488a4e8cc2449f77c927acbc5d420d9",
                 "shasum": ""
             },
             "require": {
@@ -200,7 +200,7 @@
                     "pint --test"
                 ],
                 "analyse": [
-                    "phpstan analyse"
+                    "phpstan analyse --memory-limit=512M"
                 ],
                 "ci": [
                     "@lint:test",
@@ -235,7 +235,7 @@
                 "issues": "https://github.com/cerberus-iam/laravel-iam/issues",
                 "source": "https://github.com/cerberus-iam/laravel-iam"
             },
-            "time": "2025-11-08T08:09:05+00:00"
+            "time": "2025-11-08T08:20:37+00:00"
         },
         {
             "name": "clue/stream-filter",
