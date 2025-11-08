@@ -1,0 +1,406 @@
+name: Release Build
+
+on:
+  release:
+    types: [published] # Triggers when a release is published (created from UI or API)
+    branches: [release] # Only trigger for releases from 'release' branch
+
+permissions:
+  contents: write # Required for creating releases and uploading assets
+
+jobs:
+  # Pre-release validation
+  pre-release-checks:
+    name: Pre-Release Validation
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: aarch64-apple-darwin
+
+      - name: Install Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check TypeScript types
+        run: npm run build --if-present
+
+      - name: Run ESLint
+        run: npm run lint:js || true
+
+      - name: Check Prettier formatting
+        run: npm run format:check:js || true
+
+      - name: Check Rust formatting
+        run: cd src-tauri && cargo fmt --all -- --check
+
+      - name: Run Clippy
+        run: cd src-tauri && cargo clippy --all-targets --all-features -- -D warnings
+
+      - name: Run Rust tests
+        run: cd src-tauri && cargo test --all-features --lib
+
+      - name: Run frontend tests (if configured)
+        run: |
+          if grep -q '"vitest"' package.json || [ -f "vitest.config.ts" ] || [ -f "vitest.config.js" ]; then
+            npm run test 2>&1 || echo "Vitest tests not configured"
+          else
+            echo "Vitest not configured, skipping"
+          fi
+        continue-on-error: true
+
+  # Main release build
+  build-and-upload:
+    name: Build and Upload Artifacts
+    runs-on: macos-14 # macOS 14 on Apple Silicon (M1)
+    needs: pre-release-checks
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - name: Install Rust cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install FFmpeg (for capability detection and bundling)
+        run: brew install ffmpeg
+
+      - name: Create FFmpeg resources directory
+        run: |
+          mkdir -p src-tauri/resources/bin
+          echo "Created resources directory for FFmpeg bundling"
+
+      - name: Copy FFmpeg binaries for bundling
+        run: |
+          # Copy system ffmpeg and ffprobe to resources for bundling
+          FFMPEG_PATH=$(which ffmpeg)
+          FFPROBE_PATH=$(which ffprobe)
+
+          if [ -f "$FFMPEG_PATH" ]; then
+            cp "$FFMPEG_PATH" src-tauri/resources/bin/ffmpeg
+            echo "Copied ffmpeg to resources: $FFMPEG_PATH"
+          else
+            echo "Warning: ffmpeg not found in system PATH"
+          fi
+
+          if [ -f "$FFPROBE_PATH" ]; then
+            cp "$FFPROBE_PATH" src-tauri/resources/bin/ffprobe
+            echo "Copied ffprobe to resources: $FFPROBE_PATH"
+          else
+            echo "Warning: ffprobe not found in system PATH"
+          fi
+
+          # Verify bundled binaries
+          ls -lh src-tauri/resources/bin/ || echo "No binaries in resources"
+
+      - name: Sign FFmpeg binaries
+        if: github.event.release.prerelease == false # Skip for pre-releases
+        run: |
+          # Only sign if Apple signing identity is configured
+          if [ -n "${{ secrets.APPLE_SIGNING_IDENTITY }}" ]; then
+            echo "Signing FFmpeg binaries with Developer ID..."
+
+            # Sign ffmpeg with hardened runtime
+            codesign --sign "${{ secrets.APPLE_SIGNING_IDENTITY }}" \
+                     --force \
+                     --options runtime \
+                     --entitlements src-tauri/entitlements.plist \
+                     --timestamp \
+                     --verbose \
+                     src-tauri/resources/bin/ffmpeg
+
+            # Sign ffprobe with hardened runtime
+            codesign --sign "${{ secrets.APPLE_SIGNING_IDENTITY }}" \
+                     --force \
+                     --options runtime \
+                     --entitlements src-tauri/entitlements.plist \
+                     --timestamp \
+                     --verbose \
+                     src-tauri/resources/bin/ffprobe
+
+            echo "FFmpeg binaries signed successfully"
+
+            # Verify signatures
+            echo "Verifying signatures..."
+            codesign --verify --deep --strict --verbose=2 src-tauri/resources/bin/ffmpeg
+            codesign --verify --deep --strict --verbose=2 src-tauri/resources/bin/ffprobe
+
+            # Display signature info
+            echo "FFmpeg signature info:"
+            codesign --display --verbose=4 src-tauri/resources/bin/ffmpeg
+            echo "ffprobe signature info:"
+            codesign --display --verbose=4 src-tauri/resources/bin/ffprobe
+
+            echo "Signature verification complete"
+          else
+            echo "WARNING: Skipping FFmpeg signing - APPLE_SIGNING_IDENTITY not configured"
+            echo "WARNING: Production builds require signed FFmpeg binaries for notarization"
+          fi
+
+      - name: Build application
+        if: github.event.release.prerelease == false # Skip for pre-releases
+        run: |
+          if [ -z "${HONEYMELON_LICENSE_PUBLIC_KEY}" ]; then
+            echo "::: Missing HONEYMELON_LICENSE_PUBLIC_KEY secret" >&2
+            exit 1
+          fi
+          npm run tauri:build
+        env:
+          # Apple code signing (optional - only if secrets are configured)
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Enable notarization if credentials provided
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          # License verification key (Ed25519 public key, base64)
+          HONEYMELON_LICENSE_PUBLIC_KEY: ${{ secrets.HONEYMELON_LICENSE_PUBLIC_KEY }}
+          LICENSE_SIGNING_PUBLIC_KEY: ${{ secrets.HONEYMELON_LICENSE_PUBLIC_KEY }}
+
+      - name: Prepare release artifacts
+        id: prepare_artifacts
+        run: |
+          # Try to find the bundle directory under target (handles target-specific folders like
+          # target/aarch64-apple-darwin/release/bundle and the default target/release/bundle)
+          BUNDLE_DIR="$(find src-tauri/target -type d -path '*/release/bundle' -print -quit || true)"
+
+          # Fallback to the conventional path if find returned nothing
+          if [ -z "$BUNDLE_DIR" ]; then
+            BUNDLE_DIR=src-tauri/target/release/bundle
+          fi
+
+          STAGING_DIR="$BUNDLE_DIR/release-artifacts"
+
+          # Always ensure staging dir exists so later steps can safely reference it.
+          mkdir -p "$STAGING_DIR"
+
+          if [ -d "$BUNDLE_DIR" ]; then
+            echo "Found bundle directory: $BUNDLE_DIR"
+
+            # Copy DMG files if present
+            if [ -d "$BUNDLE_DIR/dmg" ]; then
+              cp "$BUNDLE_DIR/dmg"/*.dmg "$STAGING_DIR/" 2>/dev/null || true
+            fi
+
+            # Zip the .app bundle if present under macos/
+            if [ -d "$BUNDLE_DIR/macos" ]; then
+              (cd "$BUNDLE_DIR/macos" && zip -r ../release-artifacts/Honeymelon-macOS-aarch64.app.zip Honeymelon.app) || true
+            fi
+
+            # (Optional) look for other common artifacts and copy them
+            if compgen -G "$BUNDLE_DIR"/*.zip > /dev/null; then
+              cp "$BUNDLE_DIR"/*.zip "$STAGING_DIR/" 2>/dev/null || true
+            fi
+          else
+            echo "Warning: bundle directory not found at $BUNDLE_DIR - created empty staging dir at $STAGING_DIR"
+          fi
+
+          # List staging contents (or show message if empty). If empty, fail the job.
+          if [ -n "$(ls -A "$STAGING_DIR" 2>/dev/null)" ]; then
+            ls -lh "$STAGING_DIR"
+          else
+            echo "Error: No release artifacts found in $STAGING_DIR" >&2
+            echo "Searched for bundle under src-tauri/target (found: $BUNDLE_DIR)" >&2
+            exit 1
+          fi
+
+      - name: Upload artifacts to platform
+        id: upload_artifacts
+        run: |
+          set -euo pipefail
+
+          detect_platform() {
+            local filepath="$1"
+            if [[ "$filepath" =~ (darwin|mac).*arm64|aarch64 ]]; then
+              echo "darwin-aarch64"
+              return
+            fi
+            if [[ "$filepath" =~ (darwin|mac).*x86_64|amd64|x64 ]]; then
+              echo "darwin-x64"
+              return
+            fi
+            echo "unknown"
+          }
+
+          ARTIFACTS_JSON="[]"
+
+          for file in src-tauri/target/**/release/bundle/release-artifacts/*; do
+            if [[ -f "$file" ]]; then
+              PLATFORM=$(detect_platform "$file")
+              if [[ "$PLATFORM" == "unknown" ]]; then
+                PLATFORM="darwin-aarch64"
+              fi
+
+              SHA256=$(shasum -a 256 "$file" | awk '{print $1}')
+
+              RESPONSE=$(curl -X POST "${{ secrets.LARAVEL_ARTIFACT_UPLOAD_URL }}" \
+                -H "Authorization: Bearer ${{ secrets.LARAVEL_WEBHOOK_TOKEN }}" \
+                -F "platform=$PLATFORM" \
+                -F "sha256=$SHA256" \
+                -F "artifact=@$file" \
+                -s)
+
+              DATA=$(jq '.data' <<< "$RESPONSE")
+              if [[ "$DATA" != "null" ]]; then
+                ARTIFACTS_JSON=$(jq --argjson item "$DATA" '. + [$item]' <<< "$ARTIFACTS_JSON")
+              fi
+            fi
+          done
+
+          {
+            echo "artifacts<<EOF"
+            echo "$ARTIFACTS_JSON"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifacts to release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: |
+            src-tauri/target/**/release/bundle/release-artifacts/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract release metadata
+        id: metadata
+        run: |
+          # Extract version from tag (remove 'v' prefix if present)
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"
+
+          # Extract major version (e.g., "1" from "1.2.3")
+          MAJOR=$(echo "$VERSION" | cut -d. -f1)
+
+          # Determine channel based on prerelease flag and tag
+          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            CHANNEL="beta"
+          elif [[ "$TAG" =~ -alpha ]]; then
+            CHANNEL="alpha"
+          elif [[ "$TAG" =~ -rc ]]; then
+            CHANNEL="rc"
+          else
+            CHANNEL="stable"
+          fi
+
+          # Get commit hash
+          COMMIT_HASH="${{ github.sha }}"
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "major=$MAJOR" >> $GITHUB_OUTPUT
+          echo "channel=$CHANNEL" >> $GITHUB_OUTPUT
+          echo "commit_hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+
+      - name: Notify Laravel webhook
+        run: |
+          set -euo pipefail
+
+          TAG="${{ github.event.release.tag_name }}"
+          VERSION="${TAG#v}"
+          MAJOR="${{ steps.metadata.outputs.major }}"
+          CHANNEL="${{ steps.metadata.outputs.channel }}"
+          COMMIT_HASH="${{ steps.metadata.outputs.commit_hash }}"
+          NOTES_RAW=$(jq -r '.release.body // ""' "$GITHUB_EVENT_PATH")
+          PUBLISHED_AT="${{ github.event.release.published_at }}"
+          ARTIFACTS="${{ steps.upload_artifacts.outputs.artifacts }}"
+          ARTIFACTS_JSON="${ARTIFACTS:-[]}"
+
+          PAYLOAD=$(jq -n \
+            --arg version "$VERSION" \
+            --arg tag "$TAG" \
+            --arg commit_hash "$COMMIT_HASH" \
+            --arg channel "$CHANNEL" \
+            --arg notes "$NOTES_RAW" \
+            --arg published_at "$PUBLISHED_AT" \
+            --argjson major "$MAJOR" \
+            --argjson artifacts "$ARTIFACTS_JSON" \
+            '{
+              version: $version,
+              tag: $tag,
+              commit_hash: $commit_hash,
+              channel: $channel,
+              notes: $notes,
+              published_at: $published_at,
+              major: $major,
+              artifacts: $artifacts
+            }')
+
+          curl -X POST "${{ secrets.LARAVEL_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer ${{ secrets.LARAVEL_WEBHOOK_TOKEN }}" \
+            -d "$PAYLOAD"
+
+      - name: Upload build artifacts (for debugging)
+        uses: actions/upload-artifact@v4
+        with:
+          name: honeymelon-macos-aarch64
+          path: src-tauri/target/**/release/bundle/release-artifacts/*
+          retention-days: 30
+
+  # Optional: Create checksums for verification
+  create-checksums:
+    needs: build-and-upload
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: honeymelon-macos-aarch64
+          path: artifacts
+
+      - name: Generate checksums
+        run: |
+          set -euo pipefail
+          cd artifacts
+
+          # Find files only (skip directories) and generate deterministic SHA256 sums.
+          # Use NUL separators to safely handle spaces/newlines in filenames.
+          if [ -z "$(find . -type f -print -quit)" ]; then
+            echo "Error: no files found in artifacts to checksum" >&2
+            exit 1
+          fi
+
+          # Generate sorted list of files and compute shasums in a stable order
+          find . -type f -print0 | sort -z | xargs -0 shasum -a 256 > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Upload checksums to release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.release.tag_name }}
+          files: artifacts/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

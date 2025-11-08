@@ -32,6 +32,16 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
             'channel' => ['required', 'string', Rule::in(['stable', 'beta'])],
             'commit_hash' => ['required', 'string', 'max:255'],
             'major' => ['sometimes', 'boolean'],
+            'artifacts' => ['sometimes', 'array'],
+            'artifacts.*.platform' => ['required_with:artifacts', 'string', 'max:64'],
+            'artifacts.*.source' => ['sometimes', 'string', Rule::in(['github', 'r2', 's3'])],
+            'artifacts.*.filename' => ['sometimes', 'string', 'max:255'],
+            'artifacts.*.url' => ['required_with:artifacts', 'string', 'max:2048'],
+            'artifacts.*.path' => ['sometimes', 'string', 'max:2048'],
+            'artifacts.*.size' => ['sometimes', 'integer', 'min:0'],
+            'artifacts.*.sha256' => ['sometimes', 'string'],
+            'artifacts.*.signature' => ['sometimes', 'string'],
+            'artifacts.*.notarized' => ['sometimes', 'boolean'],
         ];
     }
 }

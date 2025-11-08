@@ -27,7 +27,8 @@ class ProcessGithubReleaseJob implements ShouldQueue
         public readonly string $version,
         public readonly string $commitHash,
         public readonly bool $isMajor = false,
-        public readonly ?string $userId = null
+        public readonly ?int $userId = null,
+        public readonly array $payload = []
     ) {}
 
     /**
@@ -46,8 +47,16 @@ class ProcessGithubReleaseJob implements ShouldQueue
 
         try {
             DB::transaction(function () use ($githubService, $releaseService, $updateService) {
-                // Fetch release data from GitHub
-                $githubData = $githubService->fetchRelease($this->tag);
+                $notes = $this->payload['notes'] ?? null;
+                $publishedAt = $this->payload['published_at'] ?? null;
+                $artifacts = $this->payload['artifacts'] ?? [];
+
+                if (empty($artifacts)) {
+                    $githubData = $githubService->fetchRelease($this->tag);
+                    $notes = $githubData['notes'];
+                    $publishedAt = $githubData['published_at'];
+                    $artifacts = $githubData['assets'];
+                }
 
                 // Create release record
                 $release = $releaseService->recordRelease([
@@ -55,8 +64,8 @@ class ProcessGithubReleaseJob implements ShouldQueue
                     'tag' => $this->tag,
                     'commit_hash' => $this->commitHash,
                     'channel' => $this->channel,
-                    'notes' => $githubData['notes'],
-                    'published_at' => $githubData['published_at'],
+                    'notes' => $notes,
+                    'published_at' => $publishedAt ?? now()->toIso8601String(),
                     'major' => $this->isMajor,
                     'user_id' => $this->userId,
                 ]);
@@ -64,31 +73,31 @@ class ProcessGithubReleaseJob implements ShouldQueue
                 Log::info('Release created', ['release_id' => $release->id]);
 
                 // Process and attach artifacts
-                foreach ($githubData['assets'] as $asset) {
-                    $platform = PlatformDetector::detect($asset['name']);
+                foreach ($artifacts as $asset) {
+                    $platform = $asset['platform'] ?? PlatformDetector::detect($asset['filename'] ?? $asset['name'] ?? '');
 
                     if ($platform === null) {
-                        Log::warning('Could not extract platform from asset', ['asset' => $asset['name']]);
+                        Log::warning('Could not extract platform from asset', ['asset' => $asset['filename'] ?? $asset['name'] ?? null]);
 
                         continue;
                     }
 
                     $releaseService->attachArtifact($release, [
                         'platform' => $platform,
-                        'source' => 'github',
-                        'filename' => $asset['name'],
-                        'size' => $asset['size'],
-                        'sha256' => $asset['sha256'],
-                        'signature' => $asset['signature'],
-                        'notarized' => str_contains($asset['name'], 'notarized'),
-                        'url' => $asset['url'],
-                        'path' => null,
+                        'source' => $asset['source'] ?? 'github',
+                        'filename' => $asset['filename'] ?? $asset['name'] ?? null,
+                        'size' => $asset['size'] ?? 0,
+                        'sha256' => $asset['sha256'] ?? null,
+                        'signature' => $asset['signature'] ?? null,
+                        'notarized' => (bool) ($asset['notarized'] ?? false),
+                        'url' => $asset['url'] ?? $asset['path'] ?? null,
+                        'path' => $asset['path'] ?? null,
                     ]);
 
                     Log::info('Artifact attached', [
                         'release_id' => $release->id,
                         'platform' => $platform,
-                        'filename' => $asset['name'],
+                        'filename' => $asset['filename'] ?? $asset['name'] ?? null,
                     ]);
                 }
 

@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ReleaseController;
 use App\Http\Controllers\Api\RollbackReleaseController;
 use App\Http\Controllers\Api\UpdateByVersionController;
 use App\Http\Controllers\Api\UpdateController;
+use App\Http\Controllers\Api\UploadArtifactController;
 use App\Http\Controllers\Api\WebhookEventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,7 @@ Route::prefix('webhooks')->group(function () {
 
 // Resource API routes (protected)
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('artifacts/upload', UploadArtifactController::class);
     Route::apiResource('artifacts', ArtifactController::class)->only(['index', 'show']);
     Route::apiResource('releases', ReleaseController::class)->only(['index', 'show']);
     Route::apiResource('updates', UpdateController::class)->only(['index', 'show']);

@@ -18,16 +18,21 @@ class GithubWebhookController extends Controller
      */
     public function store(StoreGithubReleaseWebhookRequest $request): JsonResponse
     {
-        tap($request->validated(), function (array $data): void {
-            ProcessGithubReleaseJob::dispatch(
-                tag: $data['tag'],
-                channel: ReleaseChannel::from($data['channel']),
-                version: $data['version'],
-                commitHash: $data['commit_hash'],
-                isMajor: $data['major'],
-                userId: auth()->id(),
-            );
-        });
+        $data = $request->validated();
+
+        ProcessGithubReleaseJob::dispatch(
+            tag: $data['tag'],
+            channel: ReleaseChannel::from($data['channel']),
+            version: $data['version'],
+            commitHash: $data['commit_hash'],
+            isMajor: $data['major'],
+            userId: auth()->id(),
+            payload: [
+                'notes' => $data['notes'],
+                'published_at' => $data['published_at'],
+                'artifacts' => $data['artifacts'] ?? [],
+            ],
+        );
 
         return response()->json([], 201);
     }
