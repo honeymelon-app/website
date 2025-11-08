@@ -42,9 +42,7 @@ Route::post('/logout', function () {
     return redirect('/');
 })->name('logout');
 
-Route::get('dashboard', function () {
-    return Inertia::render('admin/Index');
-})->middleware('cerberus.auth:web')->name('dashboard');
+Route::get('dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->middleware('cerberus.auth:web')->name('dashboard');
 
 Route::prefix('admin')->middleware('cerberus.auth:web')->name('admin.')->group(function () {
     Route::resource('releases', \App\Http\Controllers\Web\Admin\ReleaseController::class)->only(['index', 'show']);
