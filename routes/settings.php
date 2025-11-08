@@ -10,6 +10,7 @@ Route::middleware('cerberus.auth:web')->group(function () {
     Route::redirect('settings', '/settings/profile');
 
     Route::get('settings/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('settings/profile', [ProfileController::class, 'update'])->name('profile.update');
 
     Route::get('settings/password', [PasswordController::class, 'edit'])->name('user-password.edit');
 

@@ -1,9 +1,5 @@
 <?php
 
-use App\Models\User;
-
-$portalBase = rtrim(env('CERBERUS_IAM_PORTAL_URL', env('CERBERUS_IAM_URL', '')), '/');
-
 return [
     /*
     |--------------------------------------------------------------------------
@@ -63,11 +59,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | HTTP Client Settings
+    | Timeout Settings
     |--------------------------------------------------------------------------
     |
-    | Configure the built-in Laravel HTTP client that powers every request the
-    | Cerberus SDK makes. You can fine tune timeouts and retry policies here.
+    | Customize the built-in Laravel HTTP client behaviour used for all outbound
+    | requests to the Cerberus IAM API.
     |
     */
 
@@ -78,21 +74,6 @@ return [
             'max_attempts' => env('CERBERUS_IAM_HTTP_RETRY_ATTEMPTS', 2),
             'delay' => env('CERBERUS_IAM_HTTP_RETRY_DELAY', 100),
         ],
-    ],
-
-    /*
-    |--------------------------------------------------------------------------
-    | Cerberus Portal URLs
-    |--------------------------------------------------------------------------
-    |
-    | These URLs power the "Manage in Cerberus" links shown throughout the UI.
-    | Override them if your Cerberus deployment uses custom domains.
-    |
-    */
-
-    'management_urls' => [
-        'profile' => env('CERBERUS_IAM_PROFILE_URL', $portalBase ? "{$portalBase}/me/profile" : null),
-        'security' => env('CERBERUS_IAM_SECURITY_URL', $portalBase ? "{$portalBase}/me/security" : null),
     ],
 
     /*
@@ -137,12 +118,20 @@ return [
     | User Model (Optional)
     |--------------------------------------------------------------------------
     |
-    | Provide a fully-qualified Eloquent model name to keep a lightweight
-    | mirror of Cerberus users inside your database. This enables first-class
-    | relationships (releases -> user, etc.) while still delegating all
-    | authentication to Cerberus IAM.
+    | If you want to sync users from Cerberus IAM to a local Eloquent model,
+    | specify the fully-qualified class name here. The model must:
+    |
+    | 1. Implement Illuminate\Contracts\Auth\Authenticatable
+    | 2. Have a 'cerberus_id' column (string/uuid) to store the IAM user ID
+    | 3. Have standard user fields: name, email
+    |
+    | When set, users will be automatically created/updated in your local
+    | database on login. When null, users are retrieved on-demand from
+    | Cerberus IAM (stateless mode).
+    |
+    | Example: App\Models\User::class
     |
     */
 
-    'user_model' => env('CERBERUS_IAM_USER_MODEL', User::class),
+    'user_model' => env('CERBERUS_IAM_USER_MODEL'),
 ];

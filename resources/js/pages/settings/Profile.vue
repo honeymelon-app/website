@@ -23,6 +23,8 @@ const props = defineProps<Props>();
 
 const page = usePage<AppPageProps>();
 const user = computed(() => page.props.auth.user);
+console.log(user.value);
+
 const manageProfileUrl = computed(
     () => props.manageProfileUrl ?? page.props.cerberus.profileUrl,
 );
