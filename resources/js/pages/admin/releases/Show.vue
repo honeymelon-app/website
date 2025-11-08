@@ -32,7 +32,17 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const breadcrumbs: BreadcrumbItem[] = [
+const releaseBreadcrumbHref = computed(() => {
+    const releaseId = props.release?.id ?? '';
+
+    if (!releaseId) {
+        return releasesRoute.index().url;
+    }
+
+    return releasesRoute.show(releaseId).url;
+});
+
+const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     {
         title: 'Dashboard',
         href: dashboard().url,
@@ -43,9 +53,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: props.release.version,
-        href: releasesRoute.show(props.release.id).url,
+        href: releaseBreadcrumbHref.value,
     },
-];
+]);
 
 // Parsed markdown notes
 const parsedNotes = computed(() => {
