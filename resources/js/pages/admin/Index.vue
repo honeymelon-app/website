@@ -143,8 +143,8 @@ const getStatusVariant = (
                             />
                             <span
                                 :class="metrics.orders_change >= 0
-                                        ? 'text-green-500'
-                                        : 'text-red-500'
+                                    ? 'text-green-500'
+                                    : 'text-red-500'
                                     "
                             >
                                 {{ Math.abs(metrics.orders_change) }}%
@@ -183,8 +183,8 @@ const getStatusVariant = (
                             />
                             <span
                                 :class="metrics.revenue_change >= 0
-                                        ? 'text-green-500'
-                                        : 'text-red-500'
+                                    ? 'text-green-500'
+                                    : 'text-red-500'
                                     "
                             >
                                 {{ Math.abs(metrics.revenue_change) }}%
@@ -223,8 +223,8 @@ const getStatusVariant = (
                             />
                             <span
                                 :class="metrics.licenses_change >= 0
-                                        ? 'text-green-500'
-                                        : 'text-red-500'
+                                    ? 'text-green-500'
+                                    : 'text-red-500'
                                     "
                             >
                                 {{ Math.abs(metrics.licenses_change) }}%
@@ -274,10 +274,10 @@ const getStatusVariant = (
                             :categories="['orders', 'revenue']"
                             :colors="['hsl(var(--chart-1))', 'hsl(var(--chart-2))']"
                             :y-formatter="(tick: number | Date) => {
-                                    return typeof tick === 'number'
-                                        ? tick.toFixed(0)
-                                        : '';
-                                }
+                                return typeof tick === 'number'
+                                    ? tick.toFixed(0)
+                                    : '';
+                            }
                                 "
                             class="h-[300px]"
                         />
@@ -300,7 +300,7 @@ const getStatusVariant = (
                             v-if="charts.licenses_by_status.length > 0"
                             :data="charts.licenses_by_status"
                             index="status"
-                            :categories="['count']"
+                            category="count"
                             :colors="['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']"
                             class="mx-auto h-[300px]"
                         />
