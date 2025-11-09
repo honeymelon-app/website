@@ -33,12 +33,11 @@ Route::prefix('webhooks')->group(function () {
     Route::post('/lemonsqueezy', [WebhookEventController::class, 'lemonsqueezy']);
     Route::post('/stripe', [WebhookEventController::class, 'stripe']);
     Route::post('/github/release', [GithubWebhookController::class, 'store']);
-})->middleware('client');
-
-Route::post('artifacts/upload', UploadArtifactController::class)->middleware('client');
+})->middleware('auth:sanctum');
 
 // Resource API routes (protected)
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('artifacts/upload', UploadArtifactController::class);
     Route::apiResource('artifacts', ArtifactController::class)->only(['index', 'show']);
     Route::apiResource('releases', ReleaseController::class)->only(['index', 'show']);
     Route::apiResource('updates', UpdateController::class)->only(['index', 'show']);
