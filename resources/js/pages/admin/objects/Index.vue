@@ -32,6 +32,7 @@ import {
     Trash2,
 } from 'lucide-vue-next';
 import { h, ref } from 'vue';
+import copy from 'copy-to-clipboard';
 
 interface R2Object {
     path: string;
@@ -176,7 +177,7 @@ const columns: Column<R2Object>[] = [
                                     h(
                                         DropdownMenuItem,
                                         {
-                                            onClick: () => copyUrl(row),
+                                            onClick: () => copy(row.url),
                                         },
                                         {
                                             default: () => [
@@ -198,21 +199,6 @@ const columns: Column<R2Object>[] = [
                                                     class: 'mr-2 h-4 w-4',
                                                 }),
                                                 'Download',
-                                            ],
-                                        },
-                                    ),
-                                    h(DropdownMenuSeparator),
-                                    h(
-                                        DropdownMenuItem,
-                                        {
-                                            onClick: () => openUrl(row),
-                                        },
-                                        {
-                                            default: () => [
-                                                h(ExternalLink, {
-                                                    class: 'mr-2 h-4 w-4',
-                                                }),
-                                                'Open in Browser',
                                             ],
                                         },
                                     ),
@@ -243,21 +229,7 @@ const columns: Column<R2Object>[] = [
 ];
 
 // Actions
-const copyUrl = async (object: R2Object): Promise<void> => {
-    try {
-        await navigator.clipboard.writeText(object.url);
-        console.log('URL copied to clipboard:', object.url);
-        // You could add a toast notification here
-    } catch (err) {
-        console.error('Failed to copy URL:', err);
-    }
-};
-
 const downloadObject = (object: R2Object): void => {
-    window.open(object.url, '_blank');
-};
-
-const openUrl = (object: R2Object): void => {
     window.open(object.url, '_blank');
 };
 
