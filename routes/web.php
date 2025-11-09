@@ -1,5 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Web\Admin\ArtifactController;
+use App\Http\Controllers\Web\Admin\LicenseController;
+use App\Http\Controllers\Web\Admin\ObjectController;
+use App\Http\Controllers\Web\Admin\OrderController;
+use App\Http\Controllers\Web\Admin\ReleaseController;
+use App\Http\Controllers\Web\Admin\UpdateController;
 use App\Http\Controllers\Web\DownloadController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,16 +49,16 @@ Route::post('/logout', function () {
     return redirect('/');
 })->name('logout');
 
-Route::get('dashboard', [\App\Http\Controllers\Admin\DashboardController::class, 'index'])->middleware('cerberus.auth:web')->name('dashboard');
+Route::get('dashboard', [DashboardController::class, 'index'])->middleware('cerberus.auth:web')->name('dashboard');
 
 Route::prefix('admin')->middleware('cerberus.auth:web')->name('admin.')->group(function () {
-    Route::resource('releases', \App\Http\Controllers\Web\Admin\ReleaseController::class)->only(['index', 'show']);
-    Route::resource('artifacts', \App\Http\Controllers\Web\Admin\ArtifactController::class)->only(['index', 'show']);
-    Route::resource('licenses', \App\Http\Controllers\Web\Admin\LicenseController::class)->only(['index', 'show', 'store']);
-    Route::resource('orders', \App\Http\Controllers\Web\Admin\OrderController::class)->only(['index', 'show']);
-    Route::resource('updates', \App\Http\Controllers\Web\Admin\UpdateController::class)->only(['index', 'show']);
-    Route::delete('objects/{path}', [\App\Http\Controllers\Web\Admin\ObjectController::class, 'destroy'])->where('path', '.*')->name('objects.destroy');
-    Route::resource('objects', \App\Http\Controllers\Web\Admin\ObjectController::class)->only(['index']);
+    Route::resource('releases', ReleaseController::class)->only(['index', 'show']);
+    Route::resource('artifacts', ArtifactController::class)->only(['index', 'show']);
+    Route::resource('licenses', LicenseController::class)->only(['index', 'show', 'store']);
+    Route::resource('orders', OrderController::class)->only(['index', 'show']);
+    Route::resource('updates', UpdateController::class)->only(['index', 'show']);
+    Route::delete('objects/{path}', [ObjectController::class, 'destroy'])->where('path', '.*')->name('objects.destroy');
+    Route::resource('objects', ObjectController::class)->only(['index']);
 });
 
 require __DIR__.'/settings.php';
