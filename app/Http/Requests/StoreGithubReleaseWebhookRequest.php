@@ -29,7 +29,7 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
             'published_at' => ['required', 'date'],
             'tag' => ['required', 'string', 'max:255'],
             'version' => ['required', 'string', 'max:255'],
-            'channel' => ['required', 'string', Rule::in(['stable', 'beta'])],
+            'channel' => ['required', 'string', Rule::in(['stable', 'beta', 'alpha', 'rc'])],
             'commit_hash' => ['required', 'string', 'max:255'],
             'major' => ['sometimes', 'boolean'],
             'artifacts' => ['sometimes', 'array'],
