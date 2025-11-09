@@ -40,7 +40,7 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
             'artifacts.*.path' => ['sometimes', 'string', 'max:2048'],
             'artifacts.*.size' => ['sometimes', 'integer', 'min:0'],
             'artifacts.*.sha256' => ['sometimes', 'string'],
-            'artifacts.*.signature' => ['sometimes', 'string'],
+            'artifacts.*.signature' => ['nullable', 'string'],
             'artifacts.*.notarized' => ['sometimes', 'boolean'],
         ];
     }
