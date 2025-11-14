@@ -260,9 +260,9 @@ const getStatusVariant = (
             </div>
 
             <!-- Charts Row -->
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <div class="grid gap-4 lg:grid-cols-7">
                 <!-- Orders & Revenue Over Time -->
-                <Card class="col-span-4">
+                <Card class="lg:col-span-4">
                     <CardHeader>
                         <CardTitle>Orders & Revenue (Last 30 Days)</CardTitle>
                     </CardHeader>
@@ -291,7 +291,7 @@ const getStatusVariant = (
                 </Card>
 
                 <!-- License Status Distribution -->
-                <Card class="col-span-3">
+                <Card class="lg:col-span-3">
                     <CardHeader>
                         <CardTitle>License Status Distribution</CardTitle>
                     </CardHeader>
@@ -315,7 +315,7 @@ const getStatusVariant = (
             </div>
 
             <!-- Platform Distribution -->
-            <div class="grid gap-4 md:grid-cols-2">
+            <div class="grid gap-4 lg:grid-cols-2">
                 <Card>
                     <CardHeader>
                         <CardTitle>Artifacts by Platform</CardTitle>
@@ -354,7 +354,7 @@ const getStatusVariant = (
                             <div
                                 v-for="order in recent_orders"
                                 :key="order.id"
-                                class="flex items-center justify-between"
+                                class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                             >
                                 <div class="space-y-1">
                                     <p class="text-sm font-medium leading-none">

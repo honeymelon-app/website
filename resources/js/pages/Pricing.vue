@@ -200,21 +200,21 @@ const comparisonFeatures = [
                     <Card>
                         <CardContent class="p-0">
                             <div class="overflow-x-auto">
-                                <table class="w-full">
+                                <table class="w-full min-w-[500px]">
                                     <thead>
                                         <tr class="border-b border-border/50">
                                             <th
-                                                class="p-6 text-left font-semibold"
+                                                class="p-4 text-left text-sm font-semibold md:p-6"
                                             >
                                                 Feature
                                             </th>
                                             <th
-                                                class="p-6 text-center font-semibold"
+                                                class="p-4 text-center text-sm font-semibold md:p-6"
                                             >
                                                 Honeymelon
                                             </th>
                                             <th
-                                                class="p-6 text-center font-semibold text-muted-foreground"
+                                                class="p-4 text-center text-sm font-semibold text-muted-foreground md:p-6"
                                             >
                                                 Others
                                             </th>
@@ -230,37 +230,37 @@ const comparisonFeatures = [
                                                     : ''
                                             "
                                         >
-                                            <td class="p-6">
+                                            <td class="p-4 text-sm md:p-6">
                                                 {{ item.feature }}
                                             </td>
-                                            <td class="p-6 text-center">
+                                            <td class="p-4 text-center md:p-6">
                                                 <div
                                                     class="flex justify-center"
                                                 >
                                                     <Check
                                                         v-if="item.us"
-                                                        class="h-6 w-6 text-primary"
+                                                        class="h-5 w-5 text-primary md:h-6 md:w-6"
                                                         :stroke-width="3"
                                                     />
                                                     <X
                                                         v-else
-                                                        class="h-6 w-6 text-muted-foreground"
+                                                        class="h-5 w-5 text-muted-foreground md:h-6 md:w-6"
                                                         :stroke-width="2"
                                                     />
                                                 </div>
                                             </td>
-                                            <td class="p-6 text-center">
+                                            <td class="p-4 text-center md:p-6">
                                                 <div
                                                     class="flex justify-center"
                                                 >
                                                     <Check
                                                         v-if="item.them"
-                                                        class="h-6 w-6 text-muted-foreground"
+                                                        class="h-5 w-5 text-muted-foreground md:h-6 md:w-6"
                                                         :stroke-width="2"
                                                     />
                                                     <X
                                                         v-else
-                                                        class="h-6 w-6 text-muted-foreground"
+                                                        class="h-5 w-5 text-muted-foreground md:h-6 md:w-6"
                                                         :stroke-width="2"
                                                     />
                                                 </div>

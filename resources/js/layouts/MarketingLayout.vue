@@ -3,6 +3,19 @@ import AppLogoIcon from '@/components/AppLogoIcon.vue';
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
+import { Menu, ExternalLink } from 'lucide-vue-next';
+import { usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
+
+const page = usePage();
+const auth = computed(() => page.props.auth);
 </script>
 
 <template>
@@ -19,17 +32,85 @@ import Separator from '@/components/ui/separator/Separator.vue';
                         />
                         <span class="text-xl font-bold">Honeymelon</span>
                     </a>
-                    <nav class="flex items-center gap-3">
-                        <Button as-child variant="ghost">
-                            <a href="/#features">Features</a>
-                        </Button>
+
+                    <!-- Desktop Navigation -->
+                    <nav class="hidden items-center gap-3 md:flex">
                         <Button as-child variant="ghost">
                             <a href="/pricing">Pricing</a>
+                        </Button>
+                        <Button as-child variant="ghost">
+                            <a
+                                href="https://docs.honeymelon.app"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-1.5"
+                            >
+                                Docs
+                                <ExternalLink class="h-3 w-3" />
+                            </a>
                         </Button>
                         <Button as-child>
                             <a href="/download">Download</a>
                         </Button>
+                        <Button v-if="auth?.user" as-child variant="outline">
+                            <a href="/dashboard">Dashboard</a>
+                        </Button>
+                        <Button v-else as-child variant="outline">
+                            <a href="/login">Sign In</a>
+                        </Button>
                     </nav>
+
+                    <!-- Mobile Navigation -->
+                    <div class="md:hidden">
+                        <Sheet>
+                            <SheetTrigger :as-child="true">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-10 w-10"
+                                >
+                                    <Menu class="h-5 w-5" />
+                                    <span class="sr-only">Toggle menu</span>
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" class="w-[300px]">
+                                <SheetHeader>
+                                    <SheetTitle class="text-left">
+                                        <div class="flex items-center gap-3">
+                                            <AppLogoIcon class="h-8 w-8" />
+                                            <span class="text-lg font-bold">Honeymelon</span>
+                                        </div>
+                                    </SheetTitle>
+                                </SheetHeader>
+                                <nav class="mt-8 flex flex-col gap-4">
+                                    <Button as-child variant="ghost" class="justify-start">
+                                        <a href="/pricing">Pricing</a>
+                                    </Button>
+                                    <Button as-child variant="ghost" class="justify-start">
+                                        <a
+                                            href="https://docs.honeymelon.app"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="inline-flex items-center gap-1.5"
+                                        >
+                                            Documentation
+                                            <ExternalLink class="h-3 w-3" />
+                                        </a>
+                                    </Button>
+                                    <Button as-child class="justify-start">
+                                        <a href="/download">Download</a>
+                                    </Button>
+                                    <div class="my-2 border-t border-border" />
+                                    <Button v-if="auth?.user" as-child variant="outline" class="justify-start">
+                                        <a href="/dashboard">Dashboard</a>
+                                    </Button>
+                                    <Button v-else as-child variant="outline" class="justify-start">
+                                        <a href="/login">Sign In</a>
+                                    </Button>
+                                </nav>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
                 </div>
             </div>
         </header>
@@ -59,9 +140,9 @@ import Separator from '@/components/ui/separator/Separator.vue';
                         <ul class="space-y-3 text-sm text-muted-foreground">
                             <li>
                                 <a
-                                    href="/#features"
+                                    href="/download"
                                     class="transition-colors hover:text-foreground"
-                                    >Features</a
+                                    >Download</a
                                 >
                             </li>
                             <li>
@@ -76,9 +157,11 @@ import Separator from '@/components/ui/separator/Separator.vue';
                                     href="https://docs.honeymelon.app"
                                     target="_blank"
                                     rel="noopener"
-                                    class="transition-colors hover:text-foreground"
-                                    >Documentation</a
-                                >
+                                    class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
+                                    >
+                                    Documentation
+                                    <ExternalLink class="h-3 w-3" />
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -87,19 +170,25 @@ import Separator from '@/components/ui/separator/Separator.vue';
                         <ul class="space-y-3 text-sm text-muted-foreground">
                             <li>
                                 <a
-                                    href="https://docs.honeymelon.app"
+                                    href="https://github.com/honeymelon-app/honeymelon"
                                     target="_blank"
                                     rel="noopener"
-                                    class="transition-colors hover:text-foreground"
-                                    >Documentation</a
-                                >
+                                    class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
+                                    >
+                                    GitHub
+                                    <ExternalLink class="h-3 w-3" />
+                                </a>
                             </li>
                             <li>
                                 <a
-                                    href="/download"
-                                    class="transition-colors hover:text-foreground"
-                                    >Download</a
-                                >
+                                    href="https://docs.honeymelon.app"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
+                                    >
+                                    Support
+                                    <ExternalLink class="h-3 w-3" />
+                                </a>
                             </li>
                         </ul>
                     </div>
@@ -134,11 +223,11 @@ import Separator from '@/components/ui/separator/Separator.vue';
                 <div
                     class="flex flex-col items-center justify-between gap-4 sm:flex-row"
                 >
-                    <p class="text-sm text-muted-foreground">
+                    <p class="text-center text-sm text-muted-foreground sm:text-left">
                         © 2025 Honeymelon. Privacy-first media conversion for
                         Mac.
                     </p>
-                    <div class="flex gap-3">
+                    <div class="flex flex-wrap justify-center gap-3">
                         <Badge variant="outline" class="px-3 py-1"
                             >macOS 13+</Badge
                         >

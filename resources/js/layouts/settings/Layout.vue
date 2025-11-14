@@ -39,15 +39,15 @@ const currentPath = typeof window !== undefined ? window.location.pathname : '';
             description="Manage your profile and account settings"
         />
 
-        <div class="flex flex-col lg:flex-row lg:space-x-12">
-            <aside class="w-full max-w-xl lg:w-48">
-                <nav class="flex flex-col space-y-1 space-x-0">
+        <div class="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+            <aside class="w-full lg:w-48">
+                <nav class="flex space-x-2 overflow-x-auto lg:flex-col lg:space-x-0 lg:space-y-1">
                     <Button
                         v-for="item in sidebarNavItems"
                         :key="toUrl(item.href)"
                         variant="ghost"
                         :class="[
-                            'w-full justify-start',
+                            'shrink-0 justify-start lg:w-full',
                             { 'bg-muted': urlIsActive(item.href, currentPath) },
                         ]"
                         as-child
@@ -62,7 +62,7 @@ const currentPath = typeof window !== undefined ? window.location.pathname : '';
 
             <Separator class="my-6 lg:hidden" />
 
-            <div class="flex-1 md:max-w-2xl">
+            <div class="flex-1 lg:max-w-2xl">
                 <section class="max-w-xl space-y-12">
                     <slot />
                 </section>

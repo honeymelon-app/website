@@ -43,7 +43,7 @@ const hasData = computed(() => props.data && props.data.length > 0);
 
 <template>
     <div class="space-y-4">
-        <div class="rounded-md border">
+        <div class="overflow-x-auto rounded-md border">
             <Table>
                 <TableHeader>
                     <TableRow>
