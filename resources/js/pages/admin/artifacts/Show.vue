@@ -1,4 +1,14 @@
 <script setup lang="ts">
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,24 +23,44 @@ import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
 import releases from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
-import type { Artifact } from '@/types/api';
+import type { Artifact, Release } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import {
+    AlertTriangle,
     ArrowLeft,
+    CheckCircle2,
+    Cloud,
     Download,
     FileArchive,
+    Github,
     Hash,
     ShieldCheck,
+    Trash2,
+    XCircle,
 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
+
+interface StorageStatus {
+    synced: boolean;
+    type: 'github' | 'r2' | 'missing_path' | 'not_found' | 'error';
+    message: string;
+    storage_size?: number;
+    size_match?: boolean;
+}
+
+interface ArtifactWithSync extends Artifact {
+    storage_status: StorageStatus;
+    download_url?: string;
+    release?: Release;
+}
 
 interface Props {
-    artifact: Artifact;
+    artifact: ArtifactWithSync;
 }
 
 const props = defineProps<Props>();
 
-const breadcrumbs: BreadcrumbItem[] = [
+const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     {
         title: 'Dashboard',
         href: dashboard().url,
@@ -40,10 +70,12 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: artifacts.index().url,
     },
     {
-        title: props.artifact.filename,
+        title: props.artifact.filename ?? props.artifact.id?.substring(0, 8) ?? 'Artifact',
         href: artifacts.show(props.artifact.id).url,
     },
-];
+]);
+
+const showDeleteDialog = ref(false);
 
 const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 B';
@@ -75,18 +107,39 @@ const goBack = () => {
 };
 
 const downloadArtifact = () => {
-    window.open(props.artifact.url, '_blank');
+    const url = props.artifact.download_url ?? props.artifact.url;
+    if (url) {
+        window.open(url, '_blank');
+    }
 };
 
 const viewRelease = () => {
-    if (props.artifact.release_id) {
+    if (props.artifact.release?.id) {
+        router.visit(releases.show(props.artifact.release.id).url);
+    } else if (props.artifact.release_id) {
         router.visit(releases.show(props.artifact.release_id).url);
     }
+};
+
+const confirmDelete = () => {
+    showDeleteDialog.value = true;
+};
+
+const handleDelete = () => {
+    router.delete(artifacts.destroy(props.artifact.id).url, {
+        onSuccess: () => {
+            showDeleteDialog.value = false;
+        },
+    });
+};
+
+const cancelDelete = () => {
+    showDeleteDialog.value = false;
 };
 </script>
 
 <template>
-    <Head :title="`Artifact ${artifact.filename}`" />
+    <Head :title="`Artifact ${artifact.filename ?? 'Details'}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div
@@ -106,7 +159,7 @@ const viewRelease = () => {
                                 <ArrowLeft class="h-4 w-4" />
                             </Button>
                             <h3 class="text-2xl font-semibold tracking-tight">
-                                {{ artifact.filename }}
+                                {{ artifact.filename ?? 'Artifact Details' }}
                             </h3>
                         </div>
                         <p class="text-sm text-muted-foreground">
@@ -128,10 +181,82 @@ const viewRelease = () => {
                             <ShieldCheck class="h-3 w-3" />
                             Notarized
                         </Badge>
-                        <Button @click="downloadArtifact" size="sm">
+                        <Button
+                            @click="downloadArtifact"
+                            size="sm"
+                            :disabled="!artifact.download_url && !artifact.url"
+                        >
                             <Download class="mr-2 h-4 w-4" />
                             Download
                         </Button>
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            @click="confirmDelete"
+                        >
+                            <Trash2 class="mr-2 h-4 w-4" />
+                            Delete
+                        </Button>
+                    </div>
+                </div>
+
+                <!-- Storage Status Banner -->
+                <div
+                    v-if="artifact.storage_status"
+                    :class="[
+                        'flex items-center gap-3 rounded-lg border p-4',
+                        artifact.storage_status.synced
+                            ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950'
+                            : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950',
+                    ]"
+                >
+                    <template v-if="artifact.storage_status.synced">
+                        <Github
+                            v-if="artifact.storage_status.type === 'github'"
+                            class="h-5 w-5 text-green-600 dark:text-green-400"
+                        />
+                        <AlertTriangle
+                            v-else-if="artifact.storage_status.size_match === false"
+                            class="h-5 w-5 text-yellow-600 dark:text-yellow-400"
+                        />
+                        <Cloud
+                            v-else
+                            class="h-5 w-5 text-green-600 dark:text-green-400"
+                        />
+                    </template>
+                    <XCircle
+                        v-else
+                        class="h-5 w-5 text-red-600 dark:text-red-400"
+                    />
+                    <div>
+                        <p
+                            :class="[
+                                'font-medium',
+                                artifact.storage_status.synced
+                                    ? 'text-green-800 dark:text-green-200'
+                                    : 'text-red-800 dark:text-red-200',
+                            ]"
+                        >
+                            {{
+                                artifact.storage_status.synced
+                                    ? 'Storage Synced'
+                                    : 'Storage Issue'
+                            }}
+                        </p>
+                        <p
+                            :class="[
+                                'text-sm',
+                                artifact.storage_status.synced
+                                    ? 'text-green-700 dark:text-green-300'
+                                    : 'text-red-700 dark:text-red-300',
+                            ]"
+                        >
+                            {{ artifact.storage_status.message }}
+                            <template v-if="artifact.storage_status.size_match === false">
+                                (Size mismatch: DB={{ artifact.size ? formatFileSize(artifact.size) : 'N/A' }},
+                                R2={{ artifact.storage_status.storage_size ? formatFileSize(artifact.storage_status.storage_size) : 'N/A' }})
+                            </template>
+                        </p>
                     </div>
                 </div>
 
@@ -154,7 +279,7 @@ const viewRelease = () => {
                                 >
                                 <span
                                     class="font-mono text-sm break-all text-muted-foreground"
-                                    >{{ artifact.filename }}</span
+                                    >{{ artifact.filename ?? 'N/A' }}</span
                                 >
                             </div>
                             <div class="flex flex-col gap-1">
@@ -170,7 +295,7 @@ const viewRelease = () => {
                             <div class="flex flex-col gap-1">
                                 <span class="text-sm font-medium">Size</span>
                                 <span class="text-sm text-muted-foreground">{{
-                                    formatFileSize(artifact.size)
+                                    artifact.size ? formatFileSize(artifact.size) : 'N/A'
                                 }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
@@ -196,15 +321,15 @@ const viewRelease = () => {
                             </div>
                             <div class="flex flex-col gap-1">
                                 <span class="text-sm font-medium"
-                                    >Release ID</span
+                                    >Release</span
                                 >
                                 <Button
-                                    v-if="artifact.release_id"
+                                    v-if="artifact.release?.version || artifact.release_id"
                                     variant="link"
                                     class="h-auto justify-start p-0 font-mono text-sm"
                                     @click="viewRelease"
                                 >
-                                    {{ artifact.release_id }}
+                                    {{ artifact.release?.version ?? artifact.release_id }}
                                 </Button>
                                 <span
                                     v-else
@@ -273,8 +398,7 @@ const viewRelease = () => {
                     <CardHeader>
                         <CardTitle>Download URL</CardTitle>
                         <CardDescription
-                            >Direct download link for this
-                            artifact</CardDescription
+                            >Direct download link for this artifact (signed URL valid for 1 hour)</CardDescription
                         >
                     </CardHeader>
                     <CardContent>
@@ -283,20 +407,74 @@ const viewRelease = () => {
                                 class="flex-1 overflow-x-auto rounded-md bg-muted p-3"
                             >
                                 <code class="font-mono text-xs break-all">{{
-                                    artifact.url
+                                    artifact.download_url ?? artifact.url ?? 'Not available'
                                 }}</code>
                             </div>
                             <Button
                                 @click="downloadArtifact"
                                 size="sm"
                                 variant="outline"
+                                :disabled="!artifact.download_url && !artifact.url"
                             >
                                 <Download class="h-4 w-4" />
                             </Button>
                         </div>
                     </CardContent>
                 </Card>
+
+                <!-- Storage Path -->
+                <Card v-if="artifact.path">
+                    <CardHeader>
+                        <CardTitle class="flex items-center gap-2">
+                            <Cloud class="h-5 w-5" />
+                            Storage Path
+                        </CardTitle>
+                        <CardDescription
+                            >R2/S3 storage location</CardDescription
+                        >
+                    </CardHeader>
+                    <CardContent>
+                        <div class="overflow-x-auto rounded-md bg-muted p-3">
+                            <code class="font-mono text-xs break-all">{{
+                                artifact.path
+                            }}</code>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
+
+        <!-- Delete Confirmation Dialog -->
+        <AlertDialog
+            :open="showDeleteDialog"
+            @update:open="showDeleteDialog = $event"
+        >
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Delete Artifact</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Are you sure you want to delete "{{ artifact.filename }}"?
+                        <span
+                            v-if="artifact.source === 'r2' || artifact.source === 's3'"
+                            class="mt-2 block font-medium text-destructive"
+                        >
+                            This will also delete the file from R2 storage.
+                        </span>
+                        This action cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel @click="cancelDelete">
+                        Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                        @click="handleDelete"
+                        class="bg-destructive hover:bg-destructive/90"
+                    >
+                        Delete
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
     </AppLayout>
 </template>

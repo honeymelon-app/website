@@ -110,11 +110,10 @@ const publishRelease = () => {
                                 {{ release.version }}
                             </h1>
                             <Badge
-                                :variant="
-                                    release.channel === 'stable'
+                                :variant="release.channel === 'stable'
                                         ? 'default'
                                         : 'secondary'
-                                "
+                                    "
                                 class="capitalize"
                             >
                                 {{ release.channel }}
@@ -141,7 +140,7 @@ const publishRelease = () => {
                             <div class="flex items-center gap-1.5">
                                 <GitCommit class="h-3.5 w-3.5" />
                                 <span class="font-mono">{{
-                                    release.commit_hash.substring(0, 8)
+                                    release.commit_hash?.substring(0, 8) ?? 'N/A'
                                 }}</span>
                             </div>
                             <Separator orientation="vertical" class="h-4" />
@@ -210,7 +209,7 @@ const publishRelease = () => {
                             <code
                                 class="block rounded bg-muted px-3 py-2 font-mono text-xs break-all"
                             >
-                                {{ release.commit_hash }}
+                                {{ release.commit_hash ?? 'N/A' }}
                             </code>
                         </div>
                         <div class="space-y-1">

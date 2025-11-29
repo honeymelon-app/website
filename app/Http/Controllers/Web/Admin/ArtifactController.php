@@ -28,10 +28,14 @@ class ArtifactController extends Controller
         $disk = Storage::disk('s3');
         $artifactsWithSync = $artifacts->getCollection()->map(function ($artifact) use ($disk) {
             $syncStatus = $this->checkSyncStatus($artifact, $disk);
+            $downloadUrl = $this->generateDownloadUrl($artifact, $disk);
 
             return array_merge(
                 (new ArtifactResource($artifact))->resolve(),
-                ['storage_status' => $syncStatus]
+                [
+                    'storage_status' => $syncStatus,
+                    'download_url' => $downloadUrl,
+                ]
             );
         });
 
@@ -63,11 +67,15 @@ class ArtifactController extends Controller
     {
         $disk = Storage::disk('s3');
         $syncStatus = $this->checkSyncStatus($artifact, $disk);
+        $downloadUrl = $this->generateDownloadUrl($artifact, $disk);
 
         return Inertia::render('admin/artifacts/Show', [
             'artifact' => array_merge(
                 (new ArtifactResource($artifact->load('release')))->resolve(),
-                ['storage_status' => $syncStatus]
+                [
+                    'storage_status' => $syncStatus,
+                    'download_url' => $downloadUrl,
+                ]
             ),
         ]);
     }
@@ -81,6 +89,31 @@ class ArtifactController extends Controller
 
         return redirect()->route('admin.artifacts.index')
             ->with('success', 'Artifact deleted successfully.');
+    }
+
+    /**
+     * Generate a download URL for an artifact.
+     */
+    private function generateDownloadUrl(Artifact $artifact, $disk): ?string
+    {
+        // GitHub-sourced artifacts use the direct URL
+        if ($artifact->source === 'github' && $artifact->url) {
+            return $artifact->url;
+        }
+
+        // For R2/S3 sourced artifacts, generate a temporary signed URL
+        if (! empty($artifact->path)) {
+            try {
+                if ($disk->exists($artifact->path)) {
+                    return $disk->temporaryUrl($artifact->path, now()->addHour());
+                }
+            } catch (\Exception $e) {
+                // Fall back to direct URL if signing fails
+                return $artifact->url;
+            }
+        }
+
+        return $artifact->url;
     }
 
     /**

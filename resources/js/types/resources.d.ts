@@ -29,6 +29,8 @@ export interface Artifact {
     url: string | null;
     path: string | null;
     created_at: string;
+    release?: Release;
+    download_url?: string;
 }
 
 export interface Update {
