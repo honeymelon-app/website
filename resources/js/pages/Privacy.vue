@@ -229,7 +229,7 @@ import { Head } from '@inertiajs/vue3';
                         >
                             If you have questions about this privacy policy or
                             our privacy practices, please contact us at
-                            privacy@honeymelon.app.
+                            legal@honeymelon.app.
                         </p>
                     </section>
                 </CardContent>
