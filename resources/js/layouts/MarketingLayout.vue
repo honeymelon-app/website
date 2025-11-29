@@ -52,12 +52,6 @@ const auth = computed(() => page.props.auth);
                         <Button as-child>
                             <a href="/download">Download</a>
                         </Button>
-                        <Button v-if="auth?.user" as-child variant="outline">
-                            <a href="/dashboard">Dashboard</a>
-                        </Button>
-                        <Button v-else as-child variant="outline">
-                            <a href="/login">Sign In</a>
-                        </Button>
                     </nav>
 
                     <!-- Mobile Navigation -->
