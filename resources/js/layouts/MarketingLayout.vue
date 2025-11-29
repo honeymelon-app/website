@@ -110,23 +110,6 @@ const auth = computed(() => page.props.auth);
                                     <Button as-child class="justify-start">
                                         <a href="/download">Download</a>
                                     </Button>
-                                    <div class="my-2 border-t border-border" />
-                                    <Button
-                                        v-if="auth?.user"
-                                        as-child
-                                        variant="outline"
-                                        class="justify-start"
-                                    >
-                                        <a href="/dashboard">Dashboard</a>
-                                    </Button>
-                                    <Button
-                                        v-else
-                                        as-child
-                                        variant="outline"
-                                        class="justify-start"
-                                    >
-                                        <a href="/login">Sign In</a>
-                                    </Button>
                                 </nav>
                             </SheetContent>
                         </Sheet>
