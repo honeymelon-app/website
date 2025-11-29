@@ -15,12 +15,14 @@ return new class extends Migration
     {
         Schema::create('releases', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->foreignUuid('product_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('version', 50)->index();
             $table->string('tag', 50)->index();
             $table->string('commit_hash', 1024)->index();
-            $table->enum('channel', ReleaseChannel::cases())->default(ReleaseChannel::STABLE->value)->index();
+            $table->string('channel', 16)->default(ReleaseChannel::STABLE->value)->index();
             $table->text('notes')->nullable();
             $table->timestamp('published_at')->nullable();
+            $table->boolean('is_downloadable')->default(false);
             $table->boolean('major')->default(false);
             $table->foreignIdFor(User::class)->nullable()->index();
             $table->timestamps();

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,12 +14,14 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('provider', 16);                    // ls | stripe
-            $table->string('external_id', 64)->index();        // provider-side id
+            $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
+            $table->foreignUuid('product_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('provider', 16);
+            $table->string('external_id', 64)->index();
             $table->string('email')->index();
             $table->bigInteger('amount')->nullable();
             $table->string('currency', 8)->nullable();
-            $table->json('meta')->nullable();                  // raw webhook attrs
+            $table->json('meta')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

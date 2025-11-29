@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\LicenseStatus;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,10 +15,13 @@ return new class extends Migration
     {
         Schema::create('licenses', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('key', 64)->unique();               // hashed
-            $table->string('key_plain', 255)->nullable()->unique();      // human-readable license key
-            $table->enum('status', LicenseStatus::cases())->default(LicenseStatus::ACTIVE->value);
+            $table->foreignIdFor(User::class)->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignUuid('product_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->string('key', 64)->unique();
+            $table->string('key_plain', 255)->nullable()->unique();
+            $table->string('status', 16)->default(LicenseStatus::ACTIVE->value);
             $table->unsignedTinyInteger('max_major_version')->default(1);
+            $table->boolean('can_access_prereleases')->default(true);
             $table->json('meta')->nullable();
             $table->foreignUuid('order_id')->constrained()->cascadeOnDelete();
             $table->softDeletes();

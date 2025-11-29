@@ -14,15 +14,15 @@ return new class extends Migration
         Schema::create('artifacts', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('release_id')->constrained()->cascadeOnDelete();
-            $table->string('platform', 64)->index();                // e.g., darwin-aarch64
-            $table->string('source', 16)->default('github');        // github | r2 | s3
-            $table->string('filename')->nullable();                 // display name
+            $table->string('platform', 64)->index();
+            $table->string('source', 16)->default('github');
+            $table->string('filename')->nullable();
             $table->unsignedBigInteger('size')->nullable();
             $table->string('sha256', 128)->nullable();
-            $table->string('signature', 512)->nullable();           // Tauri ed25519 signature
+            $table->string('signature', 512)->nullable();
             $table->boolean('notarized')->default(false);
-            $table->string('url')->nullable();                      // for github source
-            $table->string('path')->nullable();                     // for r2/s3 source
+            $table->string('url')->nullable();
+            $table->string('path')->nullable();
             $table->timestamps();
         });
     }
