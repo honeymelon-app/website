@@ -37,7 +37,14 @@ class ArtifactDownloadController extends Controller
         ]);
 
         try {
-            $url = $this->downloadService->resolveUrl($version, $platform, $license);
+            $url = $this->downloadService->resolveUrl(
+                version: $version,
+                platform: $platform,
+                licenseKey: $license,
+                user: $request->user(),
+                ipAddress: $request->ip(),
+                userAgent: $request->userAgent()
+            );
 
             return redirect($url);
         } catch (AccessDeniedHttpException $e) {

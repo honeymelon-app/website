@@ -1,57 +1,44 @@
 <script setup lang="ts">
 import DeleteUser from '@/components/DeleteUser.vue';
 import HeadingSmall from '@/components/HeadingSmall.vue';
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { edit } from '@/routes/profile';
 import type { AppPageProps, BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface Props {
-    manageProfileUrl?: string | null;
+    mustVerifyEmail?: boolean;
+    status?: string;
 }
 
 const props = defineProps<Props>();
 
 const page = usePage<AppPageProps>();
 const user = computed(() => page.props.auth.user);
-console.log(user.value);
 
-const manageProfileUrl = computed(
-    () => props.manageProfileUrl ?? page.props.cerberus.profileUrl,
-);
+const form = useForm({
+    name: user.value?.name ?? '',
+    email: user.value?.email ?? '',
+});
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
         title: 'Profile settings',
-        href: edit().url,
+        href: '/settings/profile',
     },
 ];
 
-const profileDetails = computed(() => {
-    if (!user.value) {
-        return [];
-    }
-
-    return [
-        { label: 'Full name', value: user.value.name },
-        { label: 'First name', value: user.value.first_name ?? '—' },
-        { label: 'Last name', value: user.value.last_name ?? '—' },
-        { label: 'Email', value: user.value.email },
-        {
-            label: 'Organisation',
-            value: user.value.organisation?.name ?? '—',
-        },
-    ];
-});
+const submit = () => {
+    form.put('/settings/profile', {
+        preserveScroll: true,
+    });
+};
 </script>
 
 <template>
@@ -62,64 +49,61 @@ const profileDetails = computed(() => {
             <div class="flex flex-col space-y-6">
                 <HeadingSmall
                     title="Profile information"
-                    description="Profile updates are managed in Cerberus IAM"
+                    description="Update your account's profile information and email address."
                 />
 
-                <Card>
-                    <CardHeader class="space-y-2">
-                        <CardTitle class="text-base font-semibold">
-                            Synced details
-                        </CardTitle>
-                        <p class="text-sm text-muted-foreground">
-                            We mirror a subset of your Cerberus profile so
-                            relationships (releases, licenses, etc.) continue to
-                            work inside Honeymelon.
-                        </p>
-                    </CardHeader>
-                    <CardContent>
-                        <dl class="divide-y divide-border/60 text-sm">
-                            <template v-if="user">
-                                <div
-                                    v-for="item in profileDetails"
-                                    :key="item.label"
-                                    class="flex flex-col gap-1 py-3 first:pt-0 last:pb-0 md:flex-row md:items-center md:justify-between"
-                                >
-                                    <dt class="font-medium text-muted-foreground">
-                                        {{ item.label }}
-                                    </dt>
-                                    <dd class="text-base">
-                                        {{ item.value }}
-                                    </dd>
-                                </div>
-                            </template>
-                            <template v-else>
-                                <div class="py-3 text-muted-foreground">
-                                    Profile data will be available once you sign
-                                    in through Cerberus.
-                                </div>
-                            </template>
-                        </dl>
+                <form @submit.prevent="submit" class="space-y-6">
+                    <div class="grid gap-2">
+                        <Label for="name">Name</Label>
+                        <Input
+                            id="name"
+                            type="text"
+                            required
+                            autocomplete="name"
+                            v-model="form.name"
+                            class="max-w-md"
+                        />
+                        <InputError :message="form.errors.name" />
+                    </div>
 
-                        <div class="mt-6">
-                            <Button
-                                v-if="manageProfileUrl"
-                                as-child
-                                class="w-full sm:w-auto"
-                            >
-                                <a
-                                    :href="manageProfileUrl"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    Manage profile in Cerberus
-                                </a>
-                            </Button>
-                            <Button v-else disabled class="w-full sm:w-auto">
-                                Cerberus portal URL not configured
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                    <div class="grid gap-2">
+                        <Label for="email">Email address</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            required
+                            autocomplete="email"
+                            v-model="form.email"
+                            class="max-w-md"
+                        />
+                        <InputError :message="form.errors.email" />
+                    </div>
+
+                    <div
+                        v-if="props.mustVerifyEmail && !user?.email_verified_at"
+                        class="text-sm text-muted-foreground"
+                    >
+                        Your email address is unverified.
+                        <a
+                            href="/email/verification-notification"
+                            class="underline underline-offset-4 hover:text-foreground"
+                        >
+                            Click here to re-send the verification email.
+                        </a>
+                    </div>
+
+                    <div
+                        v-if="props.status === 'profile-updated'"
+                        class="text-sm font-medium text-green-600"
+                    >
+                        Profile updated successfully.
+                    </div>
+
+                    <Button type="submit" :disabled="form.processing">
+                        <Spinner v-if="form.processing" />
+                        Save changes
+                    </Button>
+                </form>
             </div>
 
             <DeleteUser />

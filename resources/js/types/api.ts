@@ -75,6 +75,7 @@ export interface Update {
 // License types
 export interface License {
     id: string;
+    key: string;
     status: 'active' | 'revoked' | 'expired';
     max_major_version: number;
     issued_at: string | null;

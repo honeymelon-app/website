@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\ReleaseChannel;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,12 +25,14 @@ class Release extends Model implements Filterable
      * @var list<string>
      */
     protected $fillable = [
+        'product_id',
         'version',
         'tag',
         'commit_hash',
         'channel',
         'notes',
         'published_at',
+        'is_downloadable',
         'major',
         'user_id',
     ];
@@ -44,8 +47,17 @@ class Release extends Model implements Filterable
         return [
             'channel' => ReleaseChannel::class,
             'published_at' => 'datetime',
+            'is_downloadable' => 'boolean',
             'major' => 'boolean',
         ];
+    }
+
+    /**
+     * Get the product that owns the release.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     /**
@@ -70,5 +82,45 @@ class Release extends Model implements Filterable
     public function updates(): HasMany
     {
         return $this->hasMany(Update::class);
+    }
+
+    /**
+     * Scope to only stable releases.
+     */
+    public function scopeStable(Builder $query): Builder
+    {
+        return $query->where('channel', ReleaseChannel::STABLE);
+    }
+
+    /**
+     * Scope to only published releases.
+     */
+    public function scopePublished(Builder $query): Builder
+    {
+        return $query->whereNotNull('published_at');
+    }
+
+    /**
+     * Scope to only downloadable releases.
+     */
+    public function scopeDownloadable(Builder $query): Builder
+    {
+        return $query->where('is_downloadable', true);
+    }
+
+    /**
+     * Check if the release is stable.
+     */
+    public function isStable(): bool
+    {
+        return $this->channel === ReleaseChannel::STABLE;
+    }
+
+    /**
+     * Check if the release is published.
+     */
+    public function isPublished(): bool
+    {
+        return $this->published_at !== null;
     }
 }

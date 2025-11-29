@@ -26,15 +26,8 @@ class UserFactory extends Factory
         $lastName = fake()->lastName();
 
         return [
-            'cerberus_id' => (string) Str::uuid(),
             'name' => "{$firstName} {$lastName}",
-            'first_name' => $firstName,
-            'last_name' => $lastName,
             'email' => fake()->unique()->safeEmail(),
-            'avatar_url' => fake()->optional()->imageUrl(),
-            'organisation_id' => fake()->optional()->uuid(),
-            'organisation_slug' => fake()->optional()->slug(),
-            'organisation_name' => fake()->optional()->company(),
             'email_verified_at' => now(),
             'password' => static::$password ??= 'password',
             'remember_token' => Str::random(10),

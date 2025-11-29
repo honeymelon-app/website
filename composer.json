@@ -10,15 +10,8 @@
         "application"
     ],
     "license": "MIT",
-    "repositories": [
-        {
-            "url": "https://github.com/cerberus-iam/laravel-sdk.git",
-            "type": "vcs"
-        }
-    ],
     "require": {
         "php": "^8.3",
-        "cerberus-iam/laravel-sdk": "dev-main",
         "graham-campbell/github": "^13.0",
         "inertiajs/inertia-laravel": "^2.0",
         "jerome/filterable": "^2.1",

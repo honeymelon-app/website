@@ -46,6 +46,8 @@ return [
         'key' => env('STRIPE_KEY'),
         'secret' => env('STRIPE_SECRET'),
         'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'honeymelon_product_id' => env('STRIPE_HONEYMELON_PRODUCT_ID'),
+        'honeymelon_price_id' => env('STRIPE_HONEYMELON_PRICE_ID'),
     ],
 
     'lemonsqueezy' => [

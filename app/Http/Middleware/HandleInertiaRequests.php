@@ -46,22 +46,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $user ? [
                     'id' => $user->getAuthIdentifier(),
-                    'cerberus_id' => $user->cerberus_id,
                     'name' => $user->name,
                     'email' => $user->email,
-                    'first_name' => $user->first_name,
-                    'last_name' => $user->last_name,
-                    'avatar' => $user->avatar_url,
-                    'organisation' => [
-                        'id' => $user->organisation_id,
-                        'slug' => $user->organisation_slug,
-                        'name' => $user->organisation_name,
-                    ],
+                    'email_verified_at' => $user->email_verified_at?->toIso8601String(),
                 ] : null,
-            ],
-            'cerberus' => [
-                'profileUrl' => config('cerberus-iam.management_urls.profile'),
-                'securityUrl' => config('cerberus-iam.management_urls.security'),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];

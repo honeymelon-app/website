@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasApiTokens, HasFactory, Notifiable;
@@ -22,13 +23,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'cerberus_id',
-        'first_name',
-        'last_name',
-        'avatar_url',
-        'organisation_id',
-        'organisation_slug',
-        'organisation_name',
     ];
 
     /**
@@ -41,7 +35,6 @@ class User extends Authenticatable
         'two_factor_secret',
         'two_factor_recovery_codes',
         'remember_token',
-        'cerberus_id',
     ];
 
     /**
@@ -56,6 +49,52 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Get the licenses owned by the user.
+     */
+    public function licenses(): HasMany
+    {
+        return $this->hasMany(License::class);
+    }
+
+    /**
+     * Get the orders made by the user.
+     */
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    /**
+     * Get the downloads made by the user.
+     */
+    public function downloads(): HasMany
+    {
+        return $this->hasMany(Download::class);
+    }
+
+    /**
+     * Check if the user has an active license for a product.
+     */
+    public function hasLicenseFor(Product $product): bool
+    {
+        return $this->licenses()
+            ->where('product_id', $product->id)
+            ->where('status', 'active')
+            ->exists();
+    }
+
+    /**
+     * Get the active license for a product.
+     */
+    public function licenseFor(Product $product): ?License
+    {
+        return $this->licenses()
+            ->where('product_id', $product->id)
+            ->where('status', 'active')
+            ->first();
     }
 
     /**

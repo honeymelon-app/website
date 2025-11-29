@@ -4,25 +4,38 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
-use App\Models\User;
+use App\Models\Client;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Laravel\Sanctum\Sanctum;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class UploadArtifactTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function createClient(): array
+    {
+        $key = Str::uuid()->toString();
+        $secret = Str::random(32);
+
+        Client::create([
+            'name' => 'Test Client',
+            'key' => $key,
+            'secret' => Hash::make($secret),
+        ]);
+
+        return ['key' => $key, 'secret' => $secret];
+    }
+
     public function test_uploads_artifact_and_returns_url(): void
     {
         Storage::fake('private');
         config(['filesystems.disks.private.url' => 'https://r2.example.com/private']);
 
-        $user = User::factory()->create();
-
-        Sanctum::actingAs($user);
+        $credentials = $this->createClient();
 
         $file = UploadedFile::fake()->create('Honeymelon-arm64.dmg', 1024, 'application/x-apple-diskimage');
         $expectedHash = hash_file('sha256', $file->getRealPath());
@@ -30,6 +43,8 @@ class UploadArtifactTest extends TestCase
 
         $response = $this
             ->withHeader('Accept', 'application/json')
+            ->withHeader('X-Client-Key', $credentials['key'])
+            ->withHeader('X-Client-Secret', $credentials['secret'])
             ->post('/api/artifacts/upload', [
                 'platform' => 'darwin-aarch64',
                 'artifact' => $file,
@@ -65,17 +80,19 @@ class UploadArtifactTest extends TestCase
                 'artifact' => UploadedFile::fake()->create('build.dmg'),
             ]);
 
-        $response->assertUnauthorized();
+        $response->assertForbidden();
     }
 
     public function test_validates_required_fields(): void
     {
         Storage::fake('private');
-        $user = User::factory()->create();
-        Sanctum::actingAs($user);
+
+        $credentials = $this->createClient();
 
         $response = $this
             ->withHeader('Accept', 'application/json')
+            ->withHeader('X-Client-Key', $credentials['key'])
+            ->withHeader('X-Client-Secret', $credentials['secret'])
             ->post('/api/artifacts/upload', [
                 'platform' => 'darwin-aarch64',
             ]);

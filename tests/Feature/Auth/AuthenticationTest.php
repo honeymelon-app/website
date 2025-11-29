@@ -1,4 +1,5 @@
 <?php
+
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
@@ -12,26 +13,39 @@ class AuthenticationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        config()->set('cerberus-iam.base_url', 'https://cerberus.example');
-        config()->set('cerberus-iam.oauth', [
-            'client_id' => 'client-id',
-            'client_secret' => 'client-secret',
-            'redirect_uri' => 'https://app.test/callback',
-            'scopes' => ['openid', 'profile', 'email'],
-        ]);
+        $this->withoutVite();
     }
 
-    public function test_login_route_redirects_to_cerberus_authorize_endpoint(): void
+    public function test_login_page_can_be_rendered(): void
     {
         $response = $this->get(route('login'));
 
-        $response->assertRedirect();
+        $response->assertStatus(200);
+    }
 
-        $this->assertStringContainsString(
-            'https://cerberus.example/oauth2/authorize',
-            $response->headers->get('Location')
-        );
+    public function test_users_can_authenticate_using_the_login_screen(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $this->assertAuthenticated();
+        $response->assertRedirect(route('dashboard'));
+    }
+
+    public function test_users_can_not_authenticate_with_invalid_password(): void
+    {
+        $user = User::factory()->create();
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ]);
+
+        $this->assertGuest();
     }
 
     public function test_logout_clears_session_and_redirects_home(): void

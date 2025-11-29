@@ -113,6 +113,17 @@ class LicenseService
         Log::info('License revoked', ['license_id' => $license->id]);
     }
 
+    /**
+     * Find a license by its key.
+     */
+    public function findByKey(string $key): ?License
+    {
+        $normalized = LicenseCodec::normalize($key);
+        $hashed = $this->hashKey($normalized);
+
+        return License::where('key', $hashed)->first();
+    }
+
     protected function hashKey(string $key): string
     {
         $normalized = LicenseCodec::normalize($key);

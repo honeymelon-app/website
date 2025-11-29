@@ -15,11 +15,55 @@ import {
     ArrowRight,
     Check,
     Heart,
+    Loader2,
     Shield,
     Sparkles,
     X,
     Zap,
 } from 'lucide-vue-next';
+import { ref } from 'vue';
+
+const isCheckingOut = ref(false);
+const checkoutError = ref<string | null>(null);
+
+async function startCheckout() {
+    if (isCheckingOut.value) return;
+
+    isCheckingOut.value = true;
+    checkoutError.value = null;
+
+    try {
+        const response = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                provider: 'stripe',
+                amount: 2900,
+                currency: 'usd',
+                success_url: `${window.location.origin}/download?success=true`,
+                cancel_url: `${window.location.origin}/pricing?cancelled=true`,
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to create checkout session');
+        }
+
+        const data = await response.json();
+
+        if (data.checkout_url) {
+            window.location.href = data.checkout_url;
+        } else {
+            throw new Error('No checkout URL returned');
+        }
+    } catch (error) {
+        checkoutError.value = error instanceof Error ? error.message : 'Something went wrong';
+        isCheckingOut.value = false;
+    }
+}
 
 const whyBuilt = [
     {
@@ -168,15 +212,21 @@ const comparisonFeatures = [
                             </ul>
 
                             <Button
-                                as-child
+                                :disabled="isCheckingOut"
                                 size="lg"
                                 class="w-full text-base shadow-lg shadow-primary/20"
+                                @click="startCheckout"
                             >
-                                <a href="/download">
+                                <Loader2 v-if="isCheckingOut" class="mr-2 h-4 w-4 animate-spin" />
+                                <template v-else>
                                     Get Honeymelon
                                     <ArrowRight class="ml-2 h-4 w-4" />
-                                </a>
+                                </template>
                             </Button>
+
+                            <p v-if="checkoutError" class="mt-2 text-center text-sm text-destructive">
+                                {{ checkoutError }}
+                            </p>
 
                             <p class="mt-6 text-center text-sm text-muted-foreground">
                                 30-day money-back guarantee. No questions asked.
@@ -392,14 +442,16 @@ const comparisonFeatures = [
                             users who believe software should respect people.
                         </p>
                         <Button
-                            as-child
+                            :disabled="isCheckingOut"
                             size="lg"
                             class="text-base shadow-lg shadow-primary/20"
+                            @click="startCheckout"
                         >
-                            <a href="/download">
+                            <Loader2 v-if="isCheckingOut" class="mr-2 h-4 w-4 animate-spin" />
+                            <template v-else>
                                 Get Honeymelon for $29
                                 <ArrowRight class="ml-2 h-4 w-4" />
-                            </a>
+                            </template>
                         </Button>
                         <p class="text-sm text-muted-foreground">
                             30-day money-back guarantee · Secure payment ·

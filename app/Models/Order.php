@@ -9,6 +9,7 @@ use Filterable\Traits\Filterable as HasFilters;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -26,9 +27,11 @@ class Order extends Model implements Filterable
         'provider',
         'external_id',
         'email',
-        'amount_cents',
+        'amount',
         'currency',
         'meta',
+        'user_id',
+        'product_id',
     ];
 
     /**
@@ -39,8 +42,25 @@ class Order extends Model implements Filterable
     protected function casts(): array
     {
         return [
+            'amount' => 'integer',
             'meta' => 'array',
         ];
+    }
+
+    /**
+     * Get the user who made the order.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the product that was ordered.
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 
     /**
@@ -49,5 +69,17 @@ class Order extends Model implements Filterable
     public function license(): HasOne
     {
         return $this->hasOne(License::class);
+    }
+
+    /**
+     * Get the formatted amount.
+     */
+    public function getFormattedAmountAttribute(): string
+    {
+        if (! $this->amount) {
+            return '$0.00';
+        }
+
+        return '$'.number_format($this->amount / 100, 2);
     }
 }

@@ -1,33 +1,65 @@
 <script setup lang="ts">
+import InputError from '@/components/InputError.vue';
 import TextLink from '@/components/TextLink.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { home } from '@/routes';
-import { Head } from '@inertiajs/vue3';
+import { useForm, Head } from '@inertiajs/vue3';
 
 defineProps<{
     status?: string;
 }>();
+
+const form = useForm({
+    email: '',
+});
+
+const submit = () => {
+    form.post('/forgot-password');
+};
 </script>
 
 <template>
     <AuthLayout
-        title="Password Reset"
-        description="Password reset is managed through Cerberus IAM"
+        title="Forgot your password?"
+        description="Enter your email and we'll send you a reset link"
     >
-        <Head title="Password Reset" />
+        <Head title="Forgot Password" />
 
-        <div class="space-y-6">
-            <div class="rounded-lg border bg-muted/50 p-6 text-center">
-                <p class="text-sm text-muted-foreground">
-                    Password reset functionality is now managed through Cerberus IAM.
-                    Please contact your administrator or use the Cerberus IAM portal to reset your password.
-                </p>
-            </div>
-
-            <div class="space-x-1 text-center text-sm text-muted-foreground">
-                <span>Return to</span>
-                <TextLink :href="home()">log in</TextLink>
-            </div>
+        <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
+            {{ status }}
         </div>
+
+        <form @submit.prevent="submit" class="flex flex-col gap-6">
+            <div class="grid gap-6">
+                <div class="grid gap-2">
+                    <Label for="email">Email address</Label>
+                    <Input
+                        id="email"
+                        type="email"
+                        required
+                        autofocus
+                        autocomplete="email"
+                        v-model="form.email"
+                        placeholder="email@example.com"
+                    />
+                    <InputError :message="form.errors.email" />
+                </div>
+
+                <Button type="submit" class="w-full" :disabled="form.processing">
+                    <Spinner v-if="form.processing" />
+                    Send reset link
+                </Button>
+            </div>
+
+            <div class="text-center text-sm text-muted-foreground">
+                Remember your password?
+                <TextLink href="/login" class="underline underline-offset-4">
+                    Log in
+                </TextLink>
+            </div>
+        </form>
     </AuthLayout>
 </template>

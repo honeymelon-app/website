@@ -1,30 +1,50 @@
 <script setup lang="ts">
 import HeadingSmall from '@/components/HeadingSmall.vue';
+import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
-import { edit } from '@/routes/user-password';
-import type { AppPageProps, BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
-
-interface Props {
-    managePasswordUrl?: string | null;
-}
-
-const props = defineProps<Props>();
-const page = usePage<AppPageProps>();
+import type { BreadcrumbItem } from '@/types';
+import { Head, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
         title: 'Password settings',
-        href: edit().url,
+        href: '/settings/password',
     },
 ];
 
-const managePasswordUrl = computed(
-    () => props.managePasswordUrl ?? page.props.cerberus.securityUrl,
-);
+const passwordInput = ref<HTMLInputElement | null>(null);
+const currentPasswordInput = ref<HTMLInputElement | null>(null);
+
+const form = useForm({
+    current_password: '',
+    password: '',
+    password_confirmation: '',
+});
+
+const submit = () => {
+    form.put('/settings/password', {
+        preserveScroll: true,
+        onSuccess: () => {
+            form.reset();
+        },
+        onError: () => {
+            if (form.errors.password) {
+                form.reset('password', 'password_confirmation');
+                passwordInput.value?.focus();
+            }
+            if (form.errors.current_password) {
+                form.reset('current_password');
+                currentPasswordInput.value?.focus();
+            }
+        },
+    });
+};
 </script>
 
 <template>
@@ -35,42 +55,56 @@ const managePasswordUrl = computed(
             <div class="space-y-6">
                 <HeadingSmall
                     title="Update password"
-                    description="Password changes are managed in Cerberus IAM"
+                    description="Ensure your account is using a long, random password to stay secure."
                 />
 
-                <div class="rounded-lg border bg-muted/50 p-6 text-sm">
-                    <p class="text-muted-foreground">
-                        Honeymelon relies on Cerberus IAM for authentication,
-                        so we no longer store or verify passwords locally.
-                    </p>
-                    <p class="mt-2 text-muted-foreground">
-                        Update your password (and any other security settings)
-                        from the Cerberus security dashboard. Changes will apply
-                        to every connected application instantly.
-                    </p>
+                <form @submit.prevent="submit" class="space-y-6">
+                    <div class="grid gap-2">
+                        <Label for="current_password">Current password</Label>
+                        <Input
+                            id="current_password"
+                            ref="currentPasswordInput"
+                            type="password"
+                            required
+                            autocomplete="current-password"
+                            v-model="form.current_password"
+                            class="max-w-md"
+                        />
+                        <InputError :message="form.errors.current_password" />
+                    </div>
 
-                    <Button
-                        v-if="managePasswordUrl"
-                        class="mt-6 w-full sm:w-auto"
-                        as-child
-                    >
-                        <a
-                            :href="managePasswordUrl"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            Open Cerberus security settings
-                        </a>
+                    <div class="grid gap-2">
+                        <Label for="password">New password</Label>
+                        <Input
+                            id="password"
+                            ref="passwordInput"
+                            type="password"
+                            required
+                            autocomplete="new-password"
+                            v-model="form.password"
+                            class="max-w-md"
+                        />
+                        <InputError :message="form.errors.password" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <Label for="password_confirmation">Confirm password</Label>
+                        <Input
+                            id="password_confirmation"
+                            type="password"
+                            required
+                            autocomplete="new-password"
+                            v-model="form.password_confirmation"
+                            class="max-w-md"
+                        />
+                        <InputError :message="form.errors.password_confirmation" />
+                    </div>
+
+                    <Button type="submit" :disabled="form.processing">
+                        <Spinner v-if="form.processing" />
+                        Update password
                     </Button>
-                    <Button
-                        v-else
-                        class="mt-6 w-full sm:w-auto"
-                        variant="outline"
-                        disabled
-                    >
-                        Cerberus security URL not configured
-                    </Button>
-                </div>
+                </form>
             </div>
         </SettingsLayout>
     </AppLayout>

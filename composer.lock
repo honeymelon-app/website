@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6996cf7fd3636844c2534b2ca6432a41",
+    "content-hash": "e97fcfe936a456a4354f8d0cdd33d859",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -285,108 +285,6 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
-        },
-        {
-            "name": "cerberus-iam/laravel-sdk",
-            "version": "dev-main",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cerberus-iam/laravel-sdk.git",
-                "reference": "e36212370488a4e8cc2449f77c927acbc5d420d9"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cerberus-iam/laravel-sdk/zipball/e36212370488a4e8cc2449f77c927acbc5d420d9",
-                "reference": "e36212370488a4e8cc2449f77c927acbc5d420d9",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/auth": "^10.0|^11.0|^12",
-                "illuminate/config": "^10.0|^11.0|^12",
-                "illuminate/contracts": "^10.0|^11.0|^12",
-                "illuminate/http": "^10.0|^11.0|^12",
-                "illuminate/routing": "^10.0|^11.0|^12",
-                "illuminate/session": "^10.0|^11.0|^12",
-                "illuminate/support": "^10.0|^11.0|^12",
-                "jerome/filterable": "^2.0",
-                "php": "^8.3"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.25",
-                "orchestra/testbench": "^8.0|^9.0",
-                "pestphp/pest": "^3.8",
-                "pestphp/pest-plugin-laravel": "^2.0|^3.0",
-                "phpstan/phpstan": "^1.10"
-            },
-            "default-branch": true,
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "CerberusIAM\\Providers\\CerberusIamServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "CerberusIAM\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "CerberusIAM\\Tests\\": "tests/"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "pest"
-                ],
-                "test:coverage": [
-                    "pest --coverage"
-                ],
-                "lint": [
-                    "pint"
-                ],
-                "lint:test": [
-                    "pint --test"
-                ],
-                "analyse": [
-                    "phpstan analyse --memory-limit=512M"
-                ],
-                "ci": [
-                    "@lint:test",
-                    "@analyse",
-                    "@test"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Cerberus IAM Team",
-                    "email": "admin@cerberus-iam.com"
-                }
-            ],
-            "description": "Laravel bridge for the Cerberus IAM platform providing guard, middleware, and HTTP client integration.",
-            "homepage": "https://github.com/cerberus-iam/laravel-iam",
-            "keywords": [
-                "access-control",
-                "authentication",
-                "authorization",
-                "cerberus",
-                "iam",
-                "identity",
-                "laravel",
-                "multi-tenancy",
-                "oauth2",
-                "user-management"
-            ],
-            "support": {
-                "issues": "https://github.com/cerberus-iam/laravel-iam/issues",
-                "source": "https://github.com/cerberus-iam/laravel-iam"
-            },
-            "time": "2025-11-08T08:20:37+00:00"
         },
         {
             "name": "clue/stream-filter",
@@ -10733,9 +10631,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "cerberus-iam/laravel-sdk": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

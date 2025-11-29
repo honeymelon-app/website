@@ -1,29 +1,53 @@
 <script setup lang="ts">
-import TextLink from '@/components/TextLink.vue';
+import InputError from '@/components/InputError.vue';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { dashboard } from '@/routes';
-import { Head } from '@inertiajs/vue3';
+import { useForm, Head } from '@inertiajs/vue3';
+
+const form = useForm({
+    password: '',
+});
+
+const submit = () => {
+    form.post('/confirm-password', {
+        onFinish: () => {
+            form.reset();
+        },
+    });
+};
 </script>
 
 <template>
     <AuthLayout
-        title="Password Confirmation"
-        description="Password confirmation is managed through Cerberus IAM"
+        title="Confirm your password"
+        description="This is a secure area. Please confirm your password to continue."
     >
-        <Head title="Password Confirmation" />
+        <Head title="Confirm Password" />
 
-        <div class="space-y-6">
-            <div class="rounded-lg border bg-muted/50 p-6 text-center">
-                <p class="text-sm text-muted-foreground">
-                    Password confirmation is now managed through Cerberus IAM.
-                    Please re-authenticate through the Cerberus IAM portal if needed.
-                </p>
-            </div>
+        <form @submit.prevent="submit" class="flex flex-col gap-6">
+            <div class="grid gap-6">
+                <div class="grid gap-2">
+                    <Label for="password">Password</Label>
+                    <Input
+                        id="password"
+                        type="password"
+                        required
+                        autofocus
+                        autocomplete="current-password"
+                        v-model="form.password"
+                        placeholder="Password"
+                    />
+                    <InputError :message="form.errors.password" />
+                </div>
 
-            <div class="space-x-1 text-center text-sm text-muted-foreground">
-                <span>Return to</span>
-                <TextLink :href="dashboard()">dashboard</TextLink>
+                <Button type="submit" class="w-full" :disabled="form.processing">
+                    <Spinner v-if="form.processing" />
+                    Confirm
+                </Button>
             </div>
-        </div>
+        </form>
     </AuthLayout>
 </template>
