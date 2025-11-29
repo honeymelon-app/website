@@ -45,15 +45,15 @@ import { Head } from '@inertiajs/vue3';
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>
-                                • Download and install Honeymelon on Mac devices
+                                Download and install Honeymelon on Mac devices
                                 you own or control
                             </li>
                             <li>
-                                • Use Honeymelon for personal or commercial
+                                Use Honeymelon for personal or commercial
                                 media conversion purposes
                             </li>
                             <li>
-                                • Receive updates and support according to your
+                                Receive updates and support according to your
                                 license type
                             </li>
                         </ul>
@@ -71,18 +71,18 @@ import { Head } from '@inertiajs/vue3';
                             <ul
                                 class="space-y-2 text-base text-muted-foreground"
                             >
-                                <li>• Valid for one (1) user</li>
+                                <li>Valid for one (1) user</li>
                                 <li>
-                                    • Can be installed on up to three (3) Mac
+                                    Can be installed on up to three (3) Mac
                                     devices owned by the license holder
                                 </li>
                                 <li>
-                                    • Includes lifetime updates for all future
+                                    Includes lifetime updates for all future
                                     versions
                                 </li>
-                                <li>• One-time payment, no recurring fees</li>
+                                <li>One-time payment, no recurring fees</li>
                                 <li>
-                                    • 30-day money-back guarantee, no questions
+                                    30-day money-back guarantee, no questions
                                     asked
                                 </li>
                             </ul>
@@ -100,31 +100,31 @@ import { Head } from '@inertiajs/vue3';
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>
-                                • Reverse engineer, decompile, or disassemble
+                                Reverse engineer, decompile, or disassemble
                                 the software
                             </li>
                             <li>
-                                • Modify, adapt, or create derivative works of
+                                Modify, adapt, or create derivative works of
                                 the software
                             </li>
                             <li>
-                                • Remove or alter any proprietary notices or
+                                Remove or alter any proprietary notices or
                                 labels
                             </li>
                             <li>
-                                • Share, sell, rent, lease, or distribute your
+                                Share, sell, rent, lease, or distribute your
                                 license key
                             </li>
                             <li>
-                                • Use the software for illegal purposes or to
+                                Use the software for illegal purposes or to
                                 process illegal content
                             </li>
                             <li>
-                                • Exceed the device or user limits of your
+                                Exceed the device or user limits of your
                                 license type
                             </li>
                             <li>
-                                • Use the software to infringe on third-party
+                                Use the software to infringe on third-party
                                 copyrights or intellectual property
                             </li>
                         </ul>
@@ -142,9 +142,9 @@ import { Head } from '@inertiajs/vue3';
                             Honeymelon requires:
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
-                            <li>• macOS 13 (Ventura) or later</li>
-                            <li>• Apple Silicon (M1, M2, M3, M4, or later)</li>
-                            <li>• At least 50 MB of available disk space</li>
+                            <li>macOS 13 (Ventura) or later</li>
+                            <li>Apple Silicon (M1, M2, M3, M4, or later)</li>
+                            <li>At least 50 MB of available disk space</li>
                         </ul>
                         <p
                             class="mt-4 text-base leading-relaxed text-muted-foreground"
@@ -202,9 +202,9 @@ import { Head } from '@inertiajs/vue3';
                             must include:
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
-                            <li>• Your purchase email and license key</li>
+                            <li>Your purchase email and license key</li>
                             <li>
-                                • Brief explanation of why you're requesting a
+                                Brief explanation of why you're requesting a
                                 refund
                             </li>
                         </ul>

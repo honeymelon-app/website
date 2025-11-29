@@ -47,13 +47,13 @@ import { Head } from '@inertiajs/vue3';
                             do not collect, transmit, or store:
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
-                            <li>• Your media files or their contents</li>
-                            <li>• File names, paths, or metadata</li>
-                            <li>• Conversion settings or preferences</li>
-                            <li>• Usage analytics or telemetry data</li>
-                            <li>• Crash reports or diagnostic information</li>
-                            <li>• Your IP address or device identifiers</li>
-                            <li>• Any personally identifiable information</li>
+                            <li>Your media files or their contents</li>
+                            <li>File names, paths, or metadata</li>
+                            <li>Conversion settings or preferences</li>
+                            <li>Usage analytics or telemetry data</li>
+                            <li>Crash reports or diagnostic information</li>
+                            <li>Your IP address or device identifiers</li>
+                            <li>Any personally identifiable information</li>
                         </ul>
                     </section>
 
@@ -87,18 +87,18 @@ import { Head } from '@inertiajs/vue3';
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>
-                                • <strong>Download Statistics:</strong> We track
+                                <strong>Download Statistics:</strong> We track
                                 the number of downloads to understand usage
                                 patterns
                             </li>
                             <li>
-                                • <strong>Purchase Information:</strong> When
+                                <strong>Purchase Information:</strong> When
                                 you purchase a license, payment processing is
                                 handled by Stripe according to their privacy
                                 policy
                             </li>
                             <li>
-                                • <strong>License Validation:</strong> When you
+                                <strong>License Validation:</strong> When you
                                 activate Honeymelon, your license key is
                                 validated once. We store only the license key
                                 and activation status, no personal information
@@ -119,7 +119,7 @@ import { Head } from '@inertiajs/vue3';
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>
-                                • <strong>Stripe:</strong> Payment processing
+                                <strong>Stripe:</strong> Payment processing
                                 for license purchases (subject to Stripe's
                                 Privacy Policy)
                             </li>
@@ -174,15 +174,15 @@ import { Head } from '@inertiajs/vue3';
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>
-                                • <strong>Access:</strong> Contact us to request
+                                <strong>Access:</strong> Contact us to request
                                 any data we have associated with your license
                             </li>
                             <li>
-                                • <strong>Deletion:</strong> Request deletion of
+                                <strong>Deletion:</strong> Request deletion of
                                 your license and associated data at any time
                             </li>
                             <li>
-                                • <strong>Portability:</strong> Request export
+                                <strong>Portability:</strong> Request export
                                 of your license information
                             </li>
                         </ul>
