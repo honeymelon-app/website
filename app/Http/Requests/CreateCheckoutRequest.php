@@ -24,7 +24,7 @@ class CreateCheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'provider' => ['required', 'in:stripe,ls'],
+            'provider' => ['required', 'in:stripe'],
             'amount' => ['required', 'integer', 'min:100'],
             'currency' => ['sometimes', 'string', 'size:3'],
             'success_url' => ['required', 'url'],
@@ -42,7 +42,7 @@ class CreateCheckoutRequest extends FormRequest
     {
         return [
             'provider.required' => 'A payment provider is required',
-            'provider.in' => 'The provider must be either stripe or ls (Lemon Squeezy)',
+            'provider.in' => 'The provider must be stripe',
             'amount.required' => 'An amount is required',
             'amount.integer' => 'The amount must be an integer (in cents)',
             'amount.min' => 'The amount must be at least $1.00 (100 cents)',

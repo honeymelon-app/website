@@ -23,19 +23,13 @@ class DashboardTest extends TestCase
         $response->assertRedirect(route('login'));
     }
 
-    public function test_authenticated_users_can_visit_their_dashboard(): void
+    public function test_authenticated_users_are_redirected_to_admin_dashboard(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
 
         $response = $this->get(route('dashboard'));
-        $response->assertStatus(200);
-        $response->assertInertia(
-            fn ($page) => $page
-                ->component('Dashboard')
-                ->has('licenses')
-                ->has('hasActiveLicense')
-        );
+        $response->assertRedirect(route('admin.dashboard'));
     }
 
     public function test_authenticated_users_can_visit_admin_dashboard(): void

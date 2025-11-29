@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\License;
+use App\Mail\LicenseKeyMail;
 use App\Models\Order;
 use App\Models\WebhookEvent;
 use App\Services\LicenseService;
@@ -13,6 +13,7 @@ use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class WebhookEventController extends Controller
 {
@@ -20,59 +21,6 @@ class WebhookEventController extends Controller
         private readonly LicenseService $licenseService,
         private readonly PaymentProviderFactory $providerFactory
     ) {}
-
-    /**
-     * Handle Lemon Squeezy webhook.
-     */
-    public function lemonsqueezy(Request $request): JsonResponse
-    {
-        Log::info('Received Lemon Squeezy webhook', ['payload' => $request->all()]);
-
-        $provider = $this->providerFactory->make('ls');
-
-        // Verify signature
-        if (! $provider->verifyWebhookSignature($request->getContent(), $request->header('X-Signature', ''))) {
-            Log::warning('Invalid Lemon Squeezy webhook signature');
-
-            return response()->json(['message' => 'Invalid signature'], 401);
-        }
-
-        $payload = $request->all();
-
-        // Store webhook event
-        $event = WebhookEvent::create([
-            'provider' => 'ls',
-            'type' => $this->mapLemonSqueezyEventType($payload),
-            'payload' => $payload,
-            'processed_at' => null,
-        ]);
-
-        try {
-            // Parse webhook data
-            $orderData = $provider->parseWebhookPayload($payload);
-
-            if (! $orderData) {
-                Log::info('Non-payment webhook event, skipping', ['event_id' => $event->id]);
-                $event->update(['processed_at' => now()]);
-
-                return response()->json(['message' => 'Event acknowledged']);
-            }
-
-            // Process the payment
-            $this->processPayment($event, $orderData);
-
-            $event->update(['processed_at' => now()]);
-
-            return response()->json(['message' => 'Webhook processed']);
-        } catch (\Exception $e) {
-            Log::error('Failed to process Lemon Squeezy webhook', [
-                'event_id' => $event->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json(['message' => 'Webhook processing failed'], 500);
-        }
-    }
 
     /**
      * Handle Stripe webhook.
@@ -162,22 +110,14 @@ class WebhookEventController extends Controller
                 'license_id' => $license->id,
             ]);
 
-            // TODO: Send email with license key
+            // Send email with license key
+            Mail::to($orderData['email'])->queue(new LicenseKeyMail($license));
+
+            Log::info('License key email queued', [
+                'email' => $orderData['email'],
+                'license_id' => $license->id,
+            ]);
         }
-    }
-
-    /**
-     * Map Lemon Squeezy event types to our enum.
-     */
-    protected function mapLemonSqueezyEventType(array $payload): string
-    {
-        $eventName = $payload['meta']['event_name'] ?? 'unknown';
-
-        return match ($eventName) {
-            'order_created' => 'order.created',
-            'subscription_created' => 'subscription.created',
-            default => 'unknown',
-        };
     }
 
     /**

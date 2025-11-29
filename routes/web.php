@@ -6,17 +6,11 @@ use App\Http\Controllers\Web\Admin\LicenseController;
 use App\Http\Controllers\Web\Admin\ObjectController;
 use App\Http\Controllers\Web\Admin\OrderController;
 use App\Http\Controllers\Web\Admin\ReleaseController;
-use App\Http\Controllers\Web\Admin\UpdateController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Web\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Web\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Web\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
 use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Web\Auth\RegisteredUserController;
-use App\Http\Controllers\Web\Auth\VerifyEmailController;
 use App\Http\Controllers\Web\DownloadController;
-use App\Http\Controllers\Web\UserDashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -26,9 +20,7 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canRegister' => true,
-    ]);
+    return Inertia::render('Welcome');
 })->name('home');
 
 Route::get('/download', DownloadController::class)->name('download');
@@ -47,13 +39,10 @@ Route::get('/terms', function () {
 
 /*
 |--------------------------------------------------------------------------
-| Guest Routes (Auth)
+| Admin Auth Routes (No public registration)
 |--------------------------------------------------------------------------
 */
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])->name('register');
-    Route::post('register', [RegisteredUserController::class, 'store']);
-
     Route::get('login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
@@ -66,24 +55,17 @@ Route::middleware('guest')->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| Authenticated Routes
+| Admin Routes (Authenticated)
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('verify-email', EmailVerificationPromptController::class)->name('verification.notice');
-    Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)
-        ->middleware(['signed', 'throttle:6,1'])
-        ->name('verification.verify');
-    Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-        ->middleware('throttle:6,1')
-        ->name('verification.send');
-
     Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
-    Route::get('dashboard', UserDashboardController::class)->name('dashboard');
+    // Redirect dashboard to admin dashboard (no customer dashboard - admin only platform)
+    Route::get('dashboard', fn () => redirect()->route('admin.dashboard'))->name('dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
@@ -91,7 +73,6 @@ Route::middleware('auth')->group(function () {
         Route::resource('artifacts', ArtifactController::class)->only(['index', 'show']);
         Route::resource('licenses', LicenseController::class)->only(['index', 'show', 'store']);
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
-        Route::resource('updates', UpdateController::class)->only(['index', 'show']);
         Route::delete('objects/{path}', [ObjectController::class, 'destroy'])->where('path', '.*')->name('objects.destroy');
         Route::resource('objects', ObjectController::class)->only(['index']);
     });

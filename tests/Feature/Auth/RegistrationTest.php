@@ -13,7 +13,7 @@ class RegistrationTest extends TestCase
     {
         parent::setUp();
 
-        $this->markTestSkipped('Registration is handled by Cerberus IAM.');
+        $this->markTestSkipped('Registration is disabled. Admin users are seeded.');
     }
 
     public function test_registration_screen_can_be_rendered()

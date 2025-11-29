@@ -50,11 +50,4 @@ return [
         'honeymelon_price_id' => env('STRIPE_HONEYMELON_PRICE_ID'),
     ],
 
-    'lemonsqueezy' => [
-        'store_id' => env('LEMONSQUEEZY_STORE_ID'),
-        'api_key' => env('LEMONSQUEEZY_API_KEY'),
-        'webhook_secret' => env('LEMONSQUEEZY_WEBHOOK_SECRET'),
-        'variant_id' => env('LEMONSQUEEZY_VARIANT_ID'),
-    ],
-
 ];

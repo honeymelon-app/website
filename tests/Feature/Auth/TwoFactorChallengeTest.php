@@ -16,7 +16,7 @@ class TwoFactorChallengeTest extends TestCase
     {
         parent::setUp();
 
-        $this->markTestSkipped('Two-factor challenges are handled by Cerberus IAM.');
+        $this->markTestSkipped('Two-factor authentication is not yet implemented.');
     }
 
     public function test_two_factor_challenge_redirects_to_login_when_not_authenticated(): void
@@ -56,8 +56,9 @@ class TwoFactorChallengeTest extends TestCase
 
         $this->get(route('two-factor.login'))
             ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page
-                ->component('auth/TwoFactorChallenge')
+            ->assertInertia(
+                fn (Assert $page) => $page
+                    ->component('auth/TwoFactorChallenge')
             );
     }
 }

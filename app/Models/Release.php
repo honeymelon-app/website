@@ -77,14 +77,6 @@ class Release extends Model implements Filterable
     }
 
     /**
-     * Get the updates for the release.
-     */
-    public function updates(): HasMany
-    {
-        return $this->hasMany(Update::class);
-    }
-
-    /**
      * Scope to only stable releases.
      */
     public function scopeStable(Builder $query): Builder

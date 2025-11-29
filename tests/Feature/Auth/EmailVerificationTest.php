@@ -17,7 +17,7 @@ class EmailVerificationTest extends TestCase
     {
         parent::setUp();
 
-        $this->markTestSkipped('Email verification is delegated to Cerberus IAM.');
+        $this->markTestSkipped('Email verification is disabled for admin-only platform.');
     }
 
     public function test_email_verification_screen_can_be_rendered()

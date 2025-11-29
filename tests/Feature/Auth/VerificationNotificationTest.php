@@ -16,7 +16,7 @@ class VerificationNotificationTest extends TestCase
     {
         parent::setUp();
 
-        $this->markTestSkipped('Email verification notifications are handled by Cerberus IAM.');
+        $this->markTestSkipped('Email verification is disabled for admin-only platform.');
     }
 
     public function test_sends_verification_notification(): void

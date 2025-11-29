@@ -7,7 +7,6 @@ namespace App\Jobs;
 use App\Enums\ReleaseChannel;
 use App\Services\GithubService;
 use App\Services\ReleaseService;
-use App\Services\UpdateService;
 use App\Support\PlatformDetector;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -37,7 +36,6 @@ class ProcessGithubReleaseJob implements ShouldQueue
     public function handle(
         GithubService $githubService,
         ReleaseService $releaseService,
-        UpdateService $updateService
     ): void {
         Log::info('Processing GitHub release', [
             'tag' => $this->tag,
@@ -46,7 +44,7 @@ class ProcessGithubReleaseJob implements ShouldQueue
         ]);
 
         try {
-            DB::transaction(function () use ($githubService, $releaseService, $updateService) {
+            DB::transaction(function () use ($githubService, $releaseService) {
                 $notes = $this->payload['notes'] ?? null;
                 $publishedAt = $this->payload['published_at'] ?? null;
                 $artifacts = $this->payload['artifacts'] ?? [];
@@ -84,7 +82,7 @@ class ProcessGithubReleaseJob implements ShouldQueue
 
                     $releaseService->attachArtifact($release, [
                         'platform' => $platform,
-                        'source' => $asset['source'] ?? 'github',
+                        'source' => $asset['source'] ?? 'r2',
                         'filename' => $asset['filename'] ?? $asset['name'] ?? null,
                         'size' => $asset['size'] ?? 0,
                         'sha256' => $asset['sha256'] ?? null,
@@ -101,12 +99,8 @@ class ProcessGithubReleaseJob implements ShouldQueue
                     ]);
                 }
 
-                // Build and publish update manifest
-                $update = $updateService->buildAndPublish($release, $this->channel->value);
-
                 Log::info('GitHub release processed successfully', [
                     'release_id' => $release->id,
-                    'update_id' => $update->id,
                     'version' => $this->version,
                     'channel' => $this->channel->value,
                 ]);

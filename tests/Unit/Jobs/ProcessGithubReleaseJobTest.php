@@ -9,7 +9,6 @@ use App\Jobs\ProcessGithubReleaseJob;
 use App\Models\User;
 use App\Services\GithubService;
 use App\Services\ReleaseService;
-use App\Services\UpdateService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -55,7 +54,6 @@ class ProcessGithubReleaseJobTest extends TestCase
         $job->handle(
             $githubService,
             app(ReleaseService::class),
-            app(UpdateService::class),
         );
 
         $this->assertDatabaseHas('releases', [

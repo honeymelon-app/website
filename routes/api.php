@@ -29,7 +29,6 @@ Route::prefix('webhooks')
     ->middleware('client')
     ->name('webhooks.')
     ->group(function () {
-        Route::post('/lemonsqueezy', [WebhookEventController::class, 'lemonsqueezy'])->name('lemonsqueezy');
         Route::post('/stripe', [WebhookEventController::class, 'stripe'])->name('stripe');
         Route::post('/github/release', [GithubWebhookController::class, 'store'])->name('github.release');
     });

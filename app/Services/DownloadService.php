@@ -103,16 +103,12 @@ class DownloadService
 
     /**
      * Generate a download URL for an artifact.
+     * Only R2 is supported as the artifact source.
      */
     protected function generateDownloadUrl(Artifact $artifact): string
     {
-        // For GitHub source, return the URL directly
-        if ($artifact->source === 'github') {
-            return $artifact->url;
-        }
-
-        // For S3/R2, generate a signed URL
-        if (in_array($artifact->source, ['s3', 'r2']) && $artifact->path) {
+        // For R2/S3, generate a signed URL
+        if (in_array($artifact->source, ['r2', 's3']) && $artifact->path) {
             $disk = $artifact->source === 'r2' ? 'r2' : 's3';
 
             return Storage::disk($disk)->temporaryUrl(
@@ -124,8 +120,8 @@ class DownloadService
             );
         }
 
-        // Fallback to stored URL
-        return $artifact->url ?? $artifact->path ?? '';
+        // Fallback to stored URL (should not happen in production)
+        return $artifact->url ?? '';
     }
 
     /**

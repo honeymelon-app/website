@@ -10,8 +10,7 @@ use InvalidArgumentException;
 class PaymentProviderFactory
 {
     public function __construct(
-        private readonly StripePaymentProvider $stripe,
-        private readonly LemonSqueezyPaymentProvider $lemonSqueezy
+        private readonly StripePaymentProvider $stripe
     ) {}
 
     /**
@@ -23,7 +22,6 @@ class PaymentProviderFactory
     {
         return match ($provider) {
             'stripe' => $this->stripe,
-            'ls', 'lemonsqueezy' => $this->lemonSqueezy,
             default => throw new InvalidArgumentException("Unknown payment provider: {$provider}"),
         };
     }

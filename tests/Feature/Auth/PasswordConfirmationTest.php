@@ -14,27 +14,49 @@ class PasswordConfirmationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        $this->markTestSkipped('Password confirmations are handled by Cerberus IAM.');
+        $this->withoutVite();
     }
 
-    public function test_confirm_password_screen_can_be_rendered()
+    public function test_confirm_password_screen_can_be_rendered(): void
     {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->get(route('password.confirm'));
 
         $response->assertStatus(200);
-
-        $response->assertInertia(fn (Assert $page) => $page
-            ->component('auth/ConfirmPassword')
+        $response->assertInertia(
+            fn (Assert $page) => $page
+                ->component('auth/ConfirmPassword')
         );
     }
 
-    public function test_password_confirmation_requires_authentication()
+    public function test_password_confirmation_requires_authentication(): void
     {
         $response = $this->get(route('password.confirm'));
 
         $response->assertRedirect(route('login'));
+    }
+
+    public function test_password_can_be_confirmed(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('password.confirm'), [
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHasNoErrors();
+    }
+
+    public function test_password_is_not_confirmed_with_invalid_password(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('password.confirm'), [
+            'password' => 'wrong-password',
+        ]);
+
+        $response->assertSessionHasErrors();
     }
 }

@@ -57,31 +57,6 @@ class CheckoutTest extends TestCase
             ->assertJson($expectedResponse);
     }
 
-    public function test_creates_checkout_session_with_lemon_squeezy(): void
-    {
-        $expectedResponse = [
-            'checkout_url' => 'https://checkout.lemonsqueezy.com/test-session',
-            'session_id' => 'ls_test_123',
-            'provider' => 'ls',
-        ];
-
-        $mockProvider = $this->getMockPaymentProvider($expectedResponse);
-
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $mockFactory->method('make')
-            ->with('ls')
-            ->willReturn($mockProvider);
-
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
-
-        $response = $this->postJson('/api/checkout', $this->getValidCheckoutPayload([
-            'provider' => 'ls',
-        ]));
-
-        $response->assertStatus(201)
-            ->assertJson($expectedResponse);
-    }
-
     public function test_creates_checkout_session_without_optional_email(): void
     {
         $expectedResponse = [
@@ -160,7 +135,7 @@ class CheckoutTest extends TestCase
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['provider'])
             ->assertJsonFragment([
-                'provider' => ['The provider must be either stripe or ls (Lemon Squeezy)'],
+                'provider' => ['The provider must be stripe'],
             ]);
     }
 
