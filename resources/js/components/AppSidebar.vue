@@ -15,7 +15,6 @@ import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
 import releases from '@/routes/admin/releases';
 import licenses from '@/routes/admin/licenses';
-import updates from '@/routes/admin/updates';
 import objects from '@/routes/admin/objects';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
@@ -25,7 +24,6 @@ import {
     Folder,
     LayoutGrid,
     Package,
-    RefreshCw,
     Shield,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
@@ -45,11 +43,6 @@ const mainNavItems: NavItem[] = [
         title: 'Licenses',
         href: licenses.index(),
         icon: Shield,
-    },
-    {
-        title: 'Updates',
-        href: updates.index(),
-        icon: RefreshCw,
     },
     {
         title: 'Artifacts',
