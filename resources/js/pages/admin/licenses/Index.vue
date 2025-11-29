@@ -100,11 +100,11 @@ const getStatusVariant = (
     status: string,
 ): 'default' | 'secondary' | 'destructive' => {
     const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
-    {
-        active: 'default',
-        revoked: 'destructive',
-        expired: 'secondary',
-    };
+        {
+            active: 'default',
+            revoked: 'destructive',
+            expired: 'secondary',
+        };
     return variantMap[status] || 'secondary';
 };
 
@@ -259,21 +259,21 @@ const columns: Column<License>[] = [
                                             : null,
                                         row.status === 'active'
                                             ? h(
-                                                DropdownMenuItem,
-                                                {
-                                                    onClick: () =>
-                                                        revokeLicense(row),
-                                                    class: 'text-destructive focus:text-destructive',
-                                                },
-                                                {
-                                                    default: () => [
-                                                        h(ShieldOff, {
-                                                            class: 'mr-2 h-4 w-4',
-                                                        }),
-                                                        'Revoke License',
-                                                    ],
-                                                },
-                                            )
+                                                  DropdownMenuItem,
+                                                  {
+                                                      onClick: () =>
+                                                          revokeLicense(row),
+                                                      class: 'text-destructive focus:text-destructive',
+                                                  },
+                                                  {
+                                                      default: () => [
+                                                          h(ShieldOff, {
+                                                              class: 'mr-2 h-4 w-4',
+                                                          }),
+                                                          'Revoke License',
+                                                      ],
+                                                  },
+                                              )
                                             : null,
                                     ].filter(Boolean),
                             },
@@ -545,8 +545,9 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="getStatusVariant(selectedLicense.status)
-                                    "
+                                :variant="
+                                    getStatusVariant(selectedLicense.status)
+                                "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -648,7 +649,7 @@ const handlePageChange = (page: number): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                            isDetailsDialogOpen = false;
+                                isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />

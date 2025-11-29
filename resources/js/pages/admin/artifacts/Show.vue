@@ -268,9 +268,9 @@ const cancelDelete = () => {
                                 }}, R2={{
                                     artifact.storage_status.storage_size
                                         ? formatFileSize(
-                                            artifact.storage_status
-                                                .storage_size,
-                                        )
+                                              artifact.storage_status
+                                                  .storage_size,
+                                          )
                                         : 'N/A'
                                 }})
                             </template>
@@ -441,8 +441,9 @@ const cancelDelete = () => {
                                 @click="downloadArtifact"
                                 size="sm"
                                 variant="outline"
-                                :disabled="!artifact.download_url && !artifact.url
-                                    "
+                                :disabled="
+                                    !artifact.download_url && !artifact.url
+                                "
                             >
                                 <Download class="h-4 w-4" />
                             </Button>

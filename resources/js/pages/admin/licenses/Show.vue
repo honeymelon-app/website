@@ -51,11 +51,11 @@ const getStatusVariant = (
     status: string,
 ): 'default' | 'secondary' | 'destructive' => {
     const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
-    {
-        active: 'default',
-        revoked: 'destructive',
-        expired: 'secondary',
-    };
+        {
+            active: 'default',
+            revoked: 'destructive',
+            expired: 'secondary',
+        };
     return variantMap[status] || 'secondary';
 };
 

@@ -319,12 +319,12 @@ const comparisonFeatures = [
                                         <tbody>
                                             <tr
                                                 v-for="(
-item, index
+                                                    item, index
                                                 ) in comparisonFeatures"
                                                 :key="item.feature"
                                                 :class="[
                                                     index !==
-                                                        comparisonFeatures.length -
+                                                    comparisonFeatures.length -
                                                         1
                                                         ? 'border-b border-border/50'
                                                         : '',
@@ -346,8 +346,9 @@ item, index
                                                         >
                                                             <Check
                                                                 class="h-4 w-4 text-primary"
-                                                                :stroke-width="3
-                                                                    "
+                                                                :stroke-width="
+                                                                    3
+                                                                "
                                                             />
                                                         </div>
                                                         <X
@@ -369,8 +370,9 @@ item, index
                                                         >
                                                             <Check
                                                                 class="h-4 w-4 text-muted-foreground"
-                                                                :stroke-width="2
-                                                                    "
+                                                                :stroke-width="
+                                                                    2
+                                                                "
                                                             />
                                                         </div>
                                                         <X

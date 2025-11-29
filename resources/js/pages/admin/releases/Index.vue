@@ -72,10 +72,10 @@ const columns: Column<Release>[] = [
         render: (row: Release) => {
             return row.major
                 ? h(
-                    Badge,
-                    { variant: 'destructive', class: 'text-xs' },
-                    { default: () => 'Major' },
-                )
+                      Badge,
+                      { variant: 'destructive', class: 'text-xs' },
+                      { default: () => 'Major' },
+                  )
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },

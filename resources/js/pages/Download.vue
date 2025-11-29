@@ -139,9 +139,9 @@ function formatDate(dateString: string): string {
                                             {{
                                                 artifact.release?.published_at
                                                     ? formatDate(
-                                                        artifact.release
-                                                            .published_at,
-                                                    )
+                                                          artifact.release
+                                                              .published_at,
+                                                      )
                                                     : 'N/A'
                                             }}
                                         </span>

@@ -120,11 +120,11 @@ const getStatusVariant = (
     status: string,
 ): 'default' | 'secondary' | 'destructive' => {
     const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
-    {
-        active: 'default',
-        revoked: 'destructive',
-        expired: 'secondary',
-    };
+        {
+            active: 'default',
+            revoked: 'destructive',
+            expired: 'secondary',
+        };
     return variantMap[status] || 'secondary';
 };
 
@@ -347,8 +347,9 @@ const cancelRefund = (): void => {
                                     >Provider</span
                                 >
                                 <Badge
-                                    :variant="getProviderVariant(order.provider)
-                                        "
+                                    :variant="
+                                        getProviderVariant(order.provider)
+                                    "
                                     class="w-fit capitalize"
                                 >
                                     {{ order.provider }}
@@ -415,10 +416,11 @@ const cancelRefund = (): void => {
                                             >Status</span
                                         >
                                         <Badge
-                                            :variant="getStatusVariant(
-                                                order.license.status,
-                                            )
-                                                "
+                                            :variant="
+                                                getStatusVariant(
+                                                    order.license.status,
+                                                )
+                                            "
                                             class="w-fit capitalize"
                                         >
                                             {{ order.license.status }}
