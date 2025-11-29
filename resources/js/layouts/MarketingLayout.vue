@@ -11,13 +11,34 @@ import {
     SheetTrigger,
 } from '@/components/ui/sheet';
 import { ExternalLink, Menu } from 'lucide-vue-next';
+import { onMounted, onUnmounted, ref } from 'vue';
+
+const isScrolled = ref(false);
+
+function handleScroll(): void {
+    isScrolled.value = window.scrollY > 10;
+}
+
+onMounted(() => {
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
+});
 </script>
 
 <template>
     <div class="min-h-screen bg-gradient-to-b from-background to-muted/20">
         <!-- Header -->
         <header
-            class="sticky top-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-sm"
+            class="sticky top-0 z-50 transition-all duration-300"
+            :class="[
+                isScrolled
+                    ? 'border-b border-border/60 bg-background/95 shadow-sm backdrop-blur-md'
+                    : 'border-b border-transparent bg-transparent',
+            ]"
         >
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="flex h-16 items-center justify-between">
@@ -92,7 +113,7 @@ import { ExternalLink, Menu } from 'lucide-vue-next';
                                             rel="noopener noreferrer"
                                             class="inline-flex items-center gap-1.5"
                                         >
-                                            Documentation
+                                            Docs
                                             <ExternalLink class="h-3 w-3" />
                                         </a>
                                     </Button>

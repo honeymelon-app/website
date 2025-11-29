@@ -72,10 +72,10 @@ const columns: Column<Release>[] = [
         render: (row: Release) => {
             return row.major
                 ? h(
-                      Badge,
-                      { variant: 'destructive', class: 'text-xs' },
-                      { default: () => 'Major' },
-                  )
+                    Badge,
+                    { variant: 'destructive', class: 'text-xs' },
+                    { default: () => 'Major' },
+                )
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -253,7 +253,7 @@ const handlePageChange = (page: number): void => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div
-            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
                 <div class="flex items-center justify-between">

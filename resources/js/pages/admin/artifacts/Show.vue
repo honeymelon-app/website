@@ -145,7 +145,7 @@ const cancelDelete = () => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div
-            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
                 <!-- Header -->
@@ -268,9 +268,9 @@ const cancelDelete = () => {
                                 }}, R2={{
                                     artifact.storage_status.storage_size
                                         ? formatFileSize(
-                                              artifact.storage_status
-                                                  .storage_size,
-                                          )
+                                            artifact.storage_status
+                                                .storage_size,
+                                        )
                                         : 'N/A'
                                 }})
                             </template>
@@ -441,9 +441,8 @@ const cancelDelete = () => {
                                 @click="downloadArtifact"
                                 size="sm"
                                 variant="outline"
-                                :disabled="
-                                    !artifact.download_url && !artifact.url
-                                "
+                                :disabled="!artifact.download_url && !artifact.url
+                                    "
                             >
                                 <Download class="h-4 w-4" />
                             </Button>

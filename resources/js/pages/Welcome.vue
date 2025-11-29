@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import AnimatedSection from '@/components/marketing/AnimatedSection.vue';
+import FeatureCard from '@/components/marketing/FeatureCard.vue';
 import PageHero from '@/components/marketing/PageHero.vue';
+import ScreenshotFrame from '@/components/marketing/ScreenshotFrame.vue';
 import SectionHeader from '@/components/marketing/SectionHeader.vue';
-import Alert from '@/components/ui/alert/Alert.vue';
-import AlertDescription from '@/components/ui/alert/AlertDescription.vue';
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
 import Card from '@/components/ui/card/Card.vue';
@@ -32,7 +33,6 @@ import featuresData from '@/content/features.json';
 import formatsData from '@/content/formats.json';
 import keyFeaturesData from '@/content/keyFeatures.json';
 import pipelineData from '@/content/pipeline.json';
-import systemRequirementsData from '@/content/systemRequirements.json';
 
 const iconMap: Record<string, any> = {
     Zap,
@@ -50,7 +50,6 @@ const features = featuresData.map((feature) => ({
 
 const pipeline = pipelineData;
 const formats = formatsData;
-const systemRequirements = systemRequirementsData;
 const keyFeatures = keyFeaturesData;
 </script>
 
@@ -70,18 +69,20 @@ const keyFeatures = keyFeaturesData;
                     <Button
                         as-child
                         size="lg"
-                        class="text-base shadow-lg shadow-primary/20"
+                        class="group text-base transition-all duration-300 hover:scale-[1.02]"
                     >
                         <a href="/download">
                             Download for macOS
-                            <ArrowRight class="ml-2 h-4 w-4" />
+                            <ArrowRight
+                                class="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                            />
                         </a>
                     </Button>
                     <Button
                         as-child
                         variant="outline"
                         size="lg"
-                        class="text-base"
+                        class="text-base transition-all duration-300 hover:bg-muted/80"
                     >
                         <a
                             href="https://docs.honeymelon.app"
@@ -96,37 +97,41 @@ const keyFeatures = keyFeaturesData;
             </template>
             <template #footer>
                 <div
-                    class="mt-20 flex flex-wrap items-center justify-center gap-3"
+                    class="mt-12 flex flex-wrap items-center justify-center gap-3"
                 >
                     <span class="text-sm font-medium text-muted-foreground"
                         >Requirements:</span
                     >
-                    <Badge variant="secondary" class="px-3 py-1"
+                    <Badge
+                        variant="secondary"
+                        class="px-3 py-1 transition-colors duration-300 hover:bg-secondary/80"
                         >macOS 13+</Badge
                     >
-                    <Badge variant="secondary" class="px-3 py-1"
+                    <Badge
+                        variant="secondary"
+                        class="px-3 py-1 transition-colors duration-300 hover:bg-secondary/80"
                         >Apple Silicon</Badge
                     >
-                    <Badge variant="secondary" class="px-3 py-1"
+                    <Badge
+                        variant="secondary"
+                        class="px-3 py-1 transition-colors duration-300 hover:bg-secondary/80"
                         >Privacy-First</Badge
                     >
                 </div>
 
-                <!-- App Screenshot -->
-                <div class="mt-20">
-                    <div class="relative mx-auto max-w-6xl">
-                        <img
-                            src="/images/screens/Pending-Files-Active-Files-Completed-Files-Light-Mode.png"
-                            alt="Honeymelon App Interface"
-                            class="w-full rounded-xl"
-                        />
-                    </div>
+                <!-- Hero App Screenshot with enhanced frame -->
+                <div class="mt-10">
+                    <ScreenshotFrame
+                        src="/images/screens/Pending-Files-Active-Files-Completed-Files-Light-Mode.png"
+                        alt="Honeymelon App Interface showing pending, active, and completed files"
+                        :delay="500"
+                    />
                 </div>
             </template>
         </PageHero>
 
         <!-- Features Section with hover effects -->
-        <section id="features" class="border-b border-border/40 py-28">
+        <section id="features" class="border-b border-border/40 py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <SectionHeader
                     badge="Features"
@@ -135,34 +140,20 @@ const keyFeatures = keyFeaturesData;
                 />
 
                 <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    <Card
-                        v-for="feature in features"
+                    <FeatureCard
+                        v-for="(feature, index) in features"
                         :key="feature.title"
-                        class="transition-shadow hover:shadow-lg"
-                    >
-                        <CardHeader class="pb-4">
-                            <component
-                                :is="feature.icon"
-                                class="mb-4 h-12 w-12 text-primary"
-                                :stroke-width="1.5"
-                            />
-                            <CardTitle class="text-xl">{{
-                                feature.title
-                            }}</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <CardDescription
-                                class="text-base leading-relaxed"
-                                >{{ feature.description }}</CardDescription
-                            >
-                        </CardContent>
-                    </Card>
+                        :title="feature.title"
+                        :description="feature.description"
+                        :icon="feature.icon"
+                        :delay="index * 75"
+                    />
                 </div>
             </div>
         </section>
 
         <!-- App Screenshots Showcase -->
-        <section class="border-b border-border/40 py-28">
+        <section class="border-b border-border/40 py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <SectionHeader
                     badge="Interface"
@@ -170,11 +161,16 @@ const keyFeatures = keyFeaturesData;
                     description="Designed for macOS with native performance and elegant UI"
                 />
 
-                <div class="space-y-32">
+                <div class="space-y-20">
                     <!-- Queue Management -->
                     <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-                        <div class="order-2 lg:order-1">
-                            <Badge variant="outline" class="mb-4 px-3 py-1"
+                        <AnimatedSection
+                            class="order-2 lg:order-1"
+                            direction="left"
+                        >
+                            <Badge
+                                variant="outline"
+                                class="mb-4 px-3 py-1 transition-colors hover:bg-muted"
                                 >Queue Management</Badge
                             >
                             <h3 class="mb-4 text-3xl font-bold tracking-tight">
@@ -190,39 +186,52 @@ const keyFeatures = keyFeaturesData;
                             </p>
                             <ul class="space-y-3">
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >Real-time progress tracking</span
                                     >
                                 </li>
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >Batch processing support</span
                                     >
                                 </li>
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >Automatic error handling</span
                                     >
                                 </li>
                             </ul>
-                        </div>
+                        </AnimatedSection>
                         <div class="order-1 lg:order-2">
-                            <img
+                            <ScreenshotFrame
                                 src="/images/screens/Pending-Files-Queue-Light-Mode.png"
                                 alt="Queue Management"
-                                class="w-full rounded-xl"
+                                direction="right"
+                                :delay="100"
                             />
                         </div>
                     </div>
@@ -230,14 +239,17 @@ const keyFeatures = keyFeaturesData;
                     <!-- Dark Mode Support -->
                     <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
                         <div>
-                            <img
+                            <ScreenshotFrame
                                 src="/images/screens/Pending-Files-Active-Files-Completed-Files-Dark-Mode.png"
                                 alt="Dark Mode Interface"
-                                class="w-full rounded-xl"
+                                direction="left"
+                                :delay="100"
                             />
                         </div>
-                        <div>
-                            <Badge variant="outline" class="mb-4 px-3 py-1"
+                        <AnimatedSection direction="right">
+                            <Badge
+                                variant="outline"
+                                class="mb-4 px-3 py-1 transition-colors hover:bg-muted"
                                 >Dark Mode</Badge
                             >
                             <h3 class="mb-4 text-3xl font-bold tracking-tight">
@@ -252,40 +264,57 @@ const keyFeatures = keyFeaturesData;
                             </p>
                             <ul class="space-y-3">
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >System preference sync</span
                                     >
                                 </li>
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >Carefully crafted color palette</span
                                     >
                                 </li>
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >Reduced eye strain</span
                                     >
                                 </li>
                             </ul>
-                        </div>
+                        </AnimatedSection>
                     </div>
 
                     <!-- Destination Selection -->
                     <div class="grid gap-12 lg:grid-cols-2 lg:items-center">
-                        <div class="order-2 lg:order-1">
-                            <Badge variant="outline" class="mb-4 px-3 py-1"
+                        <AnimatedSection
+                            class="order-2 lg:order-1"
+                            direction="left"
+                        >
+                            <Badge
+                                variant="outline"
+                                class="mb-4 px-3 py-1 transition-colors hover:bg-muted"
                                 >Smart Output</Badge
                             >
                             <h3 class="mb-4 text-3xl font-bold tracking-tight">
@@ -300,39 +329,52 @@ const keyFeatures = keyFeaturesData;
                             </p>
                             <ul class="space-y-3">
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >Custom output directories</span
                                     >
                                 </li>
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >Automatic file organization</span
                                     >
                                 </li>
                                 <li class="flex items-start gap-3">
-                                    <Check
-                                        class="mt-1 h-5 w-5 flex-shrink-0 text-primary"
-                                        :stroke-width="3"
-                                    />
+                                    <div
+                                        class="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary/10"
+                                    >
+                                        <Check
+                                            class="h-3 w-3 text-primary"
+                                            :stroke-width="3"
+                                        />
+                                    </div>
                                     <span class="text-base"
                                         >Original file preservation</span
                                     >
                                 </li>
                             </ul>
-                        </div>
+                        </AnimatedSection>
                         <div class="order-1 lg:order-2">
-                            <img
+                            <ScreenshotFrame
                                 src="/images/screens/Destination-Directory-Chosen-Light-Mode.png"
                                 alt="Destination Selection"
-                                class="w-full rounded-xl"
+                                direction="right"
+                                :delay="100"
                             />
                         </div>
                     </div>
@@ -341,7 +383,7 @@ const keyFeatures = keyFeaturesData;
         </section>
 
         <!-- How It Works Pipeline -->
-        <section class="border-b border-border/40 bg-muted/30 py-28">
+        <section class="border-b border-border/40 bg-muted/30 py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <SectionHeader
                     badge="Process"
@@ -350,17 +392,18 @@ const keyFeatures = keyFeaturesData;
                 />
 
                 <div class="grid gap-8 md:grid-cols-3">
-                    <div
-                        v-for="stage in pipeline"
+                    <AnimatedSection
+                        v-for="(stage, index) in pipeline"
                         :key="stage.number"
+                        :delay="index * 100"
                         class="relative"
                     >
                         <Card
-                            class="h-full border-2 transition-shadow hover:shadow-lg"
+                            class="group h-full border-2 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
                         >
                             <CardHeader class="pb-4">
                                 <div
-                                    class="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-3xl font-bold text-primary-foreground shadow-lg shadow-primary/20"
+                                    class="mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-primary text-3xl font-bold text-primary-foreground transition-transform duration-300 group-hover:scale-110"
                                 >
                                     {{ stage.number }}
                                 </div>
@@ -376,13 +419,13 @@ const keyFeatures = keyFeaturesData;
                                 </CardDescription>
                             </CardContent>
                         </Card>
-                    </div>
+                    </AnimatedSection>
                 </div>
             </div>
         </section>
 
         <!-- Supported Formats -->
-        <section class="border-b border-border/40 py-28">
+        <section class="border-b border-border/40 py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <SectionHeader
                     badge="Compatibility"
@@ -391,150 +434,104 @@ const keyFeatures = keyFeaturesData;
                 />
 
                 <div class="grid gap-8 md:grid-cols-3">
-                    <Card class="transition-shadow hover:shadow-lg">
-                        <CardHeader class="pb-4">
-                            <Video
-                                class="mb-4 h-14 w-14 text-primary"
-                                :stroke-width="1.5"
-                            />
-                            <CardTitle class="text-2xl">Video</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div class="flex flex-wrap gap-2">
-                                <Badge
-                                    v-for="format in formats.video"
-                                    :key="format"
-                                    variant="secondary"
-                                    class="px-3 py-1"
-                                    >{{ format }}</Badge
-                                >
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card class="transition-shadow hover:shadow-lg">
-                        <CardHeader class="pb-4">
-                            <Music
-                                class="mb-4 h-14 w-14 text-primary"
-                                :stroke-width="1.5"
-                            />
-                            <CardTitle class="text-2xl">Audio</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div class="flex flex-wrap gap-2">
-                                <Badge
-                                    v-for="format in formats.audio"
-                                    :key="format"
-                                    variant="secondary"
-                                    class="px-3 py-1"
-                                    >{{ format }}</Badge
-                                >
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card class="transition-shadow hover:shadow-lg">
-                        <CardHeader class="pb-4">
-                            <Image
-                                class="mb-4 h-14 w-14 text-primary"
-                                :stroke-width="1.5"
-                            />
-                            <CardTitle class="text-2xl">Images</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div class="flex flex-wrap gap-2">
-                                <Badge
-                                    v-for="format in formats.image"
-                                    :key="format"
-                                    variant="secondary"
-                                    class="px-3 py-1"
-                                    >{{ format }}</Badge
-                                >
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        </section>
-
-        <!-- System Requirements -->
-        <section class="border-b border-border/40 bg-muted/30 py-28">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <SectionHeader
-                    badge="Requirements"
-                    title="System Requirements"
-                />
-
-                <div class="grid gap-8 lg:grid-cols-2">
-                    <Card class="transition-shadow hover:shadow-lg">
-                        <CardHeader class="pb-4">
-                            <CardTitle class="text-2xl">Minimum</CardTitle>
-                            <CardDescription class="text-base"
-                                >Basic requirements to run
-                                Honeymelon</CardDescription
-                            >
-                        </CardHeader>
-                        <CardContent>
-                            <div class="space-y-4">
+                    <AnimatedSection :delay="0">
+                        <Card
+                            class="group h-full transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+                        >
+                            <CardHeader class="pb-4">
                                 <div
-                                    v-for="req in systemRequirements.minimum"
-                                    :key="req.label"
-                                    class="flex justify-between border-b border-border/50 pb-4"
+                                    class="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/15"
                                 >
-                                    <span class="font-semibold">{{
-                                        req.label
-                                    }}</span>
-                                    <span class="text-muted-foreground">{{
-                                        req.value
-                                    }}</span>
+                                    <Video
+                                        class="h-8 w-8 text-primary"
+                                        :stroke-width="1.5"
+                                    />
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                                <CardTitle class="text-2xl">Video</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="flex flex-wrap gap-2">
+                                    <Badge
+                                        v-for="format in formats.video"
+                                        :key="format"
+                                        variant="secondary"
+                                        class="px-3 py-1 transition-colors hover:bg-secondary/80"
+                                        >{{ format }}</Badge
+                                    >
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </AnimatedSection>
 
-                    <Card class="transition-shadow hover:shadow-lg">
-                        <CardHeader class="pb-4">
-                            <CardTitle class="text-2xl">Recommended</CardTitle>
-                            <CardDescription class="text-base"
-                                >Optimal performance for heavy
-                                workloads</CardDescription
-                            >
-                        </CardHeader>
-                        <CardContent>
-                            <div class="space-y-4">
+                    <AnimatedSection :delay="75">
+                        <Card
+                            class="group h-full transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+                        >
+                            <CardHeader class="pb-4">
                                 <div
-                                    v-for="req in systemRequirements.recommended"
-                                    :key="req.label"
-                                    class="flex justify-between border-b border-border/50 pb-4"
+                                    class="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/15"
                                 >
-                                    <span class="font-semibold">{{
-                                        req.label
-                                    }}</span>
-                                    <span class="text-muted-foreground">{{
-                                        req.value
-                                    }}</span>
+                                    <Music
+                                        class="h-8 w-8 text-primary"
+                                        :stroke-width="1.5"
+                                    />
                                 </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
+                                <CardTitle class="text-2xl">Audio</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="flex flex-wrap gap-2">
+                                    <Badge
+                                        v-for="format in formats.audio"
+                                        :key="format"
+                                        variant="secondary"
+                                        class="px-3 py-1 transition-colors hover:bg-secondary/80"
+                                        >{{ format }}</Badge
+                                    >
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </AnimatedSection>
 
-                <Alert class="mt-10">
-                    <AlertDescription class="text-base">
-                        <strong>Important:</strong> Honeymelon is compiled
-                        exclusively for Apple Silicon (ARM64 architecture).
-                        Intel-based Macs are not supported.
-                    </AlertDescription>
-                </Alert>
+                    <AnimatedSection :delay="150">
+                        <Card
+                            class="group h-full transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+                        >
+                            <CardHeader class="pb-4">
+                                <div
+                                    class="mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/15"
+                                >
+                                    <Image
+                                        class="h-8 w-8 text-primary"
+                                        :stroke-width="1.5"
+                                    />
+                                </div>
+                                <CardTitle class="text-2xl">Images</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div class="flex flex-wrap gap-2">
+                                    <Badge
+                                        v-for="format in formats.image"
+                                        :key="format"
+                                        variant="secondary"
+                                        class="px-3 py-1 transition-colors hover:bg-secondary/80"
+                                        >{{ format }}</Badge
+                                    >
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </AnimatedSection>
+                </div>
             </div>
         </section>
 
         <!-- Key Features Checklist -->
-        <section class="border-b border-border/40 py-28">
+        <section class="border-b border-border/40 py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="grid gap-16 lg:grid-cols-2 lg:items-center">
-                    <div>
-                        <Badge variant="outline" class="mb-6 px-3 py-1"
+                    <AnimatedSection direction="left">
+                        <Badge
+                            variant="outline"
+                            class="mb-6 px-3 py-1 transition-colors hover:bg-muted"
                             >Technical Excellence</Badge
                         >
                         <h2
@@ -549,91 +546,101 @@ const keyFeatures = keyFeaturesData;
                             privacy. Optimized for Apple Silicon with
                             intelligent conversion strategies.
                         </p>
-                    </div>
+                    </AnimatedSection>
 
-                    <Card class="transition-shadow hover:shadow-lg">
-                        <CardContent class="pt-8">
-                            <ul class="space-y-5">
-                                <li
-                                    v-for="feature in keyFeatures"
-                                    :key="feature"
-                                    class="flex items-start gap-4"
-                                >
-                                    <Badge
-                                        class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full p-0"
+                    <AnimatedSection :delay="150" direction="right">
+                        <Card
+                            class="transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+                        >
+                            <CardContent class="pt-8">
+                                <ul class="space-y-5">
+                                    <li
+                                        v-for="feature in keyFeatures"
+                                        :key="feature"
+                                        class="flex items-start gap-4 transition-colors hover:text-foreground"
                                     >
-                                        <Check
-                                            class="h-3.5 w-3.5"
-                                            :stroke-width="3"
-                                        />
-                                    </Badge>
-                                    <span class="text-base leading-relaxed">{{
-                                        feature
-                                    }}</span>
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
+                                        <Badge
+                                            class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full p-0 transition-transform hover:scale-110"
+                                        >
+                                            <Check
+                                                class="h-3.5 w-3.5"
+                                                :stroke-width="3"
+                                            />
+                                        </Badge>
+                                        <span class="text-base leading-relaxed">
+                                            {{ feature }}
+                                        </span>
+                                    </li>
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    </AnimatedSection>
                 </div>
             </div>
         </section>
 
         <!-- CTA Section with gradient -->
-        <section class="py-28">
+        <section class="py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <Card
-                    class="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-background shadow-xl"
-                >
-                    <div
-                        class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.DEFAULT/10%),transparent)]"
-                    />
-                    <CardContent
-                        class="flex flex-col items-center gap-8 py-20 text-center"
+                <AnimatedSection>
+                    <Card
+                        class="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-background transition-all duration-500 hover:border-primary/30"
                     >
-                        <Badge variant="secondary" class="px-4 py-1.5"
-                            >Get Started Today</Badge
+                        <div
+                            class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.DEFAULT/10%),transparent)]"
+                        />
+                        <CardContent
+                            class="flex flex-col items-center gap-6 py-14 text-center"
                         >
-                        <h2
-                            class="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl"
-                        >
-                            Ready to Transform Your Media Workflow?
-                        </h2>
-                        <p
-                            class="max-w-2xl text-lg leading-relaxed text-muted-foreground"
-                        >
-                            Download Honeymelon today and experience
-                            intelligent, privacy-first media conversion on your
-                            Mac.
-                        </p>
-                        <div class="flex flex-col gap-3 sm:flex-row">
-                            <Button
-                                as-child
-                                size="lg"
-                                class="text-base shadow-lg shadow-primary/20"
+                            <Badge
+                                variant="secondary"
+                                class="px-4 py-1.5 transition-colors hover:bg-secondary/80"
+                                >Get Started Today</Badge
                             >
-                                <a href="/download">
-                                    Download for macOS
-                                    <ArrowRight class="ml-2 h-4 w-4" />
-                                </a>
-                            </Button>
-                            <Button
-                                as-child
-                                variant="outline"
-                                size="lg"
-                                class="text-base"
+                            <h2
+                                class="max-w-3xl text-4xl font-bold tracking-tight sm:text-5xl"
                             >
-                                <a
-                                    href="https://docs.honeymelon.app"
-                                    target="_blank"
-                                    rel="noopener"
+                                Ready to Transform Your Media Workflow?
+                            </h2>
+                            <p
+                                class="max-w-2xl text-lg leading-relaxed text-muted-foreground"
+                            >
+                                Download Honeymelon today and experience
+                                intelligent, privacy-first media conversion on
+                                your Mac.
+                            </p>
+                            <div class="flex flex-col gap-3 sm:flex-row">
+                                <Button
+                                    as-child
+                                    size="lg"
+                                    class="group text-base transition-all duration-300 hover:scale-[1.02]"
                                 >
-                                    <BookOpen class="mr-2 h-4 w-4" />
-                                    View Documentation
-                                </a>
-                            </Button>
-                        </div>
-                    </CardContent>
-                </Card>
+                                    <a href="/download">
+                                        Download for macOS
+                                        <ArrowRight
+                                            class="ml-2 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                                        />
+                                    </a>
+                                </Button>
+                                <Button
+                                    as-child
+                                    variant="outline"
+                                    size="lg"
+                                    class="text-base transition-all duration-300 hover:bg-muted/80"
+                                >
+                                    <a
+                                        href="https://docs.honeymelon.app"
+                                        target="_blank"
+                                        rel="noopener"
+                                    >
+                                        <BookOpen class="mr-2 h-4 w-4" />
+                                        View Documentation
+                                    </a>
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </AnimatedSection>
             </div>
         </section>
     </MarketingLayout>

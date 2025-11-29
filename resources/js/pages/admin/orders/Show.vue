@@ -120,11 +120,11 @@ const getStatusVariant = (
     status: string,
 ): 'default' | 'secondary' | 'destructive' => {
     const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
-        {
-            active: 'default',
-            revoked: 'destructive',
-            expired: 'secondary',
-        };
+    {
+        active: 'default',
+        revoked: 'destructive',
+        expired: 'secondary',
+    };
     return variantMap[status] || 'secondary';
 };
 
@@ -173,7 +173,7 @@ const cancelRefund = (): void => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div
-            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
                 <!-- Flash Messages -->
@@ -347,9 +347,8 @@ const cancelRefund = (): void => {
                                     >Provider</span
                                 >
                                 <Badge
-                                    :variant="
-                                        getProviderVariant(order.provider)
-                                    "
+                                    :variant="getProviderVariant(order.provider)
+                                        "
                                     class="w-fit capitalize"
                                 >
                                     {{ order.provider }}
@@ -416,11 +415,10 @@ const cancelRefund = (): void => {
                                             >Status</span
                                         >
                                         <Badge
-                                            :variant="
-                                                getStatusVariant(
-                                                    order.license.status,
-                                                )
-                                            "
+                                            :variant="getStatusVariant(
+                                                order.license.status,
+                                            )
+                                                "
                                             class="w-fit capitalize"
                                         >
                                             {{ order.license.status }}

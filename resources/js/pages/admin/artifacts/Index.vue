@@ -235,8 +235,8 @@ const columns: Column<ArtifactWithSync>[] = [
         render: (row: ArtifactWithSync) => {
             return row.notarized
                 ? h(ShieldCheck, {
-                      class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
-                  })
+                    class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
+                })
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -429,7 +429,7 @@ const handlePageChange = (page: number): void => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div
-            class="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4"
+            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
                 <div class="flex flex-col gap-2">
