@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Models\Artifact;
+use App\Observers\ArtifactObserver;
 use App\Services\GithubService;
-use App\Services\PaymentProviders\LemonSqueezyPaymentProvider;
 use App\Services\PaymentProviders\PaymentProviderFactory;
 use App\Services\PaymentProviders\StripePaymentProvider;
 use Illuminate\Http\JsonResponse;
@@ -36,21 +37,10 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        // Register LemonSqueezyPaymentProvider
-        $this->app->singleton(LemonSqueezyPaymentProvider::class, function () {
-            return new LemonSqueezyPaymentProvider(
-                storeId: config('services.lemonsqueezy.store_id'),
-                apiKey: config('services.lemonsqueezy.api_key'),
-                webhookSecret: config('services.lemonsqueezy.webhook_secret'),
-                variantId: config('services.lemonsqueezy.variant_id')
-            );
-        });
-
         // Register PaymentProviderFactory
         $this->app->singleton(PaymentProviderFactory::class, function ($app) {
             return new PaymentProviderFactory(
-                stripe: $app->make(StripePaymentProvider::class),
-                lemonSqueezy: $app->make(LemonSqueezyPaymentProvider::class)
+                stripe: $app->make(StripePaymentProvider::class)
             );
         });
     }
@@ -60,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register observers
+        Artifact::observe(ArtifactObserver::class);
+
         // Add response macro for CDN caching
         Response::macro('cdnJson', function (mixed $data, int $ttl = 300): JsonResponse {
             return response()->json($data)

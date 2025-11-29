@@ -7,6 +7,8 @@ namespace App\Http\Controllers\Web\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,9 +24,20 @@ class ArtifactController extends Controller
             ->latest('created_at')
             ->paginate(20);
 
+        // Check R2 sync status for each artifact
+        $disk = Storage::disk('s3');
+        $artifactsWithSync = $artifacts->getCollection()->map(function ($artifact) use ($disk) {
+            $syncStatus = $this->checkSyncStatus($artifact, $disk);
+
+            return array_merge(
+                (new ArtifactResource($artifact))->resolve(),
+                ['storage_status' => $syncStatus]
+            );
+        });
+
         return Inertia::render('admin/artifacts/Index', [
             'artifacts' => [
-                'data' => ArtifactResource::collection($artifacts->items())->resolve(),
+                'data' => $artifactsWithSync,
                 'meta' => [
                     'current_page' => $artifacts->currentPage(),
                     'from' => $artifacts->firstItem(),
@@ -48,8 +61,77 @@ class ArtifactController extends Controller
      */
     public function show(Artifact $artifact): Response
     {
+        $disk = Storage::disk('s3');
+        $syncStatus = $this->checkSyncStatus($artifact, $disk);
+
         return Inertia::render('admin/artifacts/Show', [
-            'artifact' => new ArtifactResource($artifact->load('release')),
+            'artifact' => array_merge(
+                (new ArtifactResource($artifact->load('release')))->resolve(),
+                ['storage_status' => $syncStatus]
+            ),
         ]);
+    }
+
+    /**
+     * Delete the specified artifact.
+     */
+    public function destroy(Artifact $artifact): RedirectResponse
+    {
+        $artifact->delete(); // Observer will handle R2 deletion
+
+        return redirect()->route('admin.artifacts.index')
+            ->with('success', 'Artifact deleted successfully.');
+    }
+
+    /**
+     * Check the storage sync status for an artifact.
+     */
+    private function checkSyncStatus(Artifact $artifact, $disk): array
+    {
+        // GitHub-sourced artifacts don't need R2 sync check
+        if ($artifact->source === 'github') {
+            return [
+                'synced' => true,
+                'type' => 'github',
+                'message' => 'Hosted on GitHub',
+            ];
+        }
+
+        // For R2/S3 sourced artifacts, check if file exists
+        if (empty($artifact->path)) {
+            return [
+                'synced' => false,
+                'type' => 'missing_path',
+                'message' => 'No storage path defined',
+            ];
+        }
+
+        try {
+            $exists = $disk->exists($artifact->path);
+
+            if ($exists) {
+                $size = $disk->size($artifact->path);
+
+                return [
+                    'synced' => true,
+                    'type' => 'r2',
+                    'message' => 'Synced to R2',
+                    'storage_size' => $size,
+                    'size_match' => $artifact->size === $size,
+                ];
+            }
+
+            return [
+                'synced' => false,
+                'type' => 'not_found',
+                'message' => 'File not found in R2',
+            ];
+        } catch (\Exception $e) {
+            return [
+                'synced' => false,
+                'type' => 'error',
+                'message' => 'Error checking R2: '.$e->getMessage(),
+            ];
+        }
     }
 }

@@ -3,7 +3,6 @@
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Web\Admin\ArtifactController;
 use App\Http\Controllers\Web\Admin\LicenseController;
-use App\Http\Controllers\Web\Admin\ObjectController;
 use App\Http\Controllers\Web\Admin\OrderController;
 use App\Http\Controllers\Web\Admin\ReleaseController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
@@ -70,11 +69,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::resource('releases', ReleaseController::class)->only(['index', 'show']);
-        Route::resource('artifacts', ArtifactController::class)->only(['index', 'show']);
+        Route::resource('artifacts', ArtifactController::class)->only(['index', 'show', 'destroy']);
         Route::resource('licenses', LicenseController::class)->only(['index', 'show', 'store']);
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
-        Route::delete('objects/{path}', [ObjectController::class, 'destroy'])->where('path', '.*')->name('objects.destroy');
-        Route::resource('objects', ObjectController::class)->only(['index']);
     });
 });
 

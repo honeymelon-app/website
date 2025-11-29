@@ -14,7 +14,6 @@ import {
 import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
 import licenses from '@/routes/admin/licenses';
-import objects from '@/routes/admin/objects';
 import releases from '@/routes/admin/releases';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
@@ -48,11 +47,6 @@ const mainNavItems: NavItem[] = [
         title: 'Artifacts',
         href: artifacts.index(),
         icon: FileArchive,
-    },
-    {
-        title: 'Objects',
-        href: objects.index(),
-        icon: Folder,
     },
 ];
 
