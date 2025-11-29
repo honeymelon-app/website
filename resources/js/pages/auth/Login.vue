@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthBase from '@/layouts/AuthLayout.vue';
-import { useForm, Head } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 
 defineProps<{
     status?: string;
@@ -37,7 +37,10 @@ const submit = () => {
     >
         <Head title="Log in" />
 
-        <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
+        <div
+            v-if="status"
+            class="mb-4 text-center text-sm font-medium text-green-600"
+        >
             {{ status }}
         </div>
 
@@ -104,9 +107,16 @@ const submit = () => {
                 </Button>
             </div>
 
-            <div v-if="canRegister" class="text-center text-sm text-muted-foreground">
+            <div
+                v-if="canRegister"
+                class="text-center text-sm text-muted-foreground"
+            >
                 Don't have an account?
-                <TextLink href="/register" class="underline underline-offset-4" :tabindex="6">
+                <TextLink
+                    href="/register"
+                    class="underline underline-offset-4"
+                    :tabindex="6"
+                >
                     Sign up
                 </TextLink>
             </div>

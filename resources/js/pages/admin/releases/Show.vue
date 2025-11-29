@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
@@ -105,15 +105,16 @@ const publishRelease = () => {
                     <div class="flex flex-col gap-2">
                         <div class="flex items-center gap-2">
                             <h1
-                                class="text-3xl font-bold tracking-tight font-mono"
+                                class="font-mono text-3xl font-bold tracking-tight"
                             >
                                 {{ release.version }}
                             </h1>
                             <Badge
-                                :variant="release.channel === 'stable'
+                                :variant="
+                                    release.channel === 'stable'
                                         ? 'default'
                                         : 'secondary'
-                                    "
+                                "
                                 class="capitalize"
                             >
                                 {{ release.channel }}
@@ -149,10 +150,7 @@ const publishRelease = () => {
                                 <span>{{ formattedPublishedDate }}</span>
                             </div>
                             <template v-if="release.created_by">
-                                <Separator
-                                    orientation="vertical"
-                                    class="h-4"
-                                />
+                                <Separator orientation="vertical" class="h-4" />
                                 <div class="flex items-center gap-1.5">
                                     <User class="h-3.5 w-3.5" />
                                     <span>{{ release.created_by }}</span>
@@ -187,13 +185,10 @@ const publishRelease = () => {
                 <CardContent>
                     <div
                         v-if="release.notes"
-                        class="prose prose-sm dark:prose-invert max-w-none"
+                        class="prose prose-sm max-w-none dark:prose-invert"
                         v-html="parsedNotes"
                     />
-                    <p
-                        v-else
-                        class="text-sm text-muted-foreground italic"
-                    >
+                    <p v-else class="text-sm text-muted-foreground italic">
                         No release notes available for this release.
                     </p>
                 </CardContent>
@@ -213,7 +208,7 @@ const publishRelease = () => {
                                 Full Commit Hash
                             </span>
                             <code
-                                class="block rounded bg-muted px-3 py-2 text-xs font-mono break-all"
+                                class="block rounded bg-muted px-3 py-2 font-mono text-xs break-all"
                             >
                                 {{ release.commit_hash }}
                             </code>

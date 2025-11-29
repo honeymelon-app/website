@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { useForm, Head } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 
 defineProps<{
     status?: string;
@@ -28,7 +28,10 @@ const submit = () => {
     >
         <Head title="Forgot Password" />
 
-        <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
+        <div
+            v-if="status"
+            class="mb-4 text-center text-sm font-medium text-green-600"
+        >
             {{ status }}
         </div>
 
@@ -48,7 +51,11 @@ const submit = () => {
                     <InputError :message="form.errors.email" />
                 </div>
 
-                <Button type="submit" class="w-full" :disabled="form.processing">
+                <Button
+                    type="submit"
+                    class="w-full"
+                    :disabled="form.processing"
+                >
                     <Spinner v-if="form.processing" />
                     Send reset link
                 </Button>

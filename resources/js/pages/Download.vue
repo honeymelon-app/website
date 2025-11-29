@@ -17,7 +17,12 @@ import CardHeader from '@/components/ui/card/CardHeader.vue';
 import CardTitle from '@/components/ui/card/CardTitle.vue';
 import MarketingLayout from '@/layouts/MarketingLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { BookOpen, Download as DownloadIcon, FileText, Key } from 'lucide-vue-next';
+import {
+    BookOpen,
+    Download as DownloadIcon,
+    FileText,
+    Key,
+} from 'lucide-vue-next';
 
 import faqsData from '@/content/faqs.json';
 import { Artifact } from '@/types/api';
@@ -154,7 +159,7 @@ function formatDate(dateString: string): string {
                                 <Button
                                     :disabled="!artifact?.url"
                                     size="lg"
-                                    class="w-full text-base shadow-lg shadow-primary/20 cursor-pointer"
+                                    class="w-full cursor-pointer text-base shadow-lg shadow-primary/20"
                                     @click="triggerDownload"
                                 >
                                     <DownloadIcon class="mr-2 h-4 w-4" />
@@ -264,8 +269,8 @@ function formatDate(dateString: string): string {
                                             class="text-sm leading-relaxed text-muted-foreground"
                                         >
                                             Open Honeymelon and enter your
-                                            license key when prompted. Don't have
-                                            one?
+                                            license key when prompted. Don't
+                                            have one?
                                             <a
                                                 href="/pricing"
                                                 class="font-medium text-primary underline underline-offset-2"
@@ -449,7 +454,7 @@ function formatDate(dateString: string): string {
                         <div class="flex flex-col gap-3 sm:flex-row">
                             <Button
                                 size="lg"
-                                class="text-base shadow-lg shadow-primary/20 cursor-pointer"
+                                class="cursor-pointer text-base shadow-lg shadow-primary/20"
                                 @click="triggerDownload"
                             >
                                 <DownloadIcon class="mr-2 h-4 w-4" />
@@ -459,7 +464,7 @@ function formatDate(dateString: string): string {
                                 as-child
                                 variant="outline"
                                 size="lg"
-                                class="text-base cursor-pointer"
+                                class="cursor-pointer text-base"
                             >
                                 <a
                                     href="https://docs.honeymelon.app"

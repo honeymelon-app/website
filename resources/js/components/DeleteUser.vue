@@ -27,9 +27,9 @@ const securityUrl = computed(() => page.props.cerberus.securityUrl);
             </p>
 
             <p>
-                Use the Cerberus dashboard to deactivate or delete your
-                account. Once removed there, this application will automatically
-                sync the change and revoke your sessions.
+                Use the Cerberus dashboard to deactivate or delete your account.
+                Once removed there, this application will automatically sync the
+                change and revoke your sessions.
             </p>
 
             <Button

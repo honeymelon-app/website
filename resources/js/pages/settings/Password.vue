@@ -88,7 +88,9 @@ const submit = () => {
                     </div>
 
                     <div class="grid gap-2">
-                        <Label for="password_confirmation">Confirm password</Label>
+                        <Label for="password_confirmation"
+                            >Confirm password</Label
+                        >
                         <Input
                             id="password_confirmation"
                             type="password"
@@ -97,7 +99,9 @@ const submit = () => {
                             v-model="form.password_confirmation"
                             class="max-w-md"
                         />
-                        <InputError :message="form.errors.password_confirmation" />
+                        <InputError
+                            :message="form.errors.password_confirmation"
+                        />
                     </div>
 
                     <Button type="submit" :disabled="form.processing">

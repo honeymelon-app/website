@@ -50,14 +50,12 @@ const copyToClipboard = async (text: string): Promise<void> => {
 const getStatusVariant = (
     status: string,
 ): 'default' | 'secondary' | 'destructive' => {
-    const variantMap: Record<
-        string,
-        'default' | 'secondary' | 'destructive'
-    > = {
-        active: 'default',
-        revoked: 'destructive',
-        expired: 'secondary',
-    };
+    const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
+        {
+            active: 'default',
+            revoked: 'destructive',
+            expired: 'secondary',
+        };
     return variantMap[status] || 'secondary';
 };
 
@@ -96,7 +94,7 @@ const formatDate = (dateString: string | null): string => {
                                 License Details
                             </h3>
                         </div>
-                        <p class="text-sm text-muted-foreground ml-12">
+                        <p class="ml-12 text-sm text-muted-foreground">
                             View license information and status.
                         </p>
                     </div>
@@ -117,7 +115,7 @@ const formatDate = (dateString: string | null): string => {
                                 <Label>License ID</Label>
                                 <div class="flex gap-2">
                                     <code
-                                        class="flex-1 rounded bg-muted px-3 py-2 text-xs font-mono"
+                                        class="flex-1 rounded bg-muted px-3 py-2 font-mono text-xs"
                                     >
                                         {{ license.id }}
                                     </code>
@@ -126,7 +124,10 @@ const formatDate = (dateString: string | null): string => {
                                         size="icon"
                                         @click="copyToClipboard(license.id)"
                                     >
-                                        <Check v-if="isCopied" class="h-4 w-4" />
+                                        <Check
+                                            v-if="isCopied"
+                                            class="h-4 w-4"
+                                        />
                                         <Copy v-else class="h-4 w-4" />
                                     </Button>
                                 </div>
@@ -136,7 +137,7 @@ const formatDate = (dateString: string | null): string => {
                                 <Label>License Key</Label>
                                 <div class="flex gap-2">
                                     <code
-                                        class="flex-1 rounded bg-muted px-3 py-2 text-xs font-mono break-all"
+                                        class="flex-1 rounded bg-muted px-3 py-2 font-mono text-xs break-all"
                                     >
                                         {{ license.key }}
                                     </code>
@@ -145,12 +146,16 @@ const formatDate = (dateString: string | null): string => {
                                         size="icon"
                                         @click="copyToClipboard(license.key)"
                                     >
-                                        <Check v-if="isCopied" class="h-4 w-4" />
+                                        <Check
+                                            v-if="isCopied"
+                                            class="h-4 w-4"
+                                        />
                                         <Copy v-else class="h-4 w-4" />
                                     </Button>
                                 </div>
                                 <p class="text-xs text-muted-foreground">
-                                    This is the publicly visible license key (hashed).
+                                    This is the publicly visible license key
+                                    (hashed).
                                 </p>
                             </div>
 
@@ -167,7 +172,9 @@ const formatDate = (dateString: string | null): string => {
 
                             <div class="space-y-2">
                                 <Label>Status</Label>
-                                <Badge :variant="getStatusVariant(license.status)">
+                                <Badge
+                                    :variant="getStatusVariant(license.status)"
+                                >
                                     {{ license.status }}
                                 </Badge>
                             </div>

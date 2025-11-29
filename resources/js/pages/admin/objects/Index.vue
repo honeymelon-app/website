@@ -24,15 +24,9 @@ import { dashboard } from '@/routes';
 import objectsRoute from '@/routes/admin/objects';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/vue3';
-import {
-    Copy,
-    Download,
-    ExternalLink,
-    MoreHorizontal,
-    Trash2,
-} from 'lucide-vue-next';
-import { h, ref } from 'vue';
 import copy from 'copy-to-clipboard';
+import { Copy, Download, MoreHorizontal, Trash2 } from 'lucide-vue-next';
+import { h, ref } from 'vue';
 
 interface R2Object {
     path: string;
@@ -105,11 +99,7 @@ const columns: Column<R2Object>[] = [
         label: 'Size',
         headerClass: 'w-[120px]',
         render: (row: R2Object) => {
-            return h(
-                'div',
-                { class: 'text-sm' },
-                formatFileSize(row.size),
-            );
+            return h('div', { class: 'text-sm' }, formatFileSize(row.size));
         },
     },
     {
@@ -272,7 +262,8 @@ const cancelDelete = (): void => {
                             Objects
                         </h3>
                         <p class="text-sm text-muted-foreground">
-                            View and manage all objects stored in your R2 bucket.
+                            View and manage all objects stored in your R2
+                            bucket.
                         </p>
                     </div>
                 </div>
@@ -286,13 +277,17 @@ const cancelDelete = (): void => {
         </div>
 
         <!-- Delete Confirmation Dialog -->
-        <AlertDialog :open="showDeleteDialog" @update:open="showDeleteDialog = $event">
+        <AlertDialog
+            :open="showDeleteDialog"
+            @update:open="showDeleteDialog = $event"
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete Object</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to delete "{{ objectToDelete?.name }}"?
-                        This action cannot be undone.
+                        Are you sure you want to delete "{{
+                            objectToDelete?.name
+                        }}"? This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

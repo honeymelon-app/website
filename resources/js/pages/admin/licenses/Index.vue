@@ -34,7 +34,14 @@ import licensesRoute from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
 import type { License, PaginatedResponse } from '@/types/resources';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { Check, Copy, Eye, MoreHorizontal, Plus, ShieldOff } from 'lucide-vue-next';
+import {
+    Check,
+    Copy,
+    Eye,
+    MoreHorizontal,
+    Plus,
+    ShieldOff,
+} from 'lucide-vue-next';
 import { h, ref } from 'vue';
 
 interface Props {
@@ -92,14 +99,12 @@ const issueForm = useForm({
 const getStatusVariant = (
     status: string,
 ): 'default' | 'secondary' | 'destructive' => {
-    const variantMap: Record<
-        string,
-        'default' | 'secondary' | 'destructive'
-    > = {
-        active: 'default',
-        revoked: 'destructive',
-        expired: 'secondary',
-    };
+    const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
+        {
+            active: 'default',
+            revoked: 'destructive',
+            expired: 'secondary',
+        };
     return variantMap[status] || 'secondary';
 };
 
@@ -228,48 +233,49 @@ const columns: Column<License>[] = [
                             DropdownMenuContent,
                             { align: 'end' },
                             {
-                                default: () => [
-                                    h(
-                                        DropdownMenuLabel,
-                                        {},
-                                        { default: () => 'Actions' },
-                                    ),
-                                    h(
-                                        DropdownMenuItem,
-                                        {
-                                            onClick: () => viewLicense(row),
-                                        },
-                                        {
-                                            default: () => [
-                                                h(Eye, {
-                                                    class: 'mr-2 h-4 w-4',
-                                                }),
-                                                'View Details',
-                                            ],
-                                        },
-                                    ),
-                                    row.status === 'active'
-                                        ? h(DropdownMenuSeparator)
-                                        : null,
-                                    row.status === 'active'
-                                        ? h(
+                                default: () =>
+                                    [
+                                        h(
+                                            DropdownMenuLabel,
+                                            {},
+                                            { default: () => 'Actions' },
+                                        ),
+                                        h(
                                             DropdownMenuItem,
                                             {
-                                                onClick: () =>
-                                                    revokeLicense(row),
-                                                class: 'text-destructive focus:text-destructive',
+                                                onClick: () => viewLicense(row),
                                             },
                                             {
                                                 default: () => [
-                                                    h(ShieldOff, {
+                                                    h(Eye, {
                                                         class: 'mr-2 h-4 w-4',
                                                     }),
-                                                    'Revoke License',
+                                                    'View Details',
                                                 ],
                                             },
-                                        )
-                                        : null,
-                                ].filter(Boolean),
+                                        ),
+                                        row.status === 'active'
+                                            ? h(DropdownMenuSeparator)
+                                            : null,
+                                        row.status === 'active'
+                                            ? h(
+                                                  DropdownMenuItem,
+                                                  {
+                                                      onClick: () =>
+                                                          revokeLicense(row),
+                                                      class: 'text-destructive focus:text-destructive',
+                                                  },
+                                                  {
+                                                      default: () => [
+                                                          h(ShieldOff, {
+                                                              class: 'mr-2 h-4 w-4',
+                                                          }),
+                                                          'Revoke License',
+                                                      ],
+                                                  },
+                                              )
+                                            : null,
+                                    ].filter(Boolean),
                             },
                         ),
                     ],
@@ -409,9 +415,7 @@ const handlePageChange = (page: number): void => {
                                         "
                                         class="text-sm text-destructive"
                                     >
-                                        {{
-                                            issueForm.errors.max_major_version
-                                        }}
+                                        {{ issueForm.errors.max_major_version }}
                                     </p>
                                 </div>
 
@@ -442,11 +446,13 @@ const handlePageChange = (page: number): void => {
                     <Dialog v-model:open="isSuccessDialogOpen">
                         <DialogContent class="sm:max-w-2xl">
                             <DialogHeader>
-                                <DialogTitle>License Issued Successfully</DialogTitle>
+                                <DialogTitle
+                                    >License Issued Successfully</DialogTitle
+                                >
                                 <DialogDescription>
-                                    The license has been generated and is ready to use.
-                                    Make sure to copy it now as it won't be shown
-                                    again.
+                                    The license has been generated and is ready
+                                    to use. Make sure to copy it now as it won't
+                                    be shown again.
                                 </DialogDescription>
                             </DialogHeader>
 
@@ -466,7 +472,7 @@ const handlePageChange = (page: number): void => {
                                         <Input
                                             :value="generatedLicenseKey"
                                             readonly
-                                            class="font-mono text-xs flex-1"
+                                            class="flex-1 font-mono text-xs"
                                         />
                                         <Button
                                             type="button"
@@ -482,8 +488,8 @@ const handlePageChange = (page: number): void => {
                                         </Button>
                                     </div>
                                     <p class="text-xs text-muted-foreground">
-                                        This key will only be shown once. Make sure to
-                                        copy and save it securely.
+                                        This key will only be shown once. Make
+                                        sure to copy and save it securely.
                                     </p>
                                 </div>
                             </div>
@@ -517,10 +523,7 @@ const handlePageChange = (page: number): void => {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div
-                    v-if="selectedLicense"
-                    class="grid gap-6 py-4"
-                >
+                <div v-if="selectedLicense" class="grid gap-6 py-4">
                     <!-- License ID -->
                     <div class="grid grid-cols-3 items-start gap-4">
                         <div class="text-sm font-medium text-muted-foreground">
@@ -528,7 +531,7 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <code
-                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                                class="block rounded bg-muted px-2 py-1 font-mono text-xs break-all"
                             >
                                 {{ selectedLicense.id }}
                             </code>
@@ -542,7 +545,9 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="getStatusVariant(selectedLicense.status)"
+                                :variant="
+                                    getStatusVariant(selectedLicense.status)
+                                "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -557,7 +562,7 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <code
-                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                                class="block rounded bg-muted px-2 py-1 font-mono text-xs break-all"
                             >
                                 {{ selectedLicense.key }}
                             </code>
@@ -571,7 +576,7 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <code
-                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                                class="block rounded bg-muted px-2 py-1 font-mono text-xs break-all"
                             >
                                 {{ selectedLicense.key_hash }}
                             </code>
@@ -644,7 +649,7 @@ const handlePageChange = (page: number): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                            isDetailsDialogOpen = false;
+                                isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />

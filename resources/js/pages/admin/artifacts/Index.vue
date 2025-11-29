@@ -131,8 +131,8 @@ const columns: Column<Artifact>[] = [
         render: (row: Artifact) => {
             return row.notarized
                 ? h(ShieldCheck, {
-                    class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
-                })
+                      class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
+                  })
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -317,10 +317,7 @@ const handlePageChange = (page: number): void => {
                     </DialogDescription>
                 </DialogHeader>
 
-                <div
-                    v-if="selectedArtifact"
-                    class="grid gap-6 py-4"
-                >
+                <div v-if="selectedArtifact" class="grid gap-6 py-4">
                     <!-- Filename -->
                     <div class="grid grid-cols-3 items-start gap-4">
                         <div class="text-sm font-medium text-muted-foreground">
@@ -328,7 +325,7 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2 flex items-center gap-2">
                             <FileArchive
-                                class="h-4 w-4 text-muted-foreground flex-shrink-0"
+                                class="h-4 w-4 flex-shrink-0 text-muted-foreground"
                             />
                             <span class="font-mono text-sm break-all">
                                 {{ selectedArtifact.filename || 'N/A' }}
@@ -342,10 +339,7 @@ const handlePageChange = (page: number): void => {
                             Platform
                         </div>
                         <div class="col-span-2">
-                            <Badge
-                                variant="outline"
-                                class="font-mono text-xs"
-                            >
+                            <Badge variant="outline" class="font-mono text-xs">
                                 {{ selectedArtifact.platform }}
                             </Badge>
                         </div>
@@ -358,12 +352,13 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="selectedArtifact.source === 'github'
+                                :variant="
+                                    selectedArtifact.source === 'github'
                                         ? 'default'
                                         : selectedArtifact.source === 'r2'
-                                            ? 'secondary'
-                                            : 'outline'
-                                    "
+                                          ? 'secondary'
+                                          : 'outline'
+                                "
                                 class="uppercase"
                             >
                                 {{ selectedArtifact.source }}
@@ -396,15 +391,14 @@ const handlePageChange = (page: number): void => {
                                 class="h-4 w-4 text-green-600 dark:text-green-500"
                             />
                             <span
-                                :class="selectedArtifact.notarized
+                                :class="
+                                    selectedArtifact.notarized
                                         ? 'text-green-600 dark:text-green-500'
                                         : 'text-muted-foreground'
-                                    "
+                                "
                                 class="text-sm"
                             >
-                                {{
-                                    selectedArtifact.notarized ? 'Yes' : 'No'
-                                }}
+                                {{ selectedArtifact.notarized ? 'Yes' : 'No' }}
                             </span>
                         </div>
                     </div>
@@ -417,14 +411,11 @@ const handlePageChange = (page: number): void => {
                         <div class="col-span-2">
                             <code
                                 v-if="selectedArtifact.sha256"
-                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                                class="block rounded bg-muted px-2 py-1 font-mono text-xs break-all"
                             >
                                 {{ selectedArtifact.sha256 }}
                             </code>
-                            <span
-                                v-else
-                                class="text-sm text-muted-foreground"
-                            >
+                            <span v-else class="text-sm text-muted-foreground">
                                 N/A
                             </span>
                         </div>
@@ -438,14 +429,11 @@ const handlePageChange = (page: number): void => {
                         <div class="col-span-2">
                             <code
                                 v-if="selectedArtifact.signature"
-                                class="block max-h-32 overflow-y-auto break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                                class="block max-h-32 overflow-y-auto rounded bg-muted px-2 py-1 font-mono text-xs break-all"
                             >
                                 {{ selectedArtifact.signature }}
                             </code>
-                            <span
-                                v-else
-                                class="text-sm text-muted-foreground"
-                            >
+                            <span v-else class="text-sm text-muted-foreground">
                                 N/A
                             </span>
                         </div>
@@ -456,7 +444,9 @@ const handlePageChange = (page: number): void => {
                         <div class="text-sm font-medium text-muted-foreground">
                             Release ID
                         </div>
-                        <div class="col-span-2 font-mono text-xs text-muted-foreground">
+                        <div
+                            class="col-span-2 font-mono text-xs text-muted-foreground"
+                        >
                             {{ selectedArtifact.release_id }}
                         </div>
                     </div>
@@ -471,7 +461,7 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <code
-                                class="block break-all rounded bg-muted px-2 py-1 font-mono text-xs"
+                                class="block rounded bg-muted px-2 py-1 font-mono text-xs break-all"
                             >
                                 {{ selectedArtifact.path }}
                             </code>
@@ -491,7 +481,7 @@ const handlePageChange = (page: number): void => {
                                 :href="selectedArtifact.url"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="block break-all font-mono text-xs text-primary hover:underline"
+                                class="block font-mono text-xs break-all text-primary hover:underline"
                             >
                                 {{ selectedArtifact.url }}
                             </a>

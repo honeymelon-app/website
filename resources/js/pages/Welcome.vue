@@ -180,10 +180,13 @@ const keyFeatures = keyFeaturesData;
                             <h3 class="mb-4 text-3xl font-bold tracking-tight">
                                 Effortless File Processing
                             </h3>
-                            <p class="mb-6 text-lg leading-relaxed text-muted-foreground">
-                                Drop your files and watch them process automatically.
-                                Track pending, active, and completed conversions all
-                                in one clean interface.
+                            <p
+                                class="mb-6 text-lg leading-relaxed text-muted-foreground"
+                            >
+                                Drop your files and watch them process
+                                automatically. Track pending, active, and
+                                completed conversions all in one clean
+                                interface.
                             </p>
                             <ul class="space-y-3">
                                 <li class="flex items-start gap-3">
@@ -240,10 +243,12 @@ const keyFeatures = keyFeaturesData;
                             <h3 class="mb-4 text-3xl font-bold tracking-tight">
                                 Easy on the Eyes
                             </h3>
-                            <p class="mb-6 text-lg leading-relaxed text-muted-foreground">
-                                Beautiful dark mode that automatically adapts to your
-                                system preferences. Perfect for long conversion
-                                sessions.
+                            <p
+                                class="mb-6 text-lg leading-relaxed text-muted-foreground"
+                            >
+                                Beautiful dark mode that automatically adapts to
+                                your system preferences. Perfect for long
+                                conversion sessions.
                             </p>
                             <ul class="space-y-3">
                                 <li class="flex items-start gap-3">
@@ -286,9 +291,12 @@ const keyFeatures = keyFeaturesData;
                             <h3 class="mb-4 text-3xl font-bold tracking-tight">
                                 Flexible Output Options
                             </h3>
-                            <p class="mb-6 text-lg leading-relaxed text-muted-foreground">
-                                Choose where your converted files go. Save to custom
-                                directories or let Honeymelon organize them for you.
+                            <p
+                                class="mb-6 text-lg leading-relaxed text-muted-foreground"
+                            >
+                                Choose where your converted files go. Save to
+                                custom directories or let Honeymelon organize
+                                them for you.
                             </p>
                             <ul class="space-y-3">
                                 <li class="flex items-start gap-3">

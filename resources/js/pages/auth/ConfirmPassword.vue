@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthLayout from '@/layouts/AuthLayout.vue';
-import { useForm, Head } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 
 const form = useForm({
     password: '',
@@ -43,7 +43,11 @@ const submit = () => {
                     <InputError :message="form.errors.password" />
                 </div>
 
-                <Button type="submit" class="w-full" :disabled="form.processing">
+                <Button
+                    type="submit"
+                    class="w-full"
+                    :disabled="form.processing"
+                >
                     <Spinner v-if="form.processing" />
                     Confirm
                 </Button>

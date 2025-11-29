@@ -10,8 +10,8 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { Menu, ExternalLink } from 'lucide-vue-next';
 import { usePage } from '@inertiajs/vue3';
+import { ExternalLink, Menu } from 'lucide-vue-next';
 import { computed } from 'vue';
 
 const page = usePage();
@@ -78,15 +78,25 @@ const auth = computed(() => page.props.auth);
                                     <SheetTitle class="text-left">
                                         <div class="flex items-center gap-3">
                                             <AppLogoIcon class="h-8 w-8" />
-                                            <span class="text-lg font-bold">Honeymelon</span>
+                                            <span class="text-lg font-bold"
+                                                >Honeymelon</span
+                                            >
                                         </div>
                                     </SheetTitle>
                                 </SheetHeader>
                                 <nav class="mt-8 flex flex-col gap-4">
-                                    <Button as-child variant="ghost" class="justify-start">
+                                    <Button
+                                        as-child
+                                        variant="ghost"
+                                        class="justify-start"
+                                    >
                                         <a href="/pricing">Pricing</a>
                                     </Button>
-                                    <Button as-child variant="ghost" class="justify-start">
+                                    <Button
+                                        as-child
+                                        variant="ghost"
+                                        class="justify-start"
+                                    >
                                         <a
                                             href="https://docs.honeymelon.app"
                                             target="_blank"
@@ -101,10 +111,20 @@ const auth = computed(() => page.props.auth);
                                         <a href="/download">Download</a>
                                     </Button>
                                     <div class="my-2 border-t border-border" />
-                                    <Button v-if="auth?.user" as-child variant="outline" class="justify-start">
+                                    <Button
+                                        v-if="auth?.user"
+                                        as-child
+                                        variant="outline"
+                                        class="justify-start"
+                                    >
                                         <a href="/dashboard">Dashboard</a>
                                     </Button>
-                                    <Button v-else as-child variant="outline" class="justify-start">
+                                    <Button
+                                        v-else
+                                        as-child
+                                        variant="outline"
+                                        class="justify-start"
+                                    >
                                         <a href="/login">Sign In</a>
                                     </Button>
                                 </nav>
@@ -158,7 +178,7 @@ const auth = computed(() => page.props.auth);
                                     target="_blank"
                                     rel="noopener"
                                     class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
-                                    >
+                                >
                                     Documentation
                                     <ExternalLink class="h-3 w-3" />
                                 </a>
@@ -174,7 +194,7 @@ const auth = computed(() => page.props.auth);
                                     target="_blank"
                                     rel="noopener"
                                     class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
-                                    >
+                                >
                                     GitHub
                                     <ExternalLink class="h-3 w-3" />
                                 </a>
@@ -185,7 +205,7 @@ const auth = computed(() => page.props.auth);
                                     target="_blank"
                                     rel="noopener"
                                     class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
-                                    >
+                                >
                                     Support
                                     <ExternalLink class="h-3 w-3" />
                                 </a>
@@ -223,7 +243,9 @@ const auth = computed(() => page.props.auth);
                 <div
                     class="flex flex-col items-center justify-between gap-4 sm:flex-row"
                 >
-                    <p class="text-center text-sm text-muted-foreground sm:text-left">
+                    <p
+                        class="text-center text-sm text-muted-foreground sm:text-left"
+                    >
                         © 2025 Honeymelon. Privacy-first media conversion for
                         Mac.
                     </p>

@@ -17,7 +17,7 @@ import { Head } from '@inertiajs/vue3';
         >
             <Card>
                 <CardContent
-                    class="prose prose-slate dark:prose-invert max-w-none space-y-8 py-8"
+                    class="prose max-w-none space-y-8 py-8 prose-slate dark:prose-invert"
                 >
                     <section>
                         <h2 class="mb-4 text-2xl font-bold">

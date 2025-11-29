@@ -39,9 +39,13 @@ const currentPath = typeof window !== undefined ? window.location.pathname : '';
             description="Manage your profile and account settings"
         />
 
-        <div class="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
+        <div
+            class="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12"
+        >
             <aside class="w-full lg:w-48">
-                <nav class="flex space-x-2 overflow-x-auto lg:flex-col lg:space-x-0 lg:space-y-1">
+                <nav
+                    class="flex space-x-2 overflow-x-auto lg:flex-col lg:space-y-1 lg:space-x-0"
+                >
                     <Button
                         v-for="item in sidebarNavItems"
                         :key="toUrl(item.href)"

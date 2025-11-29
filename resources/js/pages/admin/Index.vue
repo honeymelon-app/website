@@ -46,9 +46,9 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
-    licenses_by_status: Array<{ status: string; count: number; }>;
-    artifacts_by_platform: Array<{ platform: string; count: number; }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
+    licenses_by_status: Array<{ status: string; count: number }>;
+    artifacts_by_platform: Array<{ platform: string; count: number }>;
 }
 
 interface Props {
@@ -85,14 +85,12 @@ const formatDate = (dateString: string): string => {
 const getStatusVariant = (
     status: string,
 ): 'default' | 'secondary' | 'destructive' => {
-    const variantMap: Record<
-        string,
-        'default' | 'secondary' | 'destructive'
-    > = {
-        active: 'default',
-        revoked: 'destructive',
-        expired: 'secondary',
-    };
+    const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
+        {
+            active: 'default',
+            revoked: 'destructive',
+            expired: 'secondary',
+        };
     return variantMap[status] || 'secondary';
 };
 </script>
@@ -105,9 +103,7 @@ const getStatusVariant = (
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight">
-                        Dashboard
-                    </h2>
+                    <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
                     <p class="text-muted-foreground">
                         Overview of your platform metrics and activity
                     </p>
@@ -124,9 +120,7 @@ const getStatusVariant = (
                         <CardTitle class="text-sm font-medium"
                             >Total Orders</CardTitle
                         >
-                        <PackageOpen
-                            class="size-4 text-muted-foreground"
-                        />
+                        <PackageOpen class="size-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold">
@@ -142,10 +136,11 @@ const getStatusVariant = (
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="metrics.orders_change >= 0
-                                    ? 'text-green-500'
-                                    : 'text-red-500'
-                                    "
+                                :class="
+                                    metrics.orders_change >= 0
+                                        ? 'text-green-500'
+                                        : 'text-red-500'
+                                "
                             >
                                 {{ Math.abs(metrics.orders_change) }}%
                             </span>
@@ -164,9 +159,7 @@ const getStatusVariant = (
                         <CardTitle class="text-sm font-medium"
                             >Total Revenue</CardTitle
                         >
-                        <DollarSign
-                            class="size-4 text-muted-foreground"
-                        />
+                        <DollarSign class="size-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold">
@@ -182,10 +175,11 @@ const getStatusVariant = (
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="metrics.revenue_change >= 0
-                                    ? 'text-green-500'
-                                    : 'text-red-500'
-                                    "
+                                :class="
+                                    metrics.revenue_change >= 0
+                                        ? 'text-green-500'
+                                        : 'text-red-500'
+                                "
                             >
                                 {{ Math.abs(metrics.revenue_change) }}%
                             </span>
@@ -204,9 +198,7 @@ const getStatusVariant = (
                         <CardTitle class="text-sm font-medium"
                             >Active Licenses</CardTitle
                         >
-                        <ShieldCheck
-                            class="size-4 text-muted-foreground"
-                        />
+                        <ShieldCheck class="size-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold">
@@ -222,10 +214,11 @@ const getStatusVariant = (
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="metrics.licenses_change >= 0
-                                    ? 'text-green-500'
-                                    : 'text-red-500'
-                                    "
+                                :class="
+                                    metrics.licenses_change >= 0
+                                        ? 'text-green-500'
+                                        : 'text-red-500'
+                                "
                             >
                                 {{ Math.abs(metrics.licenses_change) }}%
                             </span>
@@ -244,9 +237,7 @@ const getStatusVariant = (
                         <CardTitle class="text-sm font-medium"
                             >Published Releases</CardTitle
                         >
-                        <TrendingUp
-                            class="size-4 text-muted-foreground"
-                        />
+                        <TrendingUp class="size-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold">
@@ -272,13 +263,17 @@ const getStatusVariant = (
                             :data="charts.orders_over_time"
                             index="date"
                             :categories="['orders', 'revenue']"
-                            :colors="['hsl(var(--chart-1))', 'hsl(var(--chart-2))']"
-                            :y-formatter="(tick: number | Date) => {
-                                return typeof tick === 'number'
-                                    ? tick.toFixed(0)
-                                    : '';
-                            }
-                                "
+                            :colors="[
+                                'hsl(var(--chart-1))',
+                                'hsl(var(--chart-2))',
+                            ]"
+                            :y-formatter="
+                                (tick: number | Date) => {
+                                    return typeof tick === 'number'
+                                        ? tick.toFixed(0)
+                                        : '';
+                                }
+                            "
                             class="h-[300px]"
                         />
                         <div
@@ -301,7 +296,11 @@ const getStatusVariant = (
                             :data="charts.licenses_by_status"
                             index="status"
                             category="count"
-                            :colors="['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']"
+                            :colors="[
+                                'hsl(var(--chart-1))',
+                                'hsl(var(--chart-2))',
+                                'hsl(var(--chart-3))',
+                            ]"
                             class="mx-auto h-[300px]"
                         />
                         <div
@@ -357,7 +356,7 @@ const getStatusVariant = (
                                 class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
                             >
                                 <div class="space-y-1">
-                                    <p class="text-sm font-medium leading-none">
+                                    <p class="text-sm leading-none font-medium">
                                         {{ order.email }}
                                     </p>
                                     <p class="text-sm text-muted-foreground">
@@ -367,10 +366,11 @@ const getStatusVariant = (
                                 <div class="flex items-center gap-2">
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="getStatusVariant(
-                                            order.license_status,
-                                        )
-                                            "
+                                        :variant="
+                                            getStatusVariant(
+                                                order.license_status,
+                                            )
+                                        "
                                     >
                                         {{ order.license_status }}
                                     </Badge>
@@ -404,18 +404,18 @@ const getStatusVariant = (
                             <div class="flex items-center justify-between">
                                 <div class="space-y-1">
                                     <p
-                                        class="font-mono text-sm font-medium leading-none"
+                                        class="font-mono text-sm leading-none font-medium"
                                     >
                                         {{ license.key_plain }}
                                     </p>
                                     <p class="text-sm text-muted-foreground">
-                                        Max Version: {{ license.max_major_version }} •
+                                        Max Version:
+                                        {{ license.max_major_version }} •
                                         {{ formatDate(license.created_at) }}
                                     </p>
                                 </div>
                                 <Badge
-                                    :variant="getStatusVariant(license.status)
-                                        "
+                                    :variant="getStatusVariant(license.status)"
                                 >
                                     {{ license.status }}
                                 </Badge>

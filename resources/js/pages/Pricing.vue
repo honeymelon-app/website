@@ -37,7 +37,7 @@ async function startCheckout() {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
+                Accept: 'application/json',
             },
             body: JSON.stringify({
                 provider: 'stripe',
@@ -60,7 +60,8 @@ async function startCheckout() {
             throw new Error('No checkout URL returned');
         }
     } catch (error) {
-        checkoutError.value = error instanceof Error ? error.message : 'Something went wrong';
+        checkoutError.value =
+            error instanceof Error ? error.message : 'Something went wrong';
         isCheckingOut.value = false;
     }
 }
@@ -82,7 +83,7 @@ const whyBuilt = [
         icon: Heart,
         title: 'Built for People',
         description:
-            "This app exists to solve real problems for real people. No venture capital pressure, no growth-at-all-costs mentality. Just honest software that respects you.",
+            'This app exists to solve real problems for real people. No venture capital pressure, no growth-at-all-costs mentality. Just honest software that respects you.',
     },
 ];
 
@@ -164,10 +165,14 @@ const comparisonFeatures = [
                         <Sparkles class="mr-2 h-4 w-4" />
                         Simple & Fair
                     </Badge>
-                    <h2 class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl">
+                    <h2
+                        class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl"
+                    >
                         One Price. Forever.
                     </h2>
-                    <p class="mb-12 text-lg leading-relaxed text-muted-foreground">
+                    <p
+                        class="mb-12 text-lg leading-relaxed text-muted-foreground"
+                    >
                         Your purchase supports ongoing development and keeps
                         Honeymelon independent, privacy-focused, and
                         subscription-free.
@@ -181,11 +186,15 @@ const comparisonFeatures = [
                         <div
                             class="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-background to-background"
                         />
-                        <CardHeader class="border-b border-border/50 pb-8 text-center">
+                        <CardHeader
+                            class="border-b border-border/50 pb-8 text-center"
+                        >
                             <CardTitle class="mb-4 text-3xl">
                                 Honeymelon Lifetime License
                             </CardTitle>
-                            <div class="mb-4 flex items-baseline justify-center gap-2">
+                            <div
+                                class="mb-4 flex items-baseline justify-center gap-2"
+                            >
                                 <span class="text-6xl font-bold">$29</span>
                                 <span class="text-xl text-muted-foreground">
                                     USD
@@ -205,7 +214,10 @@ const comparisonFeatures = [
                                     <Badge
                                         class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full p-0"
                                     >
-                                        <Check class="h-3.5 w-3.5" :stroke-width="3" />
+                                        <Check
+                                            class="h-3.5 w-3.5"
+                                            :stroke-width="3"
+                                        />
                                     </Badge>
                                     <span class="text-base">{{ feature }}</span>
                                 </li>
@@ -217,18 +229,26 @@ const comparisonFeatures = [
                                 class="w-full text-base shadow-lg shadow-primary/20"
                                 @click="startCheckout"
                             >
-                                <Loader2 v-if="isCheckingOut" class="mr-2 h-4 w-4 animate-spin" />
+                                <Loader2
+                                    v-if="isCheckingOut"
+                                    class="mr-2 h-4 w-4 animate-spin"
+                                />
                                 <template v-else>
                                     Get Honeymelon
                                     <ArrowRight class="ml-2 h-4 w-4" />
                                 </template>
                             </Button>
 
-                            <p v-if="checkoutError" class="mt-2 text-center text-sm text-destructive">
+                            <p
+                                v-if="checkoutError"
+                                class="mt-2 text-center text-sm text-destructive"
+                            >
                                 {{ checkoutError }}
                             </p>
 
-                            <p class="mt-6 text-center text-sm text-muted-foreground">
+                            <p
+                                class="mt-6 text-center text-sm text-muted-foreground"
+                            >
                                 30-day money-back guarantee. No questions asked.
                             </p>
                         </CardContent>
@@ -272,12 +292,16 @@ const comparisonFeatures = [
                                     </thead>
                                     <tbody>
                                         <tr
-                                            v-for="(item, index) in comparisonFeatures"
+                                            v-for="(
+                                                item, index
+                                            ) in comparisonFeatures"
                                             :key="item.feature"
-                                            :class="index !== comparisonFeatures.length - 1
+                                            :class="
+                                                index !==
+                                                comparisonFeatures.length - 1
                                                     ? 'border-b border-border/50'
                                                     : ''
-                                                "
+                                            "
                                         >
                                             <td class="p-4 text-sm md:p-6">
                                                 {{ item.feature }}
@@ -332,10 +356,14 @@ const comparisonFeatures = [
                         <Heart class="mr-2 h-4 w-4" />
                         Supporting Development
                     </Badge>
-                    <h2 class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl">
+                    <h2
+                        class="mb-6 text-4xl font-bold tracking-tight sm:text-5xl"
+                    >
                         Your Purchase Makes a Difference
                     </h2>
-                    <p class="mb-8 text-lg leading-relaxed text-muted-foreground">
+                    <p
+                        class="mb-8 text-lg leading-relaxed text-muted-foreground"
+                    >
                         When you buy Honeymelon, you're not just getting
                         software. You're supporting:
                     </p>
@@ -354,7 +382,9 @@ const comparisonFeatures = [
                                     <h3 class="mb-2 text-xl font-semibold">
                                         Continuous Improvement
                                     </h3>
-                                    <p class="leading-relaxed text-muted-foreground">
+                                    <p
+                                        class="leading-relaxed text-muted-foreground"
+                                    >
                                         Your purchase funds ongoing development,
                                         new features, bug fixes, and
                                         compatibility updates. We're in this for
@@ -378,7 +408,9 @@ const comparisonFeatures = [
                                     <h3 class="mb-2 text-xl font-semibold">
                                         Independence
                                     </h3>
-                                    <p class="leading-relaxed text-muted-foreground">
+                                    <p
+                                        class="leading-relaxed text-muted-foreground"
+                                    >
                                         No investors, no board meetings, no
                                         pressure to monetize your data. We
                                         answer to you, not shareholders.
@@ -401,7 +433,9 @@ const comparisonFeatures = [
                                     <h3 class="mb-2 text-xl font-semibold">
                                         Better Software
                                     </h3>
-                                    <p class="leading-relaxed text-muted-foreground">
+                                    <p
+                                        class="leading-relaxed text-muted-foreground"
+                                    >
                                         A movement toward ethical, user-focused
                                         software. Every purchase proves that
                                         people value privacy and fair pricing.
@@ -446,7 +480,10 @@ const comparisonFeatures = [
                             class="text-base shadow-lg shadow-primary/20"
                             @click="startCheckout"
                         >
-                            <Loader2 v-if="isCheckingOut" class="mr-2 h-4 w-4 animate-spin" />
+                            <Loader2
+                                v-if="isCheckingOut"
+                                class="mr-2 h-4 w-4 animate-spin"
+                            />
                             <template v-else>
                                 Get Honeymelon for $29
                                 <ArrowRight class="ml-2 h-4 w-4" />

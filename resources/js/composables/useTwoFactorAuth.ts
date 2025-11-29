@@ -20,13 +20,17 @@ const hasSetupData = computed<boolean>(
 export const useTwoFactorAuth = () => {
     const fetchQrCode = async (): Promise<void> => {
         // 2FA is managed by Cerberus IAM
-        errors.value.push('Two-factor authentication is managed through Cerberus IAM');
+        errors.value.push(
+            'Two-factor authentication is managed through Cerberus IAM',
+        );
         qrCodeSvg.value = null;
     };
 
     const fetchSetupKey = async (): Promise<void> => {
         // 2FA is managed by Cerberus IAM
-        errors.value.push('Two-factor authentication is managed through Cerberus IAM');
+        errors.value.push(
+            'Two-factor authentication is managed through Cerberus IAM',
+        );
         manualSetupKey.value = null;
     };
 
@@ -48,7 +52,9 @@ export const useTwoFactorAuth = () => {
 
     const fetchRecoveryCodes = async (): Promise<void> => {
         // 2FA is managed by Cerberus IAM
-        errors.value.push('Two-factor authentication is managed through Cerberus IAM');
+        errors.value.push(
+            'Two-factor authentication is managed through Cerberus IAM',
+        );
         recoveryCodesList.value = [];
     };
 

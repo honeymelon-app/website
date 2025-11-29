@@ -13,9 +13,9 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
-import releases from '@/routes/admin/releases';
 import licenses from '@/routes/admin/licenses';
 import objects from '@/routes/admin/objects';
+import releases from '@/routes/admin/releases';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import {

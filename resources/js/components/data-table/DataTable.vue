@@ -81,10 +81,11 @@ const hasData = computed(() => props.data && props.data.length > 0);
                                 :class="column.class"
                             >
                                 <component
-                                    :is="column.render
-                                        ? column.render(row)
-                                        : row[column.key]
-                                        "
+                                    :is="
+                                        column.render
+                                            ? column.render(row)
+                                            : row[column.key]
+                                    "
                                     v-if="column.render"
                                 />
                                 <template v-else>

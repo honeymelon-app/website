@@ -15,8 +15,8 @@ import { Head } from '@inertiajs/vue3';
         <div class="space-y-6">
             <div class="rounded-lg border bg-muted/50 p-6 text-center">
                 <p class="text-sm text-muted-foreground">
-                    Two-factor authentication is now managed through Cerberus IAM.
-                    Please authenticate through the Cerberus IAM portal.
+                    Two-factor authentication is now managed through Cerberus
+                    IAM. Please authenticate through the Cerberus IAM portal.
                 </p>
             </div>
 
