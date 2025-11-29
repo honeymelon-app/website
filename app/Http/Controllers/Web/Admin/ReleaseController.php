@@ -49,7 +49,7 @@ class ReleaseController extends Controller
     public function show(Release $release): Response
     {
         return Inertia::render('admin/releases/Show', [
-            'release' => new ReleaseResource($release->load('artifacts', 'user')),
+            'release' => (new ReleaseResource($release->load('artifacts', 'user')))->resolve(),
         ]);
     }
 }

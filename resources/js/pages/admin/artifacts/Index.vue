@@ -235,8 +235,8 @@ const columns: Column<ArtifactWithSync>[] = [
         render: (row: ArtifactWithSync) => {
             return row.notarized
                 ? h(ShieldCheck, {
-                    class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
-                })
+                      class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
+                  })
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -245,7 +245,10 @@ const columns: Column<ArtifactWithSync>[] = [
         label: 'Release',
         headerClass: 'w-[100px]',
         render: (row: ArtifactWithSync) => {
-            const version = row.release?.version ?? row.release_id?.substring?.(0, 8) ?? 'N/A';
+            const version =
+                row.release?.version ??
+                row.release_id?.substring?.(0, 8) ??
+                'N/A';
             return h(
                 'div',
                 { class: 'font-mono text-xs text-muted-foreground truncate' },

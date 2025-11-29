@@ -3,6 +3,15 @@
  * Generated from app/Http/Resources
  */
 
+export interface ReleaseArtifact {
+    id: string;
+    platform: string;
+    filename: string | null;
+    size: number | null;
+    source: string;
+    download_url: string | null;
+}
+
 export interface Release {
     id: string;
     version: string;
@@ -14,6 +23,7 @@ export interface Release {
     major: boolean;
     created_by: string | null;
     created_at: string;
+    artifacts?: ReleaseArtifact[];
 }
 
 export interface Artifact {

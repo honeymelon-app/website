@@ -2,17 +2,27 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { dashboard } from '@/routes';
 import releasesRoute from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
-import type { Release } from '@/types/resources';
+import type { Release, ReleaseArtifact } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     Calendar,
+    ChevronDown,
     Download,
+    FileArchive,
     GitCommit,
     Rocket,
     Tag,
@@ -61,7 +71,9 @@ const formattedPublishedDate = computed(() => {
 });
 
 const formattedCreatedDate = computed(() => {
+    if (!props.release.created_at) return 'N/A';
     const date = new Date(props.release.created_at);
+    if (isNaN(date.getTime())) return 'N/A';
     return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
@@ -75,10 +87,23 @@ const goBack = () => {
     router.visit(releasesRoute.index().url);
 };
 
-const downloadArtifacts = () => {
-    console.log('Download artifacts for:', props.release.version);
-    // Implement download logic
+const formatFileSize = (bytes: number | null): string => {
+    if (!bytes || bytes === 0) return 'N/A';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 };
+
+const downloadArtifact = (artifact: ReleaseArtifact) => {
+    if (artifact.download_url) {
+        window.open(artifact.download_url, '_blank');
+    }
+};
+
+const hasArtifacts = computed(() => {
+    return props.release.artifacts && props.release.artifacts.length > 0;
+});
 
 const publishRelease = () => {
     console.log('Publish release:', props.release.version);
@@ -110,10 +135,11 @@ const publishRelease = () => {
                                 {{ release.version }}
                             </h1>
                             <Badge
-                                :variant="release.channel === 'stable'
+                                :variant="
+                                    release.channel === 'stable'
                                         ? 'default'
                                         : 'secondary'
-                                    "
+                                "
                                 class="capitalize"
                             >
                                 {{ release.channel }}
@@ -140,7 +166,8 @@ const publishRelease = () => {
                             <div class="flex items-center gap-1.5">
                                 <GitCommit class="h-3.5 w-3.5" />
                                 <span class="font-mono">{{
-                                    release.commit_hash?.substring(0, 8) ?? 'N/A'
+                                    release.commit_hash?.substring(0, 8) ??
+                                    'N/A'
                                 }}</span>
                             </div>
                             <Separator orientation="vertical" class="h-4" />
@@ -159,13 +186,49 @@ const publishRelease = () => {
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        @click="downloadArtifacts"
-                    >
+                    <DropdownMenu v-if="hasArtifacts">
+                        <DropdownMenuTrigger as-child>
+                            <Button variant="outline" size="sm">
+                                <Download class="mr-2 h-4 w-4" />
+                                Download
+                                <ChevronDown class="ml-2 h-4 w-4" />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" class="w-64">
+                            <DropdownMenuLabel>Artifacts</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                v-for="artifact in release.artifacts"
+                                :key="artifact.id"
+                                :disabled="!artifact.download_url"
+                                @click="downloadArtifact(artifact)"
+                                class="flex items-center justify-between"
+                            >
+                                <div class="flex items-center gap-2">
+                                    <FileArchive class="h-4 w-4" />
+                                    <div class="flex flex-col">
+                                        <span class="text-sm">{{
+                                            artifact.platform
+                                        }}</span>
+                                        <span
+                                            class="text-xs text-muted-foreground"
+                                            >{{
+                                                formatFileSize(artifact.size)
+                                            }}</span
+                                        >
+                                    </div>
+                                </div>
+                                <Badge
+                                    variant="outline"
+                                    class="text-xs uppercase"
+                                    >{{ artifact.source }}</Badge
+                                >
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button v-else variant="outline" size="sm" disabled>
                         <Download class="mr-2 h-4 w-4" />
-                        Download
+                        No Artifacts
                     </Button>
                     <Button size="sm" @click="publishRelease">
                         <Rocket class="mr-2 h-4 w-4" />

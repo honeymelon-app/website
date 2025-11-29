@@ -201,7 +201,8 @@ const comparisonFeatures = [
                                 </span>
                             </div>
                             <CardDescription class="text-base">
-                                Pay once, use forever. All v1.x updates included.
+                                Pay once, use forever. All v1.x updates
+                                included.
                             </CardDescription>
                         </CardHeader>
                         <CardContent class="pt-8">
@@ -293,14 +294,15 @@ const comparisonFeatures = [
                                     <tbody>
                                         <tr
                                             v-for="(
-item, index
+                                                item, index
                                             ) in comparisonFeatures"
                                             :key="item.feature"
-                                            :class="index !==
-                                                    comparisonFeatures.length - 1
+                                            :class="
+                                                index !==
+                                                comparisonFeatures.length - 1
                                                     ? 'border-b border-border/50'
                                                     : ''
-                                                "
+                                            "
                                         >
                                             <td class="p-4 text-sm md:p-6">
                                                 {{ item.feature }}
@@ -363,7 +365,9 @@ item, index
                     <p
                         class="mb-8 text-lg leading-relaxed text-muted-foreground"
                     >
-                        When you buy Honeymelon, you're getting a license for the current major version (v1.x) with all updates within that version included. You're also supporting:
+                        When you buy Honeymelon, you're getting a license for
+                        the current major version (v1.x) with all updates within
+                        that version included. You're also supporting:
                     </p>
                     <div class="space-y-6 text-left">
                         <Card class="transition-shadow hover:shadow-lg">

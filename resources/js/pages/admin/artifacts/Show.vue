@@ -28,7 +28,6 @@ import { Head, router } from '@inertiajs/vue3';
 import {
     AlertTriangle,
     ArrowLeft,
-    CheckCircle2,
     Cloud,
     Download,
     FileArchive,
@@ -70,7 +69,10 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
         href: artifacts.index().url,
     },
     {
-        title: props.artifact.filename ?? props.artifact.id?.substring(0, 8) ?? 'Artifact',
+        title:
+            props.artifact.filename ??
+            props.artifact.id?.substring(0, 8) ??
+            'Artifact',
         href: artifacts.show(props.artifact.id).url,
     },
 ]);
@@ -216,7 +218,9 @@ const cancelDelete = () => {
                             class="h-5 w-5 text-green-600 dark:text-green-400"
                         />
                         <AlertTriangle
-                            v-else-if="artifact.storage_status.size_match === false"
+                            v-else-if="
+                                artifact.storage_status.size_match === false
+                            "
                             class="h-5 w-5 text-yellow-600 dark:text-yellow-400"
                         />
                         <Cloud
@@ -252,9 +256,23 @@ const cancelDelete = () => {
                             ]"
                         >
                             {{ artifact.storage_status.message }}
-                            <template v-if="artifact.storage_status.size_match === false">
-                                (Size mismatch: DB={{ artifact.size ? formatFileSize(artifact.size) : 'N/A' }},
-                                R2={{ artifact.storage_status.storage_size ? formatFileSize(artifact.storage_status.storage_size) : 'N/A' }})
+                            <template
+                                v-if="
+                                    artifact.storage_status.size_match === false
+                                "
+                            >
+                                (Size mismatch: DB={{
+                                    artifact.size
+                                        ? formatFileSize(artifact.size)
+                                        : 'N/A'
+                                }}, R2={{
+                                    artifact.storage_status.storage_size
+                                        ? formatFileSize(
+                                              artifact.storage_status
+                                                  .storage_size,
+                                          )
+                                        : 'N/A'
+                                }})
                             </template>
                         </p>
                     </div>
@@ -295,7 +313,9 @@ const cancelDelete = () => {
                             <div class="flex flex-col gap-1">
                                 <span class="text-sm font-medium">Size</span>
                                 <span class="text-sm text-muted-foreground">{{
-                                    artifact.size ? formatFileSize(artifact.size) : 'N/A'
+                                    artifact.size
+                                        ? formatFileSize(artifact.size)
+                                        : 'N/A'
                                 }}</span>
                             </div>
                             <div class="flex flex-col gap-1">
@@ -320,16 +340,20 @@ const cancelDelete = () => {
                                 </div>
                             </div>
                             <div class="flex flex-col gap-1">
-                                <span class="text-sm font-medium"
-                                    >Release</span
-                                >
+                                <span class="text-sm font-medium">Release</span>
                                 <Button
-                                    v-if="artifact.release?.version || artifact.release_id"
+                                    v-if="
+                                        artifact.release?.version ||
+                                        artifact.release_id
+                                    "
                                     variant="link"
                                     class="h-auto justify-start p-0 font-mono text-sm"
                                     @click="viewRelease"
                                 >
-                                    {{ artifact.release?.version ?? artifact.release_id }}
+                                    {{
+                                        artifact.release?.version ??
+                                        artifact.release_id
+                                    }}
                                 </Button>
                                 <span
                                     v-else
@@ -398,7 +422,8 @@ const cancelDelete = () => {
                     <CardHeader>
                         <CardTitle>Download URL</CardTitle>
                         <CardDescription
-                            >Direct download link for this artifact (signed URL valid for 1 hour)</CardDescription
+                            >Direct download link for this artifact (signed URL
+                            valid for 1 hour)</CardDescription
                         >
                     </CardHeader>
                     <CardContent>
@@ -407,14 +432,18 @@ const cancelDelete = () => {
                                 class="flex-1 overflow-x-auto rounded-md bg-muted p-3"
                             >
                                 <code class="font-mono text-xs break-all">{{
-                                    artifact.download_url ?? artifact.url ?? 'Not available'
+                                    artifact.download_url ??
+                                    artifact.url ??
+                                    'Not available'
                                 }}</code>
                             </div>
                             <Button
                                 @click="downloadArtifact"
                                 size="sm"
                                 variant="outline"
-                                :disabled="!artifact.download_url && !artifact.url"
+                                :disabled="
+                                    !artifact.download_url && !artifact.url
+                                "
                             >
                                 <Download class="h-4 w-4" />
                             </Button>
@@ -453,9 +482,14 @@ const cancelDelete = () => {
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete Artifact</AlertDialogTitle>
                     <AlertDialogDescription>
-                        Are you sure you want to delete "{{ artifact.filename }}"?
+                        Are you sure you want to delete "{{
+                            artifact.filename
+                        }}"?
                         <span
-                            v-if="artifact.source === 'r2' || artifact.source === 's3'"
+                            v-if="
+                                artifact.source === 'r2' ||
+                                artifact.source === 's3'
+                            "
                             class="mt-2 block font-medium text-destructive"
                         >
                             This will also delete the file from R2 storage.
