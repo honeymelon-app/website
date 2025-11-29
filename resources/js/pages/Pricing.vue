@@ -274,11 +274,10 @@ const comparisonFeatures = [
                                         <tr
                                             v-for="(item, index) in comparisonFeatures"
                                             :key="item.feature"
-                                            :class="
-                                                index !== comparisonFeatures.length - 1
+                                            :class="index !== comparisonFeatures.length - 1
                                                     ? 'border-b border-border/50'
                                                     : ''
-                                            "
+                                                "
                                         >
                                             <td class="p-4 text-sm md:p-6">
                                                 {{ item.feature }}

@@ -25,7 +25,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 const props = defineProps<{
-    licenses: { data: License[] };
+    licenses: { data: License[]; };
     latestArtifact: Artifact | null;
     hasActiveLicense: boolean;
 }>();
