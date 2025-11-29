@@ -94,9 +94,8 @@ import { Head } from '@inertiajs/vue3';
                             <li>
                                 • <strong>Purchase Information:</strong> When
                                 you purchase a license, payment processing is
-                                handled by our payment providers (Stripe and
-                                LemonSqueezy) according to their privacy
-                                policies
+                                handled by Stripe according to their privacy
+                                policy
                             </li>
                             <li>
                                 • <strong>License Validation:</strong> When you
@@ -124,18 +123,13 @@ import { Head } from '@inertiajs/vue3';
                                 for license purchases (subject to Stripe's
                                 Privacy Policy)
                             </li>
-                            <li>
-                                • <strong>LemonSqueezy:</strong> Alternative
-                                payment processing and license delivery (subject
-                                to LemonSqueezy's Privacy Policy)
-                            </li>
                         </ul>
                         <p
                             class="mt-4 text-base leading-relaxed text-muted-foreground"
                         >
-                            These services may collect payment information
-                            necessary to process transactions. We do not store
-                            credit card information on our servers.
+                            Stripe may collect payment information necessary to
+                            process transactions. We do not store credit card
+                            information on our servers.
                         </p>
                     </section>
 
