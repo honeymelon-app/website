@@ -71,6 +71,12 @@ export interface Order {
     amount_cents: number | null;
     currency: string | null;
     license_id: string | null;
+    license?: License | null;
+    refund_id: string | null;
+    refunded_at: string | null;
+    is_refunded: boolean;
+    can_be_refunded: boolean;
+    is_within_refund_window: boolean;
     created_at: string;
 }
 

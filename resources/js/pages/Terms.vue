@@ -49,8 +49,8 @@ import { Head } from '@inertiajs/vue3';
                                 you own or control
                             </li>
                             <li>
-                                Use Honeymelon for personal or commercial
-                                media conversion purposes
+                                Use Honeymelon for personal or commercial media
+                                conversion purposes
                             </li>
                             <li>
                                 Receive updates and support according to your
@@ -100,12 +100,12 @@ import { Head } from '@inertiajs/vue3';
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>
-                                Reverse engineer, decompile, or disassemble
-                                the software
+                                Reverse engineer, decompile, or disassemble the
+                                software
                             </li>
                             <li>
-                                Modify, adapt, or create derivative works of
-                                the software
+                                Modify, adapt, or create derivative works of the
+                                software
                             </li>
                             <li>
                                 Remove or alter any proprietary notices or
@@ -120,8 +120,8 @@ import { Head } from '@inertiajs/vue3';
                                 process illegal content
                             </li>
                             <li>
-                                Exceed the device or user limits of your
-                                license type
+                                Exceed the device or user limits of your license
+                                type
                             </li>
                             <li>
                                 Use the software to infringe on third-party

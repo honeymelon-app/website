@@ -7,6 +7,10 @@ namespace App\Http\Controllers\Web\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReleaseResource;
 use App\Models\Release;
+use App\Services\GithubService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -51,5 +55,57 @@ class ReleaseController extends Controller
         return Inertia::render('admin/releases/Show', [
             'release' => (new ReleaseResource($release->load('artifacts', 'user')))->resolve(),
         ]);
+    }
+
+    /**
+     * Remove the specified release from storage.
+     * Also deletes the corresponding GitHub release and tag.
+     */
+    public function destroy(Release $release, GithubService $githubService): RedirectResponse
+    {
+        $tag = $release->tag;
+        $version = $release->version;
+
+        Log::info('Deleting release', [
+            'release_id' => $release->id,
+            'version' => $version,
+            'tag' => $tag,
+        ]);
+
+        try {
+            DB::transaction(function () use ($release, $githubService, $tag) {
+                // Delete associated artifacts from database
+                // Note: R2 files should be cleaned up separately or via a job
+                $release->artifacts()->delete();
+
+                // Delete the release from database
+                $release->delete();
+
+                // Delete from GitHub (release + tag)
+                try {
+                    $githubService->deleteReleaseAndTag($tag);
+                    Log::info('GitHub release and tag deleted', ['tag' => $tag]);
+                } catch (\Exception $e) {
+                    // Log but don't fail - the local delete succeeded
+                    Log::warning('Failed to delete GitHub release/tag', [
+                        'tag' => $tag,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            });
+
+            return redirect()
+                ->route('admin.releases.index')
+                ->with('success', "Release {$version} has been deleted successfully.");
+        } catch (\Exception $e) {
+            Log::error('Failed to delete release', [
+                'release_id' => $release->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('admin.releases.show', $release)
+                ->with('error', 'Failed to delete release: '.$e->getMessage());
+        }
     }
 }

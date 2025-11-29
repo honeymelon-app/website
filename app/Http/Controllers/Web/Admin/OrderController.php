@@ -8,6 +8,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderCollection;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Services\RefundService;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -23,7 +26,7 @@ class OrderController extends Controller
             ->latest('created_at')
             ->paginate(20);
 
-        return Inertia::render('Admin/Orders/Index', [
+        return Inertia::render('admin/orders/Index', [
             'orders' => new OrderCollection($orders),
         ]);
     }
@@ -33,8 +36,30 @@ class OrderController extends Controller
      */
     public function show(Order $order): Response
     {
-        return Inertia::render('Admin/Orders/Show', [
-            'order' => new OrderResource($order->load('license')),
+        return Inertia::render('admin/orders/Show', [
+            'order' => (new OrderResource($order->load('license')))->resolve(),
         ]);
+    }
+
+    /**
+     * Process a refund for the specified order.
+     */
+    public function refund(Request $request, Order $order, RefundService $refundService): RedirectResponse
+    {
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        try {
+            $refundService->refund($order, $request->input('reason'));
+
+            return redirect()
+                ->route('admin.orders.show', $order)
+                ->with('success', 'Order has been refunded successfully. The associated license has been revoked.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('admin.orders.show', $order)
+                ->with('error', 'Failed to process refund: '.$e->getMessage());
+        }
     }
 }

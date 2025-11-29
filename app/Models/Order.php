@@ -32,6 +32,8 @@ class Order extends Model implements Filterable
         'meta',
         'user_id',
         'product_id',
+        'refund_id',
+        'refunded_at',
     ];
 
     /**
@@ -44,6 +46,7 @@ class Order extends Model implements Filterable
         return [
             'amount' => 'integer',
             'meta' => 'array',
+            'refunded_at' => 'datetime',
         ];
     }
 
@@ -81,5 +84,31 @@ class Order extends Model implements Filterable
         }
 
         return '$'.number_format($this->amount / 100, 2);
+    }
+
+    /**
+     * Check if the order has been refunded.
+     */
+    public function isRefunded(): bool
+    {
+        return $this->refunded_at !== null;
+    }
+
+    /**
+     * Check if the order is within the refund window (30 days).
+     */
+    public function isWithinRefundWindow(): bool
+    {
+        return $this->created_at->addDays(30)->isFuture();
+    }
+
+    /**
+     * Check if the order can be refunded.
+     */
+    public function canBeRefunded(): bool
+    {
+        return ! $this->isRefunded()
+            && $this->provider === 'stripe'
+            && $this->amount > 0;
     }
 }

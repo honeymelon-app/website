@@ -68,10 +68,11 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
-        Route::resource('releases', ReleaseController::class)->only(['index', 'show']);
+        Route::resource('releases', ReleaseController::class)->only(['index', 'show', 'destroy']);
         Route::resource('artifacts', ArtifactController::class)->only(['index', 'show', 'destroy']);
         Route::resource('licenses', LicenseController::class)->only(['index', 'show', 'store']);
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
+        Route::post('orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
     });
 });
 

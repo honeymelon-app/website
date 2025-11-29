@@ -22,6 +22,8 @@ return new class extends Migration
             $table->bigInteger('amount')->nullable();
             $table->string('currency', 8)->nullable();
             $table->json('meta')->nullable();
+            $table->string('refund_id', 64)->nullable()->index();
+            $table->timestamp('refunded_at')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

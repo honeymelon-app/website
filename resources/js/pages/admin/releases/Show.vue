@@ -1,4 +1,15 @@
 <script setup lang="ts">
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +27,7 @@ import { dashboard } from '@/routes';
 import releasesRoute from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
 import type { Release, ReleaseArtifact } from '@/types/resources';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import {
     ArrowLeft,
     Calendar,
@@ -26,10 +37,11 @@ import {
     GitCommit,
     Rocket,
     Tag,
+    Trash2,
     User,
 } from 'lucide-vue-next';
 import { marked } from 'marked';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Props {
     release: Release;
@@ -108,6 +120,25 @@ const hasArtifacts = computed(() => {
 const publishRelease = () => {
     console.log('Publish release:', props.release.version);
     // Implement publish logic
+};
+
+// Delete release functionality
+const deleteDialogOpen = ref(false);
+const isDeleting = ref(false);
+
+const deleteForm = useForm({});
+
+const deleteRelease = () => {
+    isDeleting.value = true;
+    deleteForm.delete(releasesRoute.destroy(props.release.id).url, {
+        preserveScroll: true,
+        onSuccess: () => {
+            deleteDialogOpen.value = false;
+        },
+        onFinish: () => {
+            isDeleting.value = false;
+        },
+    });
 };
 </script>
 
@@ -234,6 +265,44 @@ const publishRelease = () => {
                         <Rocket class="mr-2 h-4 w-4" />
                         Publish
                     </Button>
+                    <AlertDialog v-model:open="deleteDialogOpen">
+                        <AlertDialogTrigger as-child>
+                            <Button variant="destructive" size="sm">
+                                <Trash2 class="mr-2 h-4 w-4" />
+                                Delete
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle
+                                    >Delete Release
+                                    {{ release.version }}?</AlertDialogTitle
+                                >
+                                <AlertDialogDescription>
+                                    <p class="mb-3">
+                                        This will permanently delete this
+                                        release and all associated artifacts.
+                                    </p>
+                                    <p class="font-medium text-destructive">
+                                        The GitHub release and tag will also be
+                                        deleted. This action cannot be undone.
+                                    </p>
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel :disabled="isDeleting"
+                                    >Cancel</AlertDialogCancel
+                                >
+                                <AlertDialogAction
+                                    :disabled="isDeleting"
+                                    class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    @click="deleteRelease"
+                                >
+                                    {{ isDeleting ? 'Deleting...' : 'Delete' }}
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
 

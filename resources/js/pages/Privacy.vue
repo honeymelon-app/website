@@ -92,8 +92,8 @@ import { Head } from '@inertiajs/vue3';
                                 patterns
                             </li>
                             <li>
-                                <strong>Purchase Information:</strong> When
-                                you purchase a license, payment processing is
+                                <strong>Purchase Information:</strong> When you
+                                purchase a license, payment processing is
                                 handled by Stripe according to their privacy
                                 policy
                             </li>
@@ -119,9 +119,9 @@ import { Head } from '@inertiajs/vue3';
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>
-                                <strong>Stripe:</strong> Payment processing
-                                for license purchases (subject to Stripe's
-                                Privacy Policy)
+                                <strong>Stripe:</strong> Payment processing for
+                                license purchases (subject to Stripe's Privacy
+                                Policy)
                             </li>
                         </ul>
                         <p
@@ -182,8 +182,8 @@ import { Head } from '@inertiajs/vue3';
                                 your license and associated data at any time
                             </li>
                             <li>
-                                <strong>Portability:</strong> Request export
-                                of your license information
+                                <strong>Portability:</strong> Request export of
+                                your license information
                             </li>
                         </ul>
                     </section>

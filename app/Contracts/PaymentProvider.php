@@ -15,6 +15,13 @@ interface PaymentProvider
     public function createCheckoutSession(array $data): array;
 
     /**
+     * Process a refund for a payment.
+     *
+     * @return array{refund_id: string, status: string, amount: int}
+     */
+    public function refund(string $paymentId, ?int $amount = null, ?string $reason = null): array;
+
+    /**
      * Verify webhook signature.
      */
     public function verifyWebhookSignature(string $payload, string $signature): bool;

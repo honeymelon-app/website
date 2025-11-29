@@ -7,6 +7,7 @@ namespace App\Services\PaymentProviders;
 use App\Contracts\PaymentProvider;
 use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
+use Stripe\Refund;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
@@ -53,6 +54,51 @@ class StripePaymentProvider implements PaymentProvider
         } catch (\Exception $e) {
             throw new \RuntimeException(
                 "Failed to create Stripe checkout session: {$e->getMessage()}",
+                (int) $e->getCode(),
+                $e
+            );
+        }
+    }
+
+    /**
+     * Process a refund for a payment.
+     *
+     * @return array{refund_id: string, status: string, amount: int}
+     */
+    public function refund(string $paymentId, ?int $amount = null, ?string $reason = null): array
+    {
+        try {
+            // If the paymentId is a checkout session ID, get the payment intent
+            $paymentIntentId = $paymentId;
+            if (str_starts_with($paymentId, 'cs_')) {
+                $session = Session::retrieve($paymentId);
+                $paymentIntentId = $session->payment_intent;
+            }
+
+            $refundData = [
+                'payment_intent' => $paymentIntentId,
+            ];
+
+            if ($amount !== null) {
+                $refundData['amount'] = $amount;
+            }
+
+            if ($reason !== null) {
+                // Stripe only accepts: duplicate, fraudulent, requested_by_customer
+                $refundData['reason'] = 'requested_by_customer';
+                $refundData['metadata'] = ['admin_reason' => $reason];
+            }
+
+            $refund = Refund::create($refundData);
+
+            return [
+                'refund_id' => $refund->id,
+                'status' => $refund->status,
+                'amount' => $refund->amount,
+            ];
+        } catch (\Exception $e) {
+            throw new \RuntimeException(
+                "Failed to process Stripe refund: {$e->getMessage()}",
                 (int) $e->getCode(),
                 $e
             );

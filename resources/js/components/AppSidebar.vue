@@ -14,11 +14,13 @@ import {
 import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
 import licenses from '@/routes/admin/licenses';
+import orders from '@/routes/admin/orders';
 import releases from '@/routes/admin/releases';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import {
     BookOpen,
+    CreditCard,
     FileArchive,
     Folder,
     LayoutGrid,
@@ -37,6 +39,11 @@ const mainNavItems: NavItem[] = [
         title: 'Releases',
         href: releases.index(),
         icon: Package,
+    },
+    {
+        title: 'Orders',
+        href: orders.index(),
+        icon: CreditCard,
     },
     {
         title: 'Licenses',

@@ -83,4 +83,69 @@ class GithubService
         // For now, return null and let the caller handle it
         return null;
     }
+
+    /**
+     * Delete a GitHub release by tag.
+     *
+     * @throws \Illuminate\Http\Client\RequestException
+     */
+    public function deleteRelease(string $tag): bool
+    {
+        // First, get the release ID from the tag
+        $response = $this->client()
+            ->get("/repos/{$this->owner}/{$this->repo}/releases/tags/{$tag}");
+
+        if ($response->status() === 404) {
+            // Release doesn't exist, nothing to delete
+            return true;
+        }
+
+        $response->throw();
+        $releaseId = $response->json('id');
+
+        // Delete the release
+        $this->client()
+            ->delete("/repos/{$this->owner}/{$this->repo}/releases/{$releaseId}")
+            ->throw();
+
+        return true;
+    }
+
+    /**
+     * Delete a GitHub tag (git ref).
+     *
+     * @throws \Illuminate\Http\Client\RequestException
+     */
+    public function deleteTag(string $tag): bool
+    {
+        $ref = "tags/{$tag}";
+
+        $response = $this->client()
+            ->delete("/repos/{$this->owner}/{$this->repo}/git/refs/{$ref}");
+
+        // 404 means tag doesn't exist, which is fine
+        if ($response->status() === 404) {
+            return true;
+        }
+
+        $response->throw();
+
+        return true;
+    }
+
+    /**
+     * Delete both the GitHub release and its tag.
+     *
+     * @throws \Illuminate\Http\Client\RequestException
+     */
+    public function deleteReleaseAndTag(string $tag): bool
+    {
+        // Delete release first (if it exists)
+        $this->deleteRelease($tag);
+
+        // Then delete the tag
+        $this->deleteTag($tag);
+
+        return true;
+    }
 }
