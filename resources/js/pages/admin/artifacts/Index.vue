@@ -243,8 +243,8 @@ const columns: Column<ArtifactWithSync>[] = [
         render: (row: ArtifactWithSync) => {
             return row.notarized
                 ? h(ShieldCheck, {
-                    class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
-                })
+                      class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
+                  })
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -548,12 +548,13 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="selectedArtifact.source === 'github'
+                                :variant="
+                                    selectedArtifact.source === 'github'
                                         ? 'default'
                                         : selectedArtifact.source === 'r2'
-                                            ? 'secondary'
-                                            : 'outline'
-                                    "
+                                          ? 'secondary'
+                                          : 'outline'
+                                "
                                 class="uppercase"
                             >
                                 {{ selectedArtifact.source }}
@@ -586,10 +587,11 @@ const handlePageChange = (page: number): void => {
                                 class="h-4 w-4 text-green-600 dark:text-green-500"
                             />
                             <span
-                                :class="selectedArtifact.notarized
+                                :class="
+                                    selectedArtifact.notarized
                                         ? 'text-green-600 dark:text-green-500'
                                         : 'text-muted-foreground'
-                                    "
+                                "
                                 class="text-sm"
                             >
                                 {{ selectedArtifact.notarized ? 'Yes' : 'No' }}
@@ -708,7 +710,7 @@ const handlePageChange = (page: number): void => {
                             variant="destructive"
                             @click="
                                 isDetailsDialogOpen = false;
-                            confirmDelete(selectedArtifact);
+                                confirmDelete(selectedArtifact);
                             "
                         >
                             <Trash2 class="mr-2 h-4 w-4" />
@@ -744,7 +746,7 @@ const handlePageChange = (page: number): void => {
                                 artifactToDelete?.source === 'r2' ||
                                 artifactToDelete?.source === 's3'
                             "
-                            class="block mt-2 font-medium text-destructive"
+                            class="mt-2 block font-medium text-destructive"
                         >
                             This will also delete the file from R2 storage.
                         </span>
