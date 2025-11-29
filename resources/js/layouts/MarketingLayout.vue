@@ -10,12 +10,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { usePage } from '@inertiajs/vue3';
 import { ExternalLink, Menu } from 'lucide-vue-next';
-import { computed } from 'vue';
-
-const page = usePage();
-const auth = computed(() => page.props.auth);
 </script>
 
 <template>
