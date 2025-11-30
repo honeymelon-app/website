@@ -11,6 +11,7 @@ use App\Models\License;
 use App\Models\Order;
 use App\Services\LicenseService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -85,7 +86,35 @@ class LicenseController extends Controller
     public function show(License $license): Response
     {
         return Inertia::render('admin/licenses/Show', [
-            'license' => new LicenseResource($license->load('order')),
+            'license' => (new LicenseResource($license->load('order')))->resolve(),
         ]);
+    }
+
+    /**
+     * Revoke a license manually.
+     */
+    public function revoke(Request $request, License $license, LicenseService $licenseService): RedirectResponse
+    {
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        if (! $license->isActive()) {
+            return redirect()
+                ->route('admin.licenses.show', $license)
+                ->with('error', 'License is already '.$license->status->label().'.');
+        }
+
+        try {
+            $licenseService->revoke($license);
+
+            return redirect()
+                ->route('admin.licenses.show', $license)
+                ->with('success', 'License has been revoked successfully.');
+        } catch (\Exception $e) {
+            return redirect()
+                ->route('admin.licenses.show', $license)
+                ->with('error', 'Failed to revoke license: '.$e->getMessage());
+        }
     }
 }

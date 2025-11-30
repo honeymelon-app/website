@@ -60,6 +60,11 @@ export interface License {
     status: string;
     max_major_version: number;
     issued_at: string | null;
+    activated_at: string | null;
+    activation_count: number;
+    device_id: string | null;
+    is_activated: boolean;
+    can_be_revoked: boolean;
     created_at: string;
 }
 

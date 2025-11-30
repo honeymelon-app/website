@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('releases', ReleaseController::class)->only(['index', 'show', 'destroy']);
         Route::resource('artifacts', ArtifactController::class)->only(['index', 'show', 'destroy']);
         Route::resource('licenses', LicenseController::class)->only(['index', 'show', 'store']);
+        Route::post('licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
         Route::post('orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
     });

@@ -24,6 +24,12 @@ return new class extends Migration
             $table->boolean('can_access_prereleases')->default(true);
             $table->json('meta')->nullable();
             $table->foreignUuid('order_id')->constrained()->cascadeOnDelete();
+
+            // Activation tracking
+            $table->timestamp('activated_at')->nullable();
+            $table->unsignedInteger('activation_count')->default(0);
+            $table->string('device_id', 255)->nullable();
+
             $table->softDeletes();
             $table->timestamps();
         });

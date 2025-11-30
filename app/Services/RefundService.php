@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\LicenseStatus;
 use App\Models\Order;
 use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Support\Facades\DB;
@@ -52,11 +51,9 @@ class RefundService
                 ]),
             ]);
 
-            // Revoke associated license
+            // Revoke associated license - use REFUNDED status for refunds
             if ($order->license) {
-                $order->license->update([
-                    'status' => LicenseStatus::REVOKED,
-                ]);
+                $order->license->markAsRefunded();
             }
 
             return $order->fresh(['license']);

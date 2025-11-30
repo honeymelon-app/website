@@ -92,6 +92,41 @@ import { Head } from '@inertiajs/vue3';
                     <Separator />
 
                     <section>
+                        <h2 class="mb-4 text-2xl font-bold">
+                            License Activation
+                        </h2>
+                        <p
+                            class="mb-4 text-base leading-relaxed text-muted-foreground"
+                        >
+                            Honeymelon requires a one-time online activation:
+                        </p>
+                        <ul class="space-y-2 text-base text-muted-foreground">
+                            <li>
+                                <strong>Internet Required Once:</strong> An
+                                internet connection is required to activate your
+                                license after purchase
+                            </li>
+                            <li>
+                                <strong>Offline After Activation:</strong> After
+                                successful activation, Honeymelon runs fully
+                                offline with no further network requirements
+                            </li>
+                            <li>
+                                <strong>One-Time Activation:</strong> Each
+                                license key can only be activated once; this
+                                cannot be reset or transferred
+                            </li>
+                            <li>
+                                <strong>No Remote Deactivation:</strong> We do
+                                not remotely disable or revoke activated
+                                installations
+                            </li>
+                        </ul>
+                    </section>
+
+                    <Separator />
+
+                    <section>
                         <h2 class="mb-4 text-2xl font-bold">Restrictions</h2>
                         <p
                             class="mb-4 text-base leading-relaxed text-muted-foreground"
@@ -198,8 +233,32 @@ import { Head } from '@inertiajs/vue3';
                         >
                             We offer a 30-day money-back guarantee. If you're
                             not satisfied with Honeymelon, contact us within 30
-                            days of purchase for a full refund. Refund requests
-                            must include:
+                            days of purchase for a full refund.
+                        </p>
+                        <p
+                            class="mb-4 text-base leading-relaxed text-muted-foreground"
+                        >
+                            <strong>Important:</strong> Because license keys can
+                            only be activated once, refunds are only available
+                            for licenses that have not yet been activated, or
+                            within the 30-day refund window. We cannot reissue
+                            or reset activated licenses.
+                        </p>
+                        <p
+                            class="mb-4 text-base leading-relaxed text-muted-foreground"
+                        >
+                            <strong>Activated License Refunds:</strong> If you
+                            request a refund after activating your license, we
+                            will process the refund, but please note that the
+                            activated copy will continue to function—we do not
+                            remotely disable activated installations. Your
+                            license will be marked as refunded and cannot be
+                            re-activated on another device.
+                        </p>
+                        <p
+                            class="mb-4 text-base leading-relaxed text-muted-foreground"
+                        >
+                            Refund requests must include:
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>Your purchase email and license key</li>
@@ -211,8 +270,7 @@ import { Head } from '@inertiajs/vue3';
                         <p
                             class="mt-4 text-base leading-relaxed text-muted-foreground"
                         >
-                            Refunds are processed within 5-7 business days. Your
-                            license will be deactivated upon refund.
+                            Refunds are processed within 5-7 business days.
                         </p>
                     </section>
 

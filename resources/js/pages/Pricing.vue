@@ -97,7 +97,7 @@ const features = [
     'Lifetime license - no subscriptions',
     'All v1.x updates included free',
     'Privacy-first, no data collection',
-    'Works 100% offline',
+    'Works offline after one-time activation',
     'Native Apple Silicon performance',
     'Unlimited conversions',
     'All supported formats included',
@@ -114,8 +114,12 @@ const pricingFaqs = [
         answer: 'Yes! Your license is valid for up to 3 Mac devices that you personally own or control. Perfect for your desktop, laptop, and home office setup.',
     },
     {
+        question: 'Does Honeymelon require an internet connection?',
+        answer: 'Only once. Honeymelon requires a one-time internet connection to activate your license. After that, the app runs fully offline with no further network calls—no telemetry, no license checks, nothing.',
+    },
+    {
         question: 'What if I want a refund?',
-        answer: "We offer a 30-day money-back guarantee, no questions asked. If Honeymelon doesn't work for you, simply contact us for a full refund.",
+        answer: "We offer a 30-day money-back guarantee, no questions asked. If Honeymelon doesn't work for you, simply contact us for a full refund. Note: Each license can only be activated once—if you've already activated, the installed copy continues to work, but the license cannot be re-activated elsewhere.",
     },
 ];
 
@@ -123,7 +127,7 @@ const comparisonFeatures = [
     { feature: 'Subscription Required', us: false, them: true },
     { feature: 'Data Collection', us: false, them: true },
     { feature: 'Cloud Processing', us: false, them: true },
-    { feature: 'Internet Required', us: false, them: true },
+    { feature: 'Ongoing Internet Required', us: false, them: true },
     { feature: 'Buy Once, Own Forever', us: true, them: false },
     { feature: 'Privacy Guaranteed', us: true, them: false },
     { feature: 'Native Performance', us: true, them: false },

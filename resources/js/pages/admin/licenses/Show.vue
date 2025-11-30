@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { PageHeader } from '@/components/admin';
+import { ConfirmDialog, PageHeader } from '@/components/admin';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -12,14 +13,24 @@ import { dashboard } from '@/routes';
 import licenses from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
 import type { License } from '@/types/resources';
-import { Head } from '@inertiajs/vue3';
-import { Check, Copy } from 'lucide-vue-next';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
+import {
+    AlertTriangle,
+    Check,
+    CheckCircle,
+    Copy,
+    ShieldOff,
+    Smartphone,
+} from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 interface Props {
     license: License;
 }
 
 const props = defineProps<Props>();
+
+const page = usePage();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -38,11 +49,35 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const { copied: isCopied, copy: copyToClipboard } = useCopyToClipboard();
 
+// Flash messages
+const successMessage = computed(
+    () => page.props.flash?.success as string | undefined,
+);
+const errorMessage = computed(
+    () => page.props.flash?.error as string | undefined,
+);
+
+// Revoke dialog state
+const showRevokeDialog = ref(false);
+const revokeForm = useForm({
+    reason: '',
+});
+
 const formatDate = (dateString: string | null): string => {
     if (!dateString) {
         return 'Not issued';
     }
     return formatDateTime(dateString);
+};
+
+const processRevoke = (): void => {
+    revokeForm.post(`/admin/licenses/${props.license.id}/revoke`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showRevokeDialog.value = false;
+            revokeForm.reset();
+        },
+    });
 };
 </script>
 
@@ -54,6 +89,70 @@ const formatDate = (dateString: string | null): string => {
             class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
+                <!-- Flash Messages -->
+                <div
+                    v-if="successMessage"
+                    class="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950"
+                >
+                    <CheckCircle
+                        class="h-5 w-5 text-green-600 dark:text-green-400"
+                    />
+                    <p
+                        class="text-sm font-medium text-green-800 dark:text-green-200"
+                    >
+                        {{ successMessage }}
+                    </p>
+                </div>
+                <div
+                    v-if="errorMessage"
+                    class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
+                >
+                    <AlertTriangle
+                        class="h-5 w-5 text-red-600 dark:text-red-400"
+                    />
+                    <p
+                        class="text-sm font-medium text-red-800 dark:text-red-200"
+                    >
+                        {{ errorMessage }}
+                    </p>
+                </div>
+
+                <!-- Revoked/Refunded Banner -->
+                <div
+                    v-if="license.status === 'revoked'"
+                    class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
+                >
+                    <ShieldOff
+                        class="h-5 w-5 text-red-600 dark:text-red-400"
+                    />
+                    <div>
+                        <p class="font-medium text-red-800 dark:text-red-200">
+                            This license has been revoked
+                        </p>
+                        <p class="text-sm text-red-700 dark:text-red-300">
+                            The license can no longer be used or activated.
+                        </p>
+                    </div>
+                </div>
+                <div
+                    v-if="license.status === 'refunded'"
+                    class="flex items-center gap-3 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-950"
+                >
+                    <ShieldOff
+                        class="h-5 w-5 text-yellow-600 dark:text-yellow-400"
+                    />
+                    <div>
+                        <p
+                            class="font-medium text-yellow-800 dark:text-yellow-200"
+                        >
+                            This license has been refunded
+                        </p>
+                        <p class="text-sm text-yellow-700 dark:text-yellow-300">
+                            The associated order was refunded.
+                        </p>
+                    </div>
+                </div>
+
                 <PageHeader
                     title="License Details"
                     description="View license information and status."
@@ -63,6 +162,53 @@ const formatDate = (dateString: string | null): string => {
                         <Badge :variant="getStatusVariant(license.status)">
                             {{ license.status }}
                         </Badge>
+                        <Badge
+                            v-if="license.is_activated"
+                            variant="outline"
+                            class="border-green-500 text-green-600"
+                        >
+                            Activated
+                        </Badge>
+                    </template>
+                    <template #actions>
+                        <ConfirmDialog
+                            v-if="license.can_be_revoked"
+                            v-model:open="showRevokeDialog"
+                            title="Revoke License"
+                            confirm-label="Revoke License"
+                            trigger-label="Revoke License"
+                            :loading="revokeForm.processing"
+                            @confirm="processRevoke"
+                        >
+                            <template #trigger>
+                                <Button variant="destructive" size="sm">
+                                    <ShieldOff class="mr-2 h-4 w-4" />
+                                    Revoke License
+                                </Button>
+                            </template>
+                            <p class="mb-4">
+                                Are you sure you want to revoke this license?
+                            </p>
+                            <ul class="mb-4 list-disc space-y-1 pl-6 text-sm">
+                                <li>
+                                    The license will no longer be valid for
+                                    activation
+                                </li>
+                                <li>
+                                    Already activated installations will
+                                    continue to work
+                                </li>
+                                <li>This action cannot be undone</li>
+                            </ul>
+                            <div class="space-y-2">
+                                <Label for="reason">Reason (optional)</Label>
+                                <Input
+                                    id="reason"
+                                    v-model="revokeForm.reason"
+                                    placeholder="Enter revocation reason..."
+                                />
+                            </div>
+                        </ConfirmDialog>
                     </template>
                 </PageHeader>
 
@@ -139,6 +285,72 @@ const formatDate = (dateString: string | null): string => {
                                 >
                                     {{ license.status }}
                                 </Badge>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Activation Status -->
+                    <Card>
+                        <CardHeader>
+                            <CardTitle class="flex items-center gap-2">
+                                <Smartphone class="h-5 w-5" />
+                                Activation Status
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent class="space-y-4">
+                            <div class="space-y-2">
+                                <Label>Activation Status</Label>
+                                <div class="flex items-center gap-2">
+                                    <Badge
+                                        :variant="
+                                            license.is_activated
+                                                ? 'default'
+                                                : 'secondary'
+                                        "
+                                    >
+                                        {{
+                                            license.is_activated
+                                                ? 'Activated'
+                                                : 'Not Activated'
+                                        }}
+                                    </Badge>
+                                    <span
+                                        v-if="license.activation_count > 0"
+                                        class="text-xs text-muted-foreground"
+                                    >
+                                        ({{ license.activation_count }}
+                                        activation{{
+                                            license.activation_count !== 1
+                                                ? 's'
+                                                : ''
+                                        }})
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div v-if="license.activated_at" class="space-y-2">
+                                <Label>Activated At</Label>
+                                <p class="text-sm">
+                                    {{ formatDate(license.activated_at) }}
+                                </p>
+                            </div>
+
+                            <div v-if="license.device_id" class="space-y-2">
+                                <Label>Device ID</Label>
+                                <code
+                                    class="block rounded bg-muted px-3 py-2 font-mono text-xs break-all"
+                                >
+                                    {{ license.device_id }}
+                                </code>
+                            </div>
+
+                            <div
+                                v-if="!license.is_activated"
+                                class="rounded-lg border border-dashed border-muted-foreground/30 p-4 text-center"
+                            >
+                                <p class="text-sm text-muted-foreground">
+                                    This license has not been activated yet.
+                                </p>
                             </div>
                         </CardContent>
                     </Card>

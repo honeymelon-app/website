@@ -43,8 +43,9 @@ import { Head } from '@inertiajs/vue3';
                         <p
                             class="mb-4 text-base leading-relaxed text-muted-foreground"
                         >
-                            Honeymelon operates entirely offline on your Mac. We
-                            do not collect, transmit, or store:
+                            After your one-time license activation, Honeymelon
+                            operates entirely offline on your Mac. We do not
+                            collect, transmit, or store:
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>Your media files or their contents</li>
@@ -52,7 +53,6 @@ import { Head } from '@inertiajs/vue3';
                             <li>Conversion settings or preferences</li>
                             <li>Usage analytics or telemetry data</li>
                             <li>Crash reports or diagnostic information</li>
-                            <li>Your IP address or device identifiers</li>
                             <li>Any personally identifiable information</li>
                         </ul>
                     </section>
@@ -64,13 +64,21 @@ import { Head } from '@inertiajs/vue3';
                             How Honeymelon Works
                         </h2>
                         <p
-                            class="text-base leading-relaxed text-muted-foreground"
+                            class="mb-4 text-base leading-relaxed text-muted-foreground"
                         >
                             All media conversion happens locally on your Mac
-                            using your device's hardware. Honeymelon never
-                            connects to the internet for conversion tasks and
-                            does not require an internet connection to function.
-                            Your files never leave your device.
+                            using your device's hardware. Your files never leave
+                            your device, and no media data is ever transmitted.
+                        </p>
+                        <p
+                            class="text-base leading-relaxed text-muted-foreground"
+                        >
+                            <strong>One-Time Online Activation:</strong>
+                            Honeymelon requires a one-time internet connection
+                            to activate your license. After successful
+                            activation, the app runs fully offline with no
+                            further network calls for licensing, telemetry, or
+                            any other purpose.
                         </p>
                     </section>
 
@@ -78,32 +86,43 @@ import { Head } from '@inertiajs/vue3';
 
                     <section>
                         <h2 class="mb-4 text-2xl font-bold">
-                            Website Data Collection
+                            License Activation Data
                         </h2>
                         <p
                             class="mb-4 text-base leading-relaxed text-muted-foreground"
                         >
-                            This website (honeymelon.app) collects minimal data:
+                            During the one-time license activation, the
+                            following minimal data is transmitted:
                         </p>
                         <ul class="space-y-2 text-base text-muted-foreground">
                             <li>
-                                <strong>Download Statistics:</strong> We track
-                                the number of downloads to understand usage
-                                patterns
+                                <strong>License Key:</strong> Your purchased
+                                license key for validation
                             </li>
                             <li>
-                                <strong>Purchase Information:</strong> When you
-                                purchase a license, payment processing is
-                                handled by Stripe according to their privacy
-                                policy
+                                <strong>App Version:</strong> The version of
+                                Honeymelon being activated
                             </li>
                             <li>
-                                <strong>License Validation:</strong> When you
-                                activate Honeymelon, your license key is
-                                validated once. We store only the license key
-                                and activation status, no personal information
+                                <strong>Device Identifier:</strong> A random,
+                                privacy-respecting identifier (not derived from
+                                hardware) used solely for one-time activation
+                            </li>
+                            <li>
+                                <strong>IP Address:</strong> Logged
+                                automatically by our servers as part of the HTTP
+                                request (standard web traffic)
                             </li>
                         </ul>
+                        <p
+                            class="mt-4 text-base leading-relaxed text-muted-foreground"
+                        >
+                            <strong>Important:</strong> After activation, the
+                            app stores a local activation token and never
+                            contacts our servers again. We do not perform
+                            periodic license checks, send usage data, or collect
+                            any telemetry.
+                        </p>
                     </section>
 
                     <Separator />

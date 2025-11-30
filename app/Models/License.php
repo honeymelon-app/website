@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\LicenseStatus;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -34,6 +35,9 @@ class License extends Model implements Filterable
         'user_id',
         'product_id',
         'order_id',
+        'activated_at',
+        'activation_count',
+        'device_id',
     ];
 
     /**
@@ -57,6 +61,8 @@ class License extends Model implements Filterable
             'max_major_version' => 'integer',
             'can_access_prereleases' => 'boolean',
             'meta' => 'array',
+            'activated_at' => 'datetime',
+            'activation_count' => 'integer',
         ];
     }
 
@@ -93,11 +99,96 @@ class License extends Model implements Filterable
     }
 
     /**
+     * Scope a query to only include active licenses.
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('status', LicenseStatus::ACTIVE);
+    }
+
+    /**
+     * Scope a query to only include refunded licenses.
+     */
+    public function scopeRefunded(Builder $query): Builder
+    {
+        return $query->where('status', LicenseStatus::REFUNDED);
+    }
+
+    /**
+     * Scope a query to only include revoked licenses.
+     */
+    public function scopeRevoked(Builder $query): Builder
+    {
+        return $query->where('status', LicenseStatus::REVOKED);
+    }
+
+    /**
      * Check if the license is active.
      */
     public function isActive(): bool
     {
         return $this->status === LicenseStatus::ACTIVE;
+    }
+
+    /**
+     * Check if the license has been refunded.
+     */
+    public function isRefunded(): bool
+    {
+        return $this->status === LicenseStatus::REFUNDED;
+    }
+
+    /**
+     * Check if the license has been revoked.
+     */
+    public function isRevoked(): bool
+    {
+        return $this->status === LicenseStatus::REVOKED;
+    }
+
+    /**
+     * Check if the license has already been activated.
+     */
+    public function isActivated(): bool
+    {
+        return $this->activated_at !== null;
+    }
+
+    /**
+     * Check if the license can be activated.
+     * Must be active and not already activated.
+     */
+    public function canActivate(): bool
+    {
+        return $this->status->allowsActivation() && ! $this->isActivated();
+    }
+
+    /**
+     * Mark the license as activated.
+     */
+    public function markAsActivated(?string $deviceId = null): void
+    {
+        $this->update([
+            'activated_at' => now(),
+            'activation_count' => $this->activation_count + 1,
+            'device_id' => $deviceId,
+        ]);
+    }
+
+    /**
+     * Mark the license as refunded.
+     */
+    public function markAsRefunded(): void
+    {
+        $this->update(['status' => LicenseStatus::REFUNDED]);
+    }
+
+    /**
+     * Mark the license as revoked.
+     */
+    public function markAsRevoked(): void
+    {
+        $this->update(['status' => LicenseStatus::REVOKED]);
     }
 
     /**
