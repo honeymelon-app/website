@@ -22,16 +22,15 @@ Download Honeymelon
 
 ## Your License Details
 
-| | |
-|:--|:--|
-| **Version** | Honeymelon v{{ $maxMajorVersion }}.x (all updates included) |
-| **Devices** | Up to 3 Macs you own |
-| **Support** | Email support included |
+- **Version:** Honeymelon v{{ $maxMajorVersion }}.x (all updates included)
+- **Devices:** Up to 3 Macs you own
+- **Support:** Email support included
 
 ## Need Help?
 
 Check out our [documentation](https://docs.honeymelon.app) or contact us at [support@honeymelon.app](mailto:support@honeymelon.app).
 
-Happy converting!<br>
+Happy converting!
+
 **The Honeymelon Team**
 </x-mail::message>
