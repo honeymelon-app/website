@@ -14,8 +14,6 @@ class TwoFactorAuthenticationController extends Controller
     public function show(): Response
     {
         return Inertia::render('settings/TwoFactor', [
-            'twoFactorEnabled' => false,
-            'requiresConfirmation' => false,
             'message' => 'Two-factor authentication is managed through Cerberus IAM.',
         ]);
     }

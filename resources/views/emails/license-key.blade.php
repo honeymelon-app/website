@@ -1,12 +1,12 @@
 <x-mail::message>
-# Welcome to Honeymelon! 🍈
+# Welcome to Honeymelon!
 
 Thank you for your purchase! Your license key is ready below. Please keep this email safe.
 
 ## Your License Key
 
 <x-mail::panel>
-<code style="font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 14px; word-break: break-all; letter-spacing: 0.5px;">{{ $licenseKey }}</code>
+{{ $licenseKey }}
 </x-mail::panel>
 
 ## Getting Started
@@ -23,7 +23,7 @@ Download Honeymelon
 ## Your License Details
 
 - **Version:** Honeymelon v{{ $maxMajorVersion }}.x (all updates included)
-- **Devices:** Up to 3 Macs you own
+- **Devices:** Unlimited Macs you own
 - **Support:** Email support included
 
 ## Need Help?
@@ -32,5 +32,6 @@ Check out our [documentation](https://docs.honeymelon.app) or contact us at [sup
 
 Happy converting!
 
-**The Honeymelon Team**
+Thanks,<br>
+{{ config('app.name') }}
 </x-mail::message>

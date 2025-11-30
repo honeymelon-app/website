@@ -11,6 +11,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatDate } from '@/lib/formatters';
+import { getChannelVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import releasesRoute from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
@@ -36,7 +38,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Helper to format file size
 const columns: Column<Release>[] = [
     {
         key: 'version',
@@ -56,10 +57,9 @@ const columns: Column<Release>[] = [
         label: 'Channel',
         headerClass: 'w-[100px]',
         render: (row: Release) => {
-            const variant = row.channel === 'stable' ? 'default' : 'secondary';
             return h(
                 Badge,
-                { variant, class: 'capitalize' },
+                { variant: getChannelVariant(row.channel), class: 'capitalize' },
                 { default: () => row.channel },
             );
         },
@@ -91,16 +91,7 @@ const columns: Column<Release>[] = [
                     'Not published',
                 );
             }
-            const date = new Date(row.published_at);
-            return h(
-                'div',
-                { class: 'text-sm' },
-                date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                }),
-            );
+            return h('div', { class: 'text-sm' }, formatDate(row.published_at));
         },
     },
     {
@@ -108,18 +99,13 @@ const columns: Column<Release>[] = [
         label: 'Created',
         headerClass: 'w-[140px]',
         render: (row: Release) => {
-            const date = new Date(row.created_at);
             return h(
                 'time',
                 {
                     datetime: row.created_at,
                     class: 'text-sm text-muted-foreground',
                 },
-                date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                }),
+                formatDate(row.created_at),
             );
         },
     },

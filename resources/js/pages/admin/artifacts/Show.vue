@@ -1,14 +1,5 @@
 <script setup lang="ts">
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { ConfirmDialog, PageHeader } from '@/components/admin';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +10,8 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatDateTime, formatFileSize, truncateId } from '@/lib/formatters';
+import { getSourceVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
 import releases from '@/routes/admin/releases';
@@ -27,14 +20,12 @@ import type { Artifact, Release } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import {
     AlertTriangle,
-    ArrowLeft,
     Cloud,
     Download,
     FileArchive,
     Github,
     Hash,
     ShieldCheck,
-    Trash2,
     XCircle,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -70,43 +61,14 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
     },
     {
         title:
-            props.artifact.filename ??
-            props.artifact.id?.substring(0, 8) ??
-            'Artifact',
+            props.artifact.filename ?? truncateId(props.artifact.id),
         href: artifacts.show(props.artifact.id).url,
     },
 ]);
 
-const showDeleteDialog = ref(false);
-
-const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-};
-
 const formattedCreatedDate = computed(() => {
-    const date = new Date(props.artifact.created_at);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    return formatDateTime(props.artifact.created_at);
 });
-
-const sourceVariantMap: Record<string, 'default' | 'secondary' | 'outline'> = {
-    github: 'default',
-    r2: 'secondary',
-    s3: 'outline',
-};
-
-const goBack = () => {
-    router.visit(artifacts.index().url);
-};
 
 const downloadArtifact = () => {
     const url = props.artifact.download_url ?? props.artifact.url;
@@ -123,20 +85,19 @@ const viewRelease = () => {
     }
 };
 
-const confirmDelete = () => {
-    showDeleteDialog.value = true;
-};
+const showDeleteDialog = ref(false);
+const isDeleting = ref(false);
 
 const handleDelete = () => {
+    isDeleting.value = true;
     router.delete(artifacts.destroy(props.artifact.id).url, {
         onSuccess: () => {
             showDeleteDialog.value = false;
         },
+        onFinish: () => {
+            isDeleting.value = false;
+        },
     });
-};
-
-const cancelDelete = () => {
-    showDeleteDialog.value = false;
 };
 </script>
 
@@ -149,28 +110,14 @@ const cancelDelete = () => {
         >
             <div class="flex flex-col gap-6">
                 <!-- Header -->
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex flex-col gap-2">
-                        <div class="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                @click="goBack"
-                                class="h-8 w-8"
-                            >
-                                <ArrowLeft class="h-4 w-4" />
-                            </Button>
-                            <h3 class="text-2xl font-semibold tracking-tight">
-                                {{ artifact.filename ?? 'Artifact Details' }}
-                            </h3>
-                        </div>
-                        <p class="text-sm text-muted-foreground">
-                            View artifact details and checksums.
-                        </p>
-                    </div>
-                    <div class="flex gap-2">
+                <PageHeader
+                    :title="artifact.filename ?? 'Artifact Details'"
+                    description="View artifact details and checksums."
+                    :back-url="artifacts.index().url"
+                >
+                    <template #badges>
                         <Badge
-                            :variant="sourceVariantMap[artifact.source]"
+                            :variant="getSourceVariant(artifact.source)"
                             class="uppercase"
                         >
                             {{ artifact.source }}
@@ -183,24 +130,37 @@ const cancelDelete = () => {
                             <ShieldCheck class="h-3 w-3" />
                             Notarized
                         </Badge>
+                    </template>
+                    <template #actions>
                         <Button
-                            @click="downloadArtifact"
                             size="sm"
                             :disabled="!artifact.download_url && !artifact.url"
+                            @click="downloadArtifact"
                         >
                             <Download class="mr-2 h-4 w-4" />
                             Download
                         </Button>
-                        <Button
-                            variant="destructive"
-                            size="sm"
-                            @click="confirmDelete"
+                        <ConfirmDialog
+                            v-model:open="showDeleteDialog"
+                            title="Delete Artifact"
+                            confirm-label="Delete"
+                            trigger-label="Delete"
+                            :loading="isDeleting"
+                            @confirm="handleDelete"
                         >
-                            <Trash2 class="mr-2 h-4 w-4" />
-                            Delete
-                        </Button>
-                    </div>
-                </div>
+                            <p>
+                                Are you sure you want to delete "{{ artifact.filename }}"?
+                            </p>
+                            <p
+                                v-if="artifact.source === 'r2' || artifact.source === 's3'"
+                                class="mt-2 font-medium text-destructive"
+                            >
+                                This will also delete the file from R2 storage.
+                            </p>
+                            <p class="mt-2">This action cannot be undone.</p>
+                        </ConfirmDialog>
+                    </template>
+                </PageHeader>
 
                 <!-- Storage Status Banner -->
                 <div
@@ -472,43 +432,5 @@ const cancelDelete = () => {
                 </Card>
             </div>
         </div>
-
-        <!-- Delete Confirmation Dialog -->
-        <AlertDialog
-            :open="showDeleteDialog"
-            @update:open="showDeleteDialog = $event"
-        >
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Artifact</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Are you sure you want to delete "{{
-                            artifact.filename
-                        }}"?
-                        <span
-                            v-if="
-                                artifact.source === 'r2' ||
-                                artifact.source === 's3'
-                            "
-                            class="mt-2 block font-medium text-destructive"
-                        >
-                            This will also delete the file from R2 storage.
-                        </span>
-                        This action cannot be undone.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel @click="cancelDelete">
-                        Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                        @click="handleDelete"
-                        class="bg-destructive hover:bg-destructive/90"
-                    >
-                        Delete
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
     </AppLayout>
 </template>

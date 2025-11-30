@@ -1,15 +1,5 @@
 <script setup lang="ts">
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { ConfirmDialog, PageHeader } from '@/components/admin';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,13 +13,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatDateTime, formatFileSize } from '@/lib/formatters';
 import { dashboard } from '@/routes';
 import releasesRoute from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
 import type { Release, ReleaseArtifact } from '@/types/resources';
-import { Head, router, useForm } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 import {
-    ArrowLeft,
     Calendar,
     ChevronDown,
     Download,
@@ -37,7 +27,6 @@ import {
     GitCommit,
     Rocket,
     Tag,
-    Trash2,
     User,
 } from 'lucide-vue-next';
 import { marked } from 'marked';
@@ -72,40 +61,15 @@ const parsedNotes = computed(() => {
 
 const formattedPublishedDate = computed(() => {
     if (!props.release.published_at) return 'Not published';
-    const date = new Date(props.release.published_at);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    return formatDateTime(props.release.published_at);
 });
 
 const formattedCreatedDate = computed(() => {
     if (!props.release.created_at) return 'N/A';
     const date = new Date(props.release.created_at);
     if (isNaN(date.getTime())) return 'N/A';
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    return formatDateTime(props.release.created_at);
 });
-
-const goBack = () => {
-    router.visit(releasesRoute.index().url);
-};
-
-const formatFileSize = (bytes: number | null): string => {
-    if (!bytes || bytes === 0) return 'N/A';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-};
 
 const downloadArtifact = (artifact: ReleaseArtifact) => {
     if (artifact.download_url) {
@@ -148,75 +112,57 @@ const deleteRelease = () => {
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 p-6">
             <!-- Header -->
-            <div class="flex items-start justify-between gap-4">
-                <div class="flex items-center gap-4">
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        @click="goBack"
-                        class="h-9 w-9"
+            <PageHeader
+                :title="release.version"
+                :back-url="releasesRoute.index().url"
+            >
+                <template #title>
+                    <span class="font-mono text-3xl font-bold tracking-tight">
+                        {{ release.version }}
+                    </span>
+                </template>
+                <template #badges>
+                    <Badge
+                        :variant="release.channel === 'stable' ? 'default' : 'secondary'"
+                        class="capitalize"
                     >
-                        <ArrowLeft class="h-4 w-4" />
-                    </Button>
-                    <div class="flex flex-col gap-2">
-                        <div class="flex items-center gap-2">
-                            <h1
-                                class="font-mono text-3xl font-bold tracking-tight"
-                            >
-                                {{ release.version }}
-                            </h1>
-                            <Badge
-                                :variant="
-                                    release.channel === 'stable'
-                                        ? 'default'
-                                        : 'secondary'
-                                "
-                                class="capitalize"
-                            >
-                                {{ release.channel }}
-                            </Badge>
-                            <Badge v-if="release.major" variant="destructive">
-                                Major
-                            </Badge>
-                            <Badge
-                                v-if="!release.published_at"
-                                variant="outline"
-                            >
-                                Unpublished
-                            </Badge>
+                        {{ release.channel }}
+                    </Badge>
+                    <Badge v-if="release.major" variant="destructive">
+                        Major
+                    </Badge>
+                    <Badge v-if="!release.published_at" variant="outline">
+                        Unpublished
+                    </Badge>
+                </template>
+                <template #description>
+                    <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                        <div class="flex items-center gap-1.5">
+                            <Tag class="h-3.5 w-3.5" />
+                            <span class="font-mono">{{ release.tag }}</span>
                         </div>
-                        <!-- Metadata badges row -->
-                        <div
-                            class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
-                        >
-                            <div class="flex items-center gap-1.5">
-                                <Tag class="h-3.5 w-3.5" />
-                                <span class="font-mono">{{ release.tag }}</span>
-                            </div>
+                        <Separator orientation="vertical" class="h-4" />
+                        <div class="flex items-center gap-1.5">
+                            <GitCommit class="h-3.5 w-3.5" />
+                            <span class="font-mono">{{
+                                release.commit_hash?.substring(0, 8) ?? 'N/A'
+                            }}</span>
+                        </div>
+                        <Separator orientation="vertical" class="h-4" />
+                        <div class="flex items-center gap-1.5">
+                            <Calendar class="h-3.5 w-3.5" />
+                            <span>{{ formattedPublishedDate }}</span>
+                        </div>
+                        <template v-if="release.created_by">
                             <Separator orientation="vertical" class="h-4" />
                             <div class="flex items-center gap-1.5">
-                                <GitCommit class="h-3.5 w-3.5" />
-                                <span class="font-mono">{{
-                                    release.commit_hash?.substring(0, 8) ??
-                                    'N/A'
-                                }}</span>
+                                <User class="h-3.5 w-3.5" />
+                                <span>{{ release.created_by }}</span>
                             </div>
-                            <Separator orientation="vertical" class="h-4" />
-                            <div class="flex items-center gap-1.5">
-                                <Calendar class="h-3.5 w-3.5" />
-                                <span>{{ formattedPublishedDate }}</span>
-                            </div>
-                            <template v-if="release.created_by">
-                                <Separator orientation="vertical" class="h-4" />
-                                <div class="flex items-center gap-1.5">
-                                    <User class="h-3.5 w-3.5" />
-                                    <span>{{ release.created_by }}</span>
-                                </div>
-                            </template>
-                        </div>
+                        </template>
                     </div>
-                </div>
-                <div class="flex items-center gap-2">
+                </template>
+                <template #actions>
                     <DropdownMenu v-if="hasArtifacts">
                         <DropdownMenuTrigger as-child>
                             <Button variant="outline" size="sm">
@@ -232,28 +178,21 @@ const deleteRelease = () => {
                                 v-for="artifact in release.artifacts"
                                 :key="artifact.id"
                                 :disabled="!artifact.download_url"
-                                @click="downloadArtifact(artifact)"
                                 class="flex items-center justify-between"
+                                @click="downloadArtifact(artifact)"
                             >
                                 <div class="flex items-center gap-2">
                                     <FileArchive class="h-4 w-4" />
                                     <div class="flex flex-col">
-                                        <span class="text-sm">{{
-                                            artifact.platform
-                                        }}</span>
-                                        <span
-                                            class="text-xs text-muted-foreground"
-                                            >{{
-                                                formatFileSize(artifact.size)
-                                            }}</span
-                                        >
+                                        <span class="text-sm">{{ artifact.platform }}</span>
+                                        <span class="text-xs text-muted-foreground">
+                                            {{ formatFileSize(artifact.size) }}
+                                        </span>
                                     </div>
                                 </div>
-                                <Badge
-                                    variant="outline"
-                                    class="text-xs uppercase"
-                                    >{{ artifact.source }}</Badge
-                                >
+                                <Badge variant="outline" class="text-xs uppercase">
+                                    {{ artifact.source }}
+                                </Badge>
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -265,46 +204,23 @@ const deleteRelease = () => {
                         <Rocket class="mr-2 h-4 w-4" />
                         Publish
                     </Button>
-                    <AlertDialog v-model:open="deleteDialogOpen">
-                        <AlertDialogTrigger as-child>
-                            <Button variant="destructive" size="sm">
-                                <Trash2 class="mr-2 h-4 w-4" />
-                                Delete
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                                <AlertDialogTitle
-                                    >Delete Release
-                                    {{ release.version }}?</AlertDialogTitle
-                                >
-                                <AlertDialogDescription>
-                                    <p class="mb-3">
-                                        This will permanently delete this
-                                        release and all associated artifacts.
-                                    </p>
-                                    <p class="font-medium text-destructive">
-                                        The GitHub release and tag will also be
-                                        deleted. This action cannot be undone.
-                                    </p>
-                                </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                                <AlertDialogCancel :disabled="isDeleting"
-                                    >Cancel</AlertDialogCancel
-                                >
-                                <AlertDialogAction
-                                    :disabled="isDeleting"
-                                    class="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                    @click="deleteRelease"
-                                >
-                                    {{ isDeleting ? 'Deleting...' : 'Delete' }}
-                                </AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </div>
-            </div>
+                    <ConfirmDialog
+                        v-model:open="deleteDialogOpen"
+                        :title="`Delete Release ${release.version}?`"
+                        confirm-label="Delete"
+                        trigger-label="Delete"
+                        :loading="isDeleting"
+                        @confirm="deleteRelease"
+                    >
+                        <p class="mb-3">
+                            This will permanently delete this release and all associated artifacts.
+                        </p>
+                        <p class="font-medium text-destructive">
+                            The GitHub release and tag will also be deleted. This action cannot be undone.
+                        </p>
+                    </ConfirmDialog>
+                </template>
+            </PageHeader>
 
             <Separator />
 

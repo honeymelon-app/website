@@ -9,19 +9,15 @@ import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface Props {
-    requiresConfirmation?: boolean;
-    twoFactorEnabled?: boolean;
     message?: string;
 }
 
 withDefaults(defineProps<Props>(), {
-    requiresConfirmation: false,
-    twoFactorEnabled: false,
     message: 'Two-factor authentication is managed through Cerberus IAM.',
 });
 
 const page = usePage<AppPageProps>();
-const securityUrl = computed(() => page.props.cerberus.securityUrl);
+const securityUrl = computed(() => page.props.cerberus?.securityUrl);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

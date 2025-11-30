@@ -27,6 +27,8 @@ import {
     TooltipTrigger,
 } from '@/components/ui/tooltip';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatDate, formatFileSize } from '@/lib/formatters';
+import { getSourceVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import artifactsRoute from '@/routes/admin/artifacts';
 import type { BreadcrumbItem } from '@/types';
@@ -75,15 +77,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Helper to format file size
-const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
-};
-
 // Column definitions
 const columns: Column<ArtifactWithSync>[] = [
     {
@@ -120,18 +113,10 @@ const columns: Column<ArtifactWithSync>[] = [
         label: 'Source',
         headerClass: 'w-[100px]',
         render: (row: ArtifactWithSync) => {
-            const variantMap: Record<
-                string,
-                'default' | 'secondary' | 'outline'
-            > = {
-                github: 'default',
-                r2: 'secondary',
-                s3: 'outline',
-            };
             return h(
                 Badge,
                 {
-                    variant: variantMap[row.source] || 'outline',
+                    variant: getSourceVariant(row.source),
                     class: 'uppercase',
                 },
                 { default: () => row.source },
@@ -223,7 +208,7 @@ const columns: Column<ArtifactWithSync>[] = [
             return h(
                 'div',
                 { class: 'text-sm text-muted-foreground' },
-                row.size ? formatFileSize(row.size) : 'N/A',
+                formatFileSize(row.size),
             );
         },
     },
@@ -261,18 +246,13 @@ const columns: Column<ArtifactWithSync>[] = [
         label: 'Created',
         headerClass: 'w-[140px]',
         render: (row: ArtifactWithSync) => {
-            const date = new Date(row.created_at);
             return h(
                 'time',
                 {
                     datetime: row.created_at,
                     class: 'text-sm text-muted-foreground',
                 },
-                date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                }),
+                formatDate(row.created_at),
             );
         },
     },

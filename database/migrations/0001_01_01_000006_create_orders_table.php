@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('provider', 16);
             $table->string('external_id', 255)->index();
             $table->string('email')->index();
-            $table->bigInteger('amount')->nullable();
+            $table->bigInteger('amount_cents')->nullable();
             $table->string('currency', 8)->nullable();
             $table->json('meta')->nullable();
             $table->string('refund_id', 255)->nullable()->index();

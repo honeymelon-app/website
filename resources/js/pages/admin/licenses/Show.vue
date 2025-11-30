@@ -1,16 +1,19 @@
 <script setup lang="ts">
+import { PageHeader } from '@/components/admin';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
+import { useCopyToClipboard } from '@/composables/useCopyToClipboard';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatDateTime, truncateId } from '@/lib/formatters';
+import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import licenses from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
 import type { License } from '@/types/resources';
-import { Head, router } from '@inertiajs/vue3';
-import { ArrowLeft, Check, Copy } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { Head } from '@inertiajs/vue3';
+import { Check, Copy } from 'lucide-vue-next';
 
 interface Props {
     license: License;
@@ -28,47 +31,18 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: licenses.index().url,
     },
     {
-        title: 'License Details',
+        title: truncateId(props.license.id),
         href: licenses.show(props.license.id).url,
     },
 ];
 
-const isCopied = ref(false);
-
-const copyToClipboard = async (text: string): Promise<void> => {
-    try {
-        await navigator.clipboard.writeText(text);
-        isCopied.value = true;
-        setTimeout(() => {
-            isCopied.value = false;
-        }, 2000);
-    } catch (err) {
-        console.error('Failed to copy:', err);
-    }
-};
-
-const getStatusVariant = (
-    status: string,
-): 'default' | 'secondary' | 'destructive' => {
-    const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
-        {
-            active: 'default',
-            revoked: 'destructive',
-            expired: 'secondary',
-        };
-    return variantMap[status] || 'secondary';
-};
+const { copied: isCopied, copy: copyToClipboard } = useCopyToClipboard();
 
 const formatDate = (dateString: string | null): string => {
-    if (!dateString) return 'Not issued';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    if (!dateString) {
+        return 'Not issued';
+    }
+    return formatDateTime(dateString);
 };
 </script>
 
@@ -80,29 +54,17 @@ const formatDate = (dateString: string | null): string => {
             class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex flex-col gap-2">
-                        <div class="flex items-center gap-3">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                @click="router.visit(licenses.index().url)"
-                            >
-                                <ArrowLeft class="h-4 w-4" />
-                            </Button>
-                            <h3 class="text-2xl font-semibold tracking-tight">
-                                License Details
-                            </h3>
-                        </div>
-                        <p class="ml-12 text-sm text-muted-foreground">
-                            View license information and status.
-                        </p>
-                    </div>
-
-                    <Badge :variant="getStatusVariant(license.status)">
-                        {{ license.status }}
-                    </Badge>
-                </div>
+                <PageHeader
+                    title="License Details"
+                    description="View license information and status."
+                    :back-url="licenses.index().url"
+                >
+                    <template #badges>
+                        <Badge :variant="getStatusVariant(license.status)">
+                            {{ license.status }}
+                        </Badge>
+                    </template>
+                </PageHeader>
 
                 <div class="grid gap-6 md:grid-cols-2">
                     <!-- License Information -->

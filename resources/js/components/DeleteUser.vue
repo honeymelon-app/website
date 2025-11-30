@@ -6,7 +6,7 @@ import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const page = usePage<AppPageProps>();
-const securityUrl = computed(() => page.props.cerberus.securityUrl);
+const securityUrl = computed(() => page.props.cerberus?.securityUrl);
 </script>
 
 <template>

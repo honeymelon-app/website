@@ -92,6 +92,7 @@ export interface Order {
     external_id: string;
     email: string;
     amount_cents: number;
+    formatted_amount: string;
     currency: string;
     meta: Record<string, any>;
     created_at: string;

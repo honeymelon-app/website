@@ -6,6 +6,8 @@ import { BarChart } from '@/components/ui/chart-bar';
 import { DonutChart } from '@/components/ui/chart-donut';
 import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatCurrency, formatDate } from '@/lib/formatters';
+import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
@@ -66,33 +68,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: dashboard().url,
     },
 ];
-
-const formatCurrency = (amount: number): string => {
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-    }).format(amount);
-};
-
-const formatDate = (dateString: string): string => {
-    return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-    }).format(new Date(dateString));
-};
-
-const getStatusVariant = (
-    status: string,
-): 'default' | 'secondary' | 'destructive' => {
-    const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
-        {
-            active: 'default',
-            revoked: 'destructive',
-            expired: 'secondary',
-        };
-    return variantMap[status] || 'secondary';
-};
 </script>
 
 <template>

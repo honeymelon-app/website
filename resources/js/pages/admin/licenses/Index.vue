@@ -28,7 +28,10 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useCopyToClipboard } from '@/composables/useCopyToClipboard';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatDate, formatDateTime, truncateId } from '@/lib/formatters';
+import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import licensesRoute from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
@@ -74,39 +77,15 @@ const selectedLicense = ref<License | null>(null);
 const isSuccessDialogOpen = ref(!!props.license_key);
 const generatedLicenseKey = ref(props.license_key || '');
 const generatedLicenseEmail = ref(props.license_email || '');
-const isCopied = ref(false);
 
-// Copy to clipboard function
-const copyToClipboard = async (): Promise<void> => {
-    try {
-        await navigator.clipboard.writeText(generatedLicenseKey.value);
-        isCopied.value = true;
-        setTimeout(() => {
-            isCopied.value = false;
-        }, 2000);
-    } catch (err) {
-        console.error('Failed to copy:', err);
-    }
-};
+// Use clipboard composable
+const { copy: copyToClipboard, copied: isCopied } = useCopyToClipboard();
 
 // Issue license form
 const issueForm = useForm({
     email: '',
     max_major_version: '1',
 });
-
-// Helper to format status badge variant
-const getStatusVariant = (
-    status: string,
-): 'default' | 'secondary' | 'destructive' => {
-    const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
-        {
-            active: 'default',
-            revoked: 'destructive',
-            expired: 'secondary',
-        };
-    return variantMap[status] || 'secondary';
-};
 
 // Column definitions
 const columns: Column<License>[] = [
@@ -118,7 +97,7 @@ const columns: Column<License>[] = [
             return h(
                 'div',
                 { class: 'font-mono text-sm text-muted-foreground' },
-                row.id ? row.id.substring(0, 8) + '...' : 'N/A',
+                truncateId(row.id),
             );
         },
     },
@@ -160,16 +139,7 @@ const columns: Column<License>[] = [
                     'Not issued',
                 );
             }
-            const date = new Date(row.issued_at);
-            return h(
-                'div',
-                { class: 'text-sm' },
-                date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                }),
-            );
+            return h('div', { class: 'text-sm' }, formatDate(row.issued_at));
         },
     },
     {
@@ -177,18 +147,13 @@ const columns: Column<License>[] = [
         label: 'Created',
         headerClass: 'w-[140px]',
         render: (row: License) => {
-            const date = new Date(row.created_at);
             return h(
                 'time',
                 {
                     datetime: row.created_at,
                     class: 'text-sm text-muted-foreground',
                 },
-                date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                }),
+                formatDate(row.created_at),
             );
         },
     },
@@ -604,17 +569,7 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2 text-sm text-muted-foreground">
                             <span v-if="selectedLicense.issued_at">
-                                {{
-                                    new Date(
-                                        selectedLicense.issued_at,
-                                    ).toLocaleString('en-US', {
-                                        year: 'numeric',
-                                        month: 'long',
-                                        day: 'numeric',
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                    })
-                                }}
+                                {{ formatDateTime(selectedLicense.issued_at) }}
                             </span>
                             <span v-else> Not issued yet </span>
                         </div>
@@ -626,17 +581,7 @@ const handlePageChange = (page: number): void => {
                             Created At
                         </div>
                         <div class="col-span-2 text-sm text-muted-foreground">
-                            {{
-                                new Date(
-                                    selectedLicense.created_at,
-                                ).toLocaleString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                })
-                            }}
+                            {{ formatDateTime(selectedLicense.created_at) }}
                         </div>
                     </div>
 

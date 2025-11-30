@@ -27,7 +27,7 @@ class Order extends Model implements Filterable
         'provider',
         'external_id',
         'email',
-        'amount',
+        'amount_cents',
         'currency',
         'meta',
         'user_id',
@@ -44,7 +44,7 @@ class Order extends Model implements Filterable
     protected function casts(): array
     {
         return [
-            'amount' => 'integer',
+            'amount_cents' => 'integer',
             'meta' => 'array',
             'refunded_at' => 'datetime',
         ];
@@ -79,11 +79,11 @@ class Order extends Model implements Filterable
      */
     public function getFormattedAmountAttribute(): string
     {
-        if (! $this->amount) {
+        if (! $this->amount_cents) {
             return '$0.00';
         }
 
-        return '$'.number_format($this->amount / 100, 2);
+        return '$'.number_format($this->amount_cents / 100, 2);
     }
 
     /**
@@ -109,6 +109,6 @@ class Order extends Model implements Filterable
     {
         return ! $this->isRefunded()
             && $this->provider === 'stripe'
-            && $this->amount > 0;
+            && $this->amount_cents > 0;
     }
 }

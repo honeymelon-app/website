@@ -10,6 +10,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatDate, truncateId } from '@/lib/formatters';
+import { getProviderVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import ordersRoute from '@/routes/admin/orders';
 import type { BreadcrumbItem } from '@/types';
@@ -35,30 +37,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Helper to format currency
-const formatCurrency = (
-    amountCents: number | null,
-    currency: string | null,
-): string => {
-    if (amountCents === null) return 'N/A';
-    const amount = amountCents / 100;
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: currency?.toUpperCase() || 'USD',
-    }).format(amount);
-};
-
-// Helper to format provider badge
-const getProviderVariant = (
-    provider: string,
-): 'default' | 'secondary' | 'outline' => {
-    const variantMap: Record<string, 'default' | 'secondary' | 'outline'> = {
-        stripe: 'default',
-        manual: 'secondary',
-    };
-    return variantMap[provider] || 'outline';
-};
-
 // Column definitions
 const columns: Column<Order>[] = [
     {
@@ -69,7 +47,7 @@ const columns: Column<Order>[] = [
             return h(
                 'div',
                 { class: 'font-mono text-sm text-muted-foreground' },
-                row.id ? row.id.substring(0, 8) + '...' : 'N/A',
+                truncateId(row.id),
             );
         },
     },
@@ -96,14 +74,14 @@ const columns: Column<Order>[] = [
         },
     },
     {
-        key: 'amount_cents',
+        key: 'formatted_amount',
         label: 'Amount',
         headerClass: 'w-[120px]',
         render: (row: Order) => {
             return h(
                 'div',
                 { class: 'text-sm font-medium' },
-                formatCurrency(row.amount_cents, row.currency),
+                row.formatted_amount,
             );
         },
     },
@@ -122,7 +100,7 @@ const columns: Column<Order>[] = [
             return h(
                 Badge,
                 { variant: 'outline', class: 'font-mono text-xs' },
-                { default: () => row.license_id?.substring(0, 8) + '...' },
+                { default: () => truncateId(row.license_id) },
             );
         },
     },
@@ -131,18 +109,13 @@ const columns: Column<Order>[] = [
         label: 'Created',
         headerClass: 'w-[140px]',
         render: (row: Order) => {
-            const date = new Date(row.created_at);
             return h(
                 'time',
                 {
                     datetime: row.created_at,
                     class: 'text-sm text-muted-foreground',
                 },
-                date.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                }),
+                formatDate(row.created_at),
             );
         },
     },

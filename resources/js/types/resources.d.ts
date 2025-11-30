@@ -69,6 +69,7 @@ export interface Order {
     external_id: string;
     email: string;
     amount_cents: number | null;
+    formatted_amount: string;
     currency: string | null;
     license_id: string | null;
     license?: License | null;

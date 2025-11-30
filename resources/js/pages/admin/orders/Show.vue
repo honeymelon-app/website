@@ -1,14 +1,5 @@
 <script setup lang="ts">
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
+import { ConfirmDialog, PageHeader } from '@/components/admin';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,6 +12,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
+import { formatDateTime, truncateId } from '@/lib/formatters';
+import { getProviderVariant, getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import licensesRoute from '@/routes/admin/licenses';
 import ordersRoute from '@/routes/admin/orders';
@@ -29,7 +22,6 @@ import type { License, Order } from '@/types/resources';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import {
     AlertTriangle,
-    ArrowLeft,
     CheckCircle,
     CreditCard,
     ExternalLink,
@@ -61,7 +53,7 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: ordersRoute.index().url,
     },
     {
-        title: props.order.id.substring(0, 8) + '...',
+        title: truncateId(props.order.id),
         href: ordersRoute.show(props.order.id).url,
     },
 ];
@@ -79,54 +71,6 @@ const successMessage = computed(
 const errorMessage = computed(
     () => page.props.flash?.error as string | undefined,
 );
-
-// Helper to format currency
-const formatCurrency = (
-    amountCents: number | null,
-    currency: string | null,
-): string => {
-    if (amountCents === null) return 'N/A';
-    const amount = amountCents / 100;
-    return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: currency?.toUpperCase() || 'USD',
-    }).format(amount);
-};
-
-// Helper to format date
-const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-};
-
-// Helper to get provider badge variant
-const getProviderVariant = (
-    provider: string,
-): 'default' | 'secondary' | 'outline' => {
-    const variantMap: Record<string, 'default' | 'secondary' | 'outline'> = {
-        stripe: 'default',
-        manual: 'secondary',
-    };
-    return variantMap[provider] || 'outline';
-};
-
-// Helper to get status badge variant
-const getStatusVariant = (
-    status: string,
-): 'default' | 'secondary' | 'destructive' => {
-    const variantMap: Record<string, 'default' | 'secondary' | 'destructive'> =
-        {
-            active: 'default',
-            revoked: 'destructive',
-            expired: 'secondary',
-        };
-    return variantMap[status] || 'secondary';
-};
 
 // Get Stripe dashboard URL for the order
 const getStripeUrl = (): string | null => {
@@ -148,10 +92,6 @@ const viewLicense = (): void => {
 };
 
 // Refund actions
-const confirmRefund = (): void => {
-    showRefundDialog.value = true;
-};
-
 const processRefund = (): void => {
     refundForm.post(ordersRoute.refund(props.order.id).url, {
         preserveScroll: true,
@@ -161,15 +101,10 @@ const processRefund = (): void => {
         },
     });
 };
-
-const cancelRefund = (): void => {
-    showRefundDialog.value = false;
-    refundForm.reset();
-};
 </script>
 
 <template>
-    <Head :title="`Order ${order.id.substring(0, 8)}...`" />
+    <Head :title="`Order ${truncateId(order.id)}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div
@@ -219,7 +154,7 @@ const cancelRefund = (): void => {
                             This order has been refunded
                         </p>
                         <p class="text-sm text-yellow-700 dark:text-yellow-300">
-                            Refunded on {{ formatDate(order.refunded_at!) }}
+                            Refunded on {{ formatDateTime(order.refunded_at!) }}
                             <span v-if="order.refund_id" class="font-mono">
                                 ({{ order.refund_id }})
                             </span>
@@ -228,26 +163,12 @@ const cancelRefund = (): void => {
                 </div>
 
                 <!-- Header -->
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex flex-col gap-2">
-                        <div class="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                @click="router.visit(ordersRoute.index().url)"
-                                class="h-8 w-8"
-                            >
-                                <ArrowLeft class="h-4 w-4" />
-                            </Button>
-                            <h3 class="text-2xl font-semibold tracking-tight">
-                                Order Details
-                            </h3>
-                        </div>
-                        <p class="text-sm text-muted-foreground">
-                            View order information and associated license.
-                        </p>
-                    </div>
-                    <div class="flex gap-2">
+                <PageHeader
+                    title="Order Details"
+                    description="View order information and associated license."
+                    :back-url="ordersRoute.index().url"
+                >
+                    <template #badges>
                         <Badge
                             v-if="order.is_refunded"
                             variant="outline"
@@ -261,6 +182,8 @@ const cancelRefund = (): void => {
                         >
                             {{ order.provider }}
                         </Badge>
+                    </template>
+                    <template #actions>
                         <Button
                             v-if="getStripeUrl()"
                             variant="outline"
@@ -276,17 +199,42 @@ const cancelRefund = (): void => {
                                 View in Stripe
                             </a>
                         </Button>
-                        <Button
+                        <ConfirmDialog
                             v-if="order.can_be_refunded"
-                            variant="destructive"
-                            size="sm"
-                            @click="confirmRefund"
+                            v-model:open="showRefundDialog"
+                            title="Refund Order"
+                            confirm-label="Process Refund"
+                            trigger-label="Refund Order"
+                            :loading="refundForm.processing"
+                            @confirm="processRefund"
                         >
-                            <RotateCcw class="mr-2 h-4 w-4" />
-                            Refund Order
-                        </Button>
-                    </div>
-                </div>
+                            <template #trigger>
+                                <Button variant="destructive" size="sm">
+                                    <RotateCcw class="mr-2 h-4 w-4" />
+                                    Refund Order
+                                </Button>
+                            </template>
+                            <p class="mb-4">
+                                Are you sure you want to refund this order? This will:
+                            </p>
+                            <ul class="mb-4 list-disc pl-6 space-y-1 text-sm">
+                                <li>Process a full refund through Stripe</li>
+                                <li>Revoke the associated license</li>
+                            </ul>
+                            <div class="space-y-2">
+                                <Label for="reason">Reason (optional)</Label>
+                                <Input
+                                    id="reason"
+                                    v-model="refundForm.reason"
+                                    placeholder="Enter refund reason..."
+                                />
+                            </div>
+                            <p class="mt-4 text-sm text-destructive font-medium">
+                                This action cannot be undone.
+                            </p>
+                        </ConfirmDialog>
+                    </template>
+                </PageHeader>
 
                 <div class="grid gap-4 md:grid-cols-2">
                     <!-- Order Information -->
@@ -334,12 +282,7 @@ const cancelRefund = (): void => {
                                             order.is_refunded,
                                     }"
                                 >
-                                    {{
-                                        formatCurrency(
-                                            order.amount_cents,
-                                            order.currency,
-                                        )
-                                    }}
+                                    {{ order.formatted_amount }}
                                 </span>
                             </div>
                             <div class="flex flex-col gap-1">
@@ -347,9 +290,8 @@ const cancelRefund = (): void => {
                                     >Provider</span
                                 >
                                 <Badge
-                                    :variant="
-                                        getProviderVariant(order.provider)
-                                    "
+                                    :variant="getProviderVariant(order.provider)
+                                        "
                                     class="w-fit capitalize"
                                 >
                                     {{ order.provider }}
@@ -368,7 +310,7 @@ const cancelRefund = (): void => {
                             <div class="flex flex-col gap-1">
                                 <span class="text-sm font-medium">Created</span>
                                 <span class="text-sm text-muted-foreground">
-                                    {{ formatDate(order.created_at) }}
+                                    {{ formatDateTime(order.created_at) }}
                                 </span>
                             </div>
                             <div
@@ -416,11 +358,10 @@ const cancelRefund = (): void => {
                                             >Status</span
                                         >
                                         <Badge
-                                            :variant="
-                                                getStatusVariant(
-                                                    order.license.status,
-                                                )
-                                            "
+                                            :variant="getStatusVariant(
+                                                order.license.status,
+                                            )
+                                                "
                                             class="w-fit capitalize"
                                         >
                                             {{ order.license.status }}
@@ -452,7 +393,7 @@ const cancelRefund = (): void => {
                                                 v-if="order.license.issued_at"
                                             >
                                                 {{
-                                                    formatDate(
+                                                    formatDateTime(
                                                         order.license.issued_at,
                                                     )
                                                 }}
@@ -484,54 +425,5 @@ const cancelRefund = (): void => {
                 </div>
             </div>
         </div>
-
-        <!-- Refund Confirmation Dialog -->
-        <AlertDialog
-            :open="showRefundDialog"
-            @update:open="showRefundDialog = $event"
-        >
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Refund Order</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Are you sure you want to refund this order for
-                        <strong>{{
-                            formatCurrency(order.amount_cents, order.currency)
-                        }}</strong
-                        >?
-                        <span class="mt-2 block font-medium text-destructive">
-                            This will also revoke the associated license. This
-                            action cannot be undone.
-                        </span>
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-
-                <div class="space-y-2 py-4">
-                    <Label for="reason">Reason for refund (optional)</Label>
-                    <Input
-                        id="reason"
-                        v-model="refundForm.reason"
-                        placeholder="e.g., Customer requested refund within 30-day guarantee"
-                    />
-                </div>
-
-                <AlertDialogFooter>
-                    <AlertDialogCancel @click="cancelRefund">
-                        Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                        @click="processRefund"
-                        class="bg-destructive hover:bg-destructive/90"
-                        :disabled="refundForm.processing"
-                    >
-                        {{
-                            refundForm.processing
-                                ? 'Processing...'
-                                : 'Refund Order'
-                        }}
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
     </AppLayout>
 </template>

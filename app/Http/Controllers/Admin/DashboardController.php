@@ -68,7 +68,7 @@ class DashboardController extends Controller
         $ordersChartData = Order::select(
             DB::raw('DATE(created_at) as date'),
             DB::raw('COUNT(*) as count'),
-            DB::raw('SUM(amount) / 100 as revenue')
+            DB::raw('SUM(amount_cents) / 100 as revenue')
         )
             ->where('created_at', '>=', now()->subDays(30))
             ->groupBy('date')
