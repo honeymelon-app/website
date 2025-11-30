@@ -20,7 +20,7 @@ class DashboardController extends Controller
     {
         // Overview metrics
         $totalOrders = Order::count();
-        $totalRevenue = Order::sum('amount') / 100; // Convert cents to dollars
+        $totalRevenue = Order::sum('amount_cents') / 100; // Convert cents to dollars
         $activeLicenses = License::where('status', LicenseStatus::ACTIVE)->count();
         $totalReleases = Release::whereNotNull('published_at')->count();
 
@@ -30,8 +30,8 @@ class DashboardController extends Controller
             Order::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])->count()
         );
 
-        $revenueThisMonth = Order::where('created_at', '>=', now()->subDays(30))->sum('amount') / 100;
-        $revenueLastMonth = Order::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])->sum('amount') / 100;
+        $revenueThisMonth = Order::where('created_at', '>=', now()->subDays(30))->sum('amount_cents') / 100;
+        $revenueLastMonth = Order::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])->sum('amount_cents') / 100;
         $revenueChange = $this->calculatePercentageChange($revenueThisMonth, $revenueLastMonth);
 
         $licensesChange = $this->calculatePercentageChange(
@@ -47,7 +47,7 @@ class DashboardController extends Controller
             ->map(fn ($order) => [
                 'id' => $order->id,
                 'email' => $order->email,
-                'amount' => $order->amount / 100,
+                'amount' => $order->amount_cents / 100,
                 'currency' => $order->currency,
                 'created_at' => $order->created_at->toIso8601String(),
                 'license_status' => $order->license?->status?->value,
