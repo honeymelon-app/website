@@ -67,11 +67,11 @@ const actionClasses = computed(() => {
     <AlertDialog v-model:open="isOpen">
         <AlertDialogTrigger v-if="showTrigger" as-child>
             <slot name="trigger">
-                <Button
-                    :variant="variant"
-                    size="sm"
-                >
-                    <Trash2 v-if="variant === 'destructive'" class="mr-2 h-4 w-4" />
+                <Button :variant="variant" size="sm">
+                    <Trash2
+                        v-if="variant === 'destructive'"
+                        class="mr-2 h-4 w-4"
+                    />
                     {{ triggerLabel ?? confirmLabel }}
                 </Button>
             </slot>
@@ -79,7 +79,10 @@ const actionClasses = computed(() => {
         <AlertDialogContent>
             <AlertDialogHeader>
                 <AlertDialogTitle>{{ title }}</AlertDialogTitle>
-                <AlertDialogDescription v-if="description || $slots.default" as="div">
+                <AlertDialogDescription
+                    v-if="description || $slots.default"
+                    as="div"
+                >
                     <slot>{{ description }}</slot>
                 </AlertDialogDescription>
             </AlertDialogHeader>

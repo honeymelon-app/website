@@ -60,8 +60,7 @@ const breadcrumbs = computed<BreadcrumbItem[]>(() => [
         href: artifacts.index().url,
     },
     {
-        title:
-            props.artifact.filename ?? truncateId(props.artifact.id),
+        title: props.artifact.filename ?? truncateId(props.artifact.id),
         href: artifacts.show(props.artifact.id).url,
     },
 ]);
@@ -149,10 +148,15 @@ const handleDelete = () => {
                             @confirm="handleDelete"
                         >
                             <p>
-                                Are you sure you want to delete "{{ artifact.filename }}"?
+                                Are you sure you want to delete "{{
+                                    artifact.filename
+                                }}"?
                             </p>
                             <p
-                                v-if="artifact.source === 'r2' || artifact.source === 's3'"
+                                v-if="
+                                    artifact.source === 'r2' ||
+                                    artifact.source === 's3'
+                                "
                                 class="mt-2 font-medium text-destructive"
                             >
                                 This will also delete the file from R2 storage.

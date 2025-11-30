@@ -36,7 +36,10 @@ const goBack = () => {
                 </h3>
                 <slot name="badges" />
             </div>
-            <p v-if="description || $slots.description" class="text-sm text-muted-foreground">
+            <p
+                v-if="description || $slots.description"
+                class="text-sm text-muted-foreground"
+            >
                 <slot name="description">{{ description }}</slot>
             </p>
         </div>

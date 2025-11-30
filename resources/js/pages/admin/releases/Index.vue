@@ -59,7 +59,10 @@ const columns: Column<Release>[] = [
         render: (row: Release) => {
             return h(
                 Badge,
-                { variant: getChannelVariant(row.channel), class: 'capitalize' },
+                {
+                    variant: getChannelVariant(row.channel),
+                    class: 'capitalize',
+                },
                 { default: () => row.channel },
             );
         },

@@ -123,7 +123,11 @@ const deleteRelease = () => {
                 </template>
                 <template #badges>
                     <Badge
-                        :variant="release.channel === 'stable' ? 'default' : 'secondary'"
+                        :variant="
+                            release.channel === 'stable'
+                                ? 'default'
+                                : 'secondary'
+                        "
                         class="capitalize"
                     >
                         {{ release.channel }}
@@ -136,7 +140,9 @@ const deleteRelease = () => {
                     </Badge>
                 </template>
                 <template #description>
-                    <div class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                    <div
+                        class="flex flex-wrap items-center gap-3 text-sm text-muted-foreground"
+                    >
                         <div class="flex items-center gap-1.5">
                             <Tag class="h-3.5 w-3.5" />
                             <span class="font-mono">{{ release.tag }}</span>
@@ -184,13 +190,20 @@ const deleteRelease = () => {
                                 <div class="flex items-center gap-2">
                                     <FileArchive class="h-4 w-4" />
                                     <div class="flex flex-col">
-                                        <span class="text-sm">{{ artifact.platform }}</span>
-                                        <span class="text-xs text-muted-foreground">
+                                        <span class="text-sm">{{
+                                            artifact.platform
+                                        }}</span>
+                                        <span
+                                            class="text-xs text-muted-foreground"
+                                        >
                                             {{ formatFileSize(artifact.size) }}
                                         </span>
                                     </div>
                                 </div>
-                                <Badge variant="outline" class="text-xs uppercase">
+                                <Badge
+                                    variant="outline"
+                                    class="text-xs uppercase"
+                                >
                                     {{ artifact.source }}
                                 </Badge>
                             </DropdownMenuItem>
@@ -213,10 +226,12 @@ const deleteRelease = () => {
                         @confirm="deleteRelease"
                     >
                         <p class="mb-3">
-                            This will permanently delete this release and all associated artifacts.
+                            This will permanently delete this release and all
+                            associated artifacts.
                         </p>
                         <p class="font-medium text-destructive">
-                            The GitHub release and tag will also be deleted. This action cannot be undone.
+                            The GitHub release and tag will also be deleted.
+                            This action cannot be undone.
                         </p>
                     </ConfirmDialog>
                 </template>

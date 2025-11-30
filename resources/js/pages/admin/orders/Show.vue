@@ -215,9 +215,10 @@ const processRefund = (): void => {
                                 </Button>
                             </template>
                             <p class="mb-4">
-                                Are you sure you want to refund this order? This will:
+                                Are you sure you want to refund this order? This
+                                will:
                             </p>
-                            <ul class="mb-4 list-disc pl-6 space-y-1 text-sm">
+                            <ul class="mb-4 list-disc space-y-1 pl-6 text-sm">
                                 <li>Process a full refund through Stripe</li>
                                 <li>Revoke the associated license</li>
                             </ul>
@@ -229,7 +230,9 @@ const processRefund = (): void => {
                                     placeholder="Enter refund reason..."
                                 />
                             </div>
-                            <p class="mt-4 text-sm text-destructive font-medium">
+                            <p
+                                class="mt-4 text-sm font-medium text-destructive"
+                            >
                                 This action cannot be undone.
                             </p>
                         </ConfirmDialog>
@@ -290,8 +293,9 @@ const processRefund = (): void => {
                                     >Provider</span
                                 >
                                 <Badge
-                                    :variant="getProviderVariant(order.provider)
-                                        "
+                                    :variant="
+                                        getProviderVariant(order.provider)
+                                    "
                                     class="w-fit capitalize"
                                 >
                                     {{ order.provider }}
@@ -358,10 +362,11 @@ const processRefund = (): void => {
                                             >Status</span
                                         >
                                         <Badge
-                                            :variant="getStatusVariant(
-                                                order.license.status,
-                                            )
-                                                "
+                                            :variant="
+                                                getStatusVariant(
+                                                    order.license.status,
+                                                )
+                                            "
                                             class="w-fit capitalize"
                                         >
                                             {{ order.license.status }}
