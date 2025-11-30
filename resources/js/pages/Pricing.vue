@@ -111,7 +111,7 @@ const pricingFaqs = [
     },
     {
         question: 'Can I use my license on multiple Macs?',
-        answer: 'Each license activates on one Mac device. The activation is one-time and cannot be transferred to another device. If you need Honeymelon on multiple Macs, you\'ll need a separate license for each.',
+        answer: "Each license activates on one Mac device. The activation is one-time and cannot be transferred to another device. If you need Honeymelon on multiple Macs, you'll need a separate license for each.",
     },
     {
         question: 'Does Honeymelon require an internet connection?',
@@ -323,12 +323,12 @@ const comparisonFeatures = [
                                         <tbody>
                                             <tr
                                                 v-for="(
-item, index
+                                                    item, index
                                                 ) in comparisonFeatures"
                                                 :key="item.feature"
                                                 :class="[
                                                     index !==
-                                                        comparisonFeatures.length -
+                                                    comparisonFeatures.length -
                                                         1
                                                         ? 'border-b border-border/50'
                                                         : '',
@@ -350,8 +350,9 @@ item, index
                                                         >
                                                             <Check
                                                                 class="h-4 w-4 text-primary"
-                                                                :stroke-width="3
-                                                                    "
+                                                                :stroke-width="
+                                                                    3
+                                                                "
                                                             />
                                                         </div>
                                                         <X
@@ -373,8 +374,9 @@ item, index
                                                         >
                                                             <Check
                                                                 class="h-4 w-4 text-muted-foreground"
-                                                                :stroke-width="2
-                                                                    "
+                                                                :stroke-width="
+                                                                    2
+                                                                "
                                                             />
                                                         </div>
                                                         <X
