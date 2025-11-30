@@ -122,9 +122,7 @@ const processRevoke = (): void => {
                     v-if="license.status === 'revoked'"
                     class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
                 >
-                    <ShieldOff
-                        class="h-5 w-5 text-red-600 dark:text-red-400"
-                    />
+                    <ShieldOff class="h-5 w-5 text-red-600 dark:text-red-400" />
                     <div>
                         <p class="font-medium text-red-800 dark:text-red-200">
                             This license has been revoked
@@ -318,7 +316,9 @@ const processRevoke = (): void => {
                                         v-if="license.activation_count > 0"
                                         class="text-xs text-muted-foreground"
                                     >
-                                        ({{ license.activation_count }}
+                                        ({{
+                                            license.activation_count
+                                        }}
                                         activation{{
                                             license.activation_count !== 1
                                                 ? 's'
