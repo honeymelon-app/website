@@ -44,7 +44,7 @@ class DashboardTest extends TestCase
                 ->component('admin/Index')
                 ->has('metrics')
                 ->has('metrics.total_orders')
-                ->has('metrics.total_revenue')
+                ->has('metrics.total_revenue_cents')
                 ->has('metrics.active_licenses')
                 ->has('metrics.total_releases')
                 ->has('recent_orders')

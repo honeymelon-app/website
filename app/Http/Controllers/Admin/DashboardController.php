@@ -20,7 +20,7 @@ class DashboardController extends Controller
     {
         // Overview metrics
         $totalOrders = Order::count();
-        $totalRevenue = Order::sum('amount_cents') / 100; // Convert cents to dollars
+        $totalRevenueCents = Order::sum('amount_cents');
         $activeLicenses = License::where('status', LicenseStatus::ACTIVE)->count();
         $totalReleases = Release::whereNotNull('published_at')->count();
 
@@ -47,7 +47,8 @@ class DashboardController extends Controller
             ->map(fn ($order) => [
                 'id' => $order->id,
                 'email' => $order->email,
-                'amount' => $order->amount_cents / 100,
+                'amount_cents' => $order->amount_cents,
+                'formatted_amount' => $order->formatted_amount,
                 'currency' => $order->currency,
                 'created_at' => $order->created_at->toIso8601String(),
                 'license_status' => $order->license?->status?->value,
@@ -101,7 +102,7 @@ class DashboardController extends Controller
         return Inertia::render('admin/Index', [
             'metrics' => [
                 'total_orders' => $totalOrders,
-                'total_revenue' => $totalRevenue,
+                'total_revenue_cents' => $totalRevenueCents,
                 'active_licenses' => $activeLicenses,
                 'total_releases' => $totalReleases,
                 'orders_change' => $ordersChange,

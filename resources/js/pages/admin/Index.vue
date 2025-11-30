@@ -22,7 +22,7 @@ import {
 
 interface Metrics {
     total_orders: number;
-    total_revenue: number;
+    total_revenue_cents: number;
     active_licenses: number;
     total_releases: number;
     orders_change: number;
@@ -33,7 +33,8 @@ interface Metrics {
 interface RecentOrder {
     id: string;
     email: string;
-    amount: number;
+    amount_cents: number;
+    formatted_amount: string;
     currency: string;
     created_at: string;
     license_status?: string;
@@ -138,7 +139,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </CardHeader>
                     <CardContent>
                         <div class="text-2xl font-bold">
-                            {{ formatCurrency(metrics.total_revenue) }}
+                            {{ formatCurrency(metrics.total_revenue_cents) }}
                         </div>
                         <p class="flex items-center gap-1 text-xs">
                             <ArrowUpRight
@@ -350,7 +351,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         {{ order.license_status }}
                                     </Badge>
                                     <div class="font-medium">
-                                        {{ formatCurrency(order.amount) }}
+                                        {{ order.formatted_amount }}
                                     </div>
                                 </div>
                             </div>
