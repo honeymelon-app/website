@@ -111,7 +111,7 @@ const pricingFaqs = [
     },
     {
         question: 'Can I use my license on multiple Macs?',
-        answer: 'Yes! Your license is valid for up to 3 Mac devices that you personally own or control. Perfect for your desktop, laptop, and home office setup.',
+        answer: 'Each license activates on one Mac device. The activation is one-time and cannot be transferred to another device. If you need Honeymelon on multiple Macs, you\'ll need a separate license for each.',
     },
     {
         question: 'Does Honeymelon require an internet connection?',
@@ -323,12 +323,12 @@ const comparisonFeatures = [
                                         <tbody>
                                             <tr
                                                 v-for="(
-                                                    item, index
+item, index
                                                 ) in comparisonFeatures"
                                                 :key="item.feature"
                                                 :class="[
                                                     index !==
-                                                    comparisonFeatures.length -
+                                                        comparisonFeatures.length -
                                                         1
                                                         ? 'border-b border-border/50'
                                                         : '',
@@ -350,9 +350,8 @@ const comparisonFeatures = [
                                                         >
                                                             <Check
                                                                 class="h-4 w-4 text-primary"
-                                                                :stroke-width="
-                                                                    3
-                                                                "
+                                                                :stroke-width="3
+                                                                    "
                                                             />
                                                         </div>
                                                         <X
@@ -374,9 +373,8 @@ const comparisonFeatures = [
                                                         >
                                                             <Check
                                                                 class="h-4 w-4 text-muted-foreground"
-                                                                :stroke-width="
-                                                                    2
-                                                                "
+                                                                :stroke-width="2
+                                                                    "
                                                             />
                                                         </div>
                                                         <X

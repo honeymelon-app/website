@@ -53,6 +53,18 @@ class Release extends Model implements Filterable
     }
 
     /**
+     * Bootstrap the model and its traits.
+     */
+    protected static function booted(): void
+    {
+        static::deleting(function (Release $release) {
+            // Delete each artifact individually to trigger their deleting events
+            // which will clean up the S3 files
+            $release->artifacts()->each(fn (Artifact $artifact) => $artifact->delete());
+        });
+    }
+
+    /**
      * Get the product that owns the release.
      */
     public function product(): BelongsTo

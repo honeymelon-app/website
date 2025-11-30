@@ -23,7 +23,7 @@ Download Honeymelon
 ## Your License Details
 
 - **Version:** Honeymelon v{{ $maxMajorVersion }}.x (all updates included)
-- **Devices:** Unlimited Macs you own
+- **Devices:** One Mac (single activation)
 - **Support:** Email support included
 
 ## Need Help?

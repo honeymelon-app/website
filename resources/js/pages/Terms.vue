@@ -73,12 +73,12 @@ import { Head } from '@inertiajs/vue3';
                             >
                                 <li>Valid for one (1) user</li>
                                 <li>
-                                    Can be installed on up to three (3) Mac
-                                    devices owned by the license holder
+                                    One-time activation on a single Mac device
+                                    (cannot be transferred)
                                 </li>
                                 <li>
-                                    Includes lifetime updates for all future
-                                    versions
+                                    Includes all updates within the major
+                                    version purchased (v1.x)
                                 </li>
                                 <li>One-time payment, no recurring fees</li>
                                 <li>
