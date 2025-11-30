@@ -26,11 +26,12 @@ Route::post('/checkout', CheckoutController::class)->name('checkout');
 | and apply signature verification in their controllers.
 */
 Route::prefix('webhooks')
-    ->middleware('client')
     ->name('webhooks.')
     ->group(function () {
         Route::post('/stripe', [WebhookEventController::class, 'stripe'])->name('stripe');
-        Route::post('/github/release', [GithubWebhookController::class, 'store'])->name('github.release');
+        Route::post('/github/release', [GithubWebhookController::class, 'store'])
+            ->middleware('client')
+            ->name('github.release');
     });
 
 /*
