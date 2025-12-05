@@ -19,7 +19,6 @@ import {
     ShieldCheck,
     TrendingUp,
 } from 'lucide-vue-next';
-import { defineComponent, h, type PropType } from 'vue';
 
 interface Metrics {
     total_orders: number;
@@ -50,9 +49,9 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
-    licenses_by_status: Array<{ status: string; count: number }>;
-    artifacts_by_platform: Array<{ platform: string; count: number }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
+    licenses_by_status: Array<{ status: string; count: number; }>;
+    artifacts_by_platform: Array<{ platform: string; count: number; }>;
 }
 
 interface Props {
@@ -63,108 +62,6 @@ interface Props {
 }
 
 defineProps<Props>();
-
-const chartPalette = [
-    'hsl(var(--chart-1))',
-    'hsl(var(--chart-3))',
-    'hsl(var(--chart-4))',
-    'hsl(var(--chart-2))',
-];
-
-type TooltipDatum = { name: string; color?: string; value: number };
-
-const OrdersTooltip = defineComponent({
-    name: 'OrdersTooltip',
-    props: {
-        title: {
-            type: String,
-            required: true,
-        },
-        data: {
-            type: Array as PropType<TooltipDatum[]>,
-            default: () => [],
-        },
-    },
-    setup(props) {
-        const formatValue = (name: string, value: number): string => {
-            if (name === 'revenue') {
-                return formatCurrency(Math.max(0, value * 100));
-            }
-
-            return value.toLocaleString();
-        };
-
-        const label = (name: string): string => {
-            if (name === 'revenue') return 'Revenue';
-            if (name === 'orders') return 'Orders';
-            return name;
-        };
-
-        return () =>
-            h(
-                'div',
-                {
-                    class: 'rounded-xl border bg-popover/90 px-3 py-2 shadow-lg backdrop-blur',
-                },
-                [
-                    h(
-                        'div',
-                        {
-                            class: 'text-[11px] font-medium uppercase tracking-wide text-muted-foreground',
-                        },
-                        props.title,
-                    ),
-                    ...props.data.map((item) =>
-                        h(
-                            'div',
-                            {
-                                class: 'flex items-center justify-between gap-3 py-1',
-                            },
-                            [
-                                h('div', { class: 'flex items-center gap-2' }, [
-                                    h('span', {
-                                        class: 'h-2 w-2 rounded-full',
-                                        style: {
-                                            backgroundColor:
-                                                item.color ??
-                                                'hsl(var(--chart-1))',
-                                        },
-                                    }),
-                                    h(
-                                        'span',
-                                        { class: 'text-sm text-foreground/80' },
-                                        label(item.name),
-                                    ),
-                                ]),
-                                h(
-                                    'span',
-                                    { class: 'text-sm font-semibold' },
-                                    formatValue(item.name, item.value),
-                                ),
-                            ],
-                        ),
-                    ),
-                ],
-            );
-    },
-});
-
-const donutValueFormatter = (value: number): string => value.toLocaleString();
-
-const platformValueFormatter = (
-    tick: number | Date,
-    _i?: number,
-    _ticks?: Array<number | Date>,
-): string => {
-    void _i;
-    void _ticks;
-
-    if (typeof tick === 'number') {
-        return tick.toFixed(0);
-    }
-
-    return '';
-};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -215,11 +112,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="
-                                    metrics.orders_change >= 0
+                                :class="metrics.orders_change >= 0
                                         ? 'text-green-500'
                                         : 'text-red-500'
-                                "
+                                    "
                             >
                                 {{ Math.abs(metrics.orders_change) }}%
                             </span>
@@ -254,11 +150,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="
-                                    metrics.revenue_change >= 0
+                                :class="metrics.revenue_change >= 0
                                         ? 'text-green-500'
                                         : 'text-red-500'
-                                "
+                                    "
                             >
                                 {{ Math.abs(metrics.revenue_change) }}%
                             </span>
@@ -293,11 +188,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="
-                                    metrics.licenses_change >= 0
+                                :class="metrics.licenses_change >= 0
                                         ? 'text-green-500'
                                         : 'text-red-500'
-                                "
+                                    "
                             >
                                 {{ Math.abs(metrics.licenses_change) }}%
                             </span>
@@ -332,9 +226,7 @@ const breadcrumbs: BreadcrumbItem[] = [
             <!-- Charts Row -->
             <div class="grid gap-4 lg:grid-cols-7">
                 <!-- Orders & Revenue Over Time -->
-                <Card
-                    class="overflow-hidden border-none bg-gradient-to-br from-amber-50/80 via-white to-amber-100/60 shadow-xl lg:col-span-4 dark:from-[#1a120a] dark:via-[#0e0805] dark:to-[#0b0704]"
-                >
+                <Card class="lg:col-span-4">
                     <CardHeader>
                         <CardTitle>Orders & Revenue (Last 30 Days)</CardTitle>
                     </CardHeader>
@@ -344,24 +236,17 @@ const breadcrumbs: BreadcrumbItem[] = [
                             :data="charts.orders_over_time"
                             index="date"
                             :categories="['orders', 'revenue']"
-                            :colors="[chartPalette[0], chartPalette[1]]"
-                            :x-formatter="
-                                (tick: number | Date) =>
-                                    typeof tick === 'number'
-                                        ? formatDate(
-                                              charts.orders_over_time[tick]
-                                                  ?.date || '',
-                                          )
-                                        : ''
-                            "
-                            :y-formatter="
-                                (tick: number | Date) =>
-                                    typeof tick === 'number'
-                                        ? tick.toLocaleString()
-                                        : ''
-                            "
-                            :custom-tooltip="OrdersTooltip"
-                            class="h-[320px]"
+                            :colors="[
+                                'hsl(var(--chart-1))',
+                                'hsl(var(--chart-2))',
+                            ]"
+                            :y-formatter="(tick: number | Date) => {
+                                    return typeof tick === 'number'
+                                        ? tick.toFixed(0)
+                                        : '';
+                                }
+                                "
+                            class="h-[300px]"
                         />
                         <div
                             v-else
@@ -373,9 +258,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </Card>
 
                 <!-- License Status Distribution -->
-                <Card
-                    class="overflow-hidden border-none bg-gradient-to-br from-slate-50 via-white to-amber-50/70 shadow-xl lg:col-span-3 dark:from-[#0e0d0b] dark:via-[#0b0a08] dark:to-[#1a120c]"
-                >
+                <Card class="lg:col-span-3">
                     <CardHeader>
                         <CardTitle>License Status Distribution</CardTitle>
                     </CardHeader>
@@ -385,8 +268,11 @@ const breadcrumbs: BreadcrumbItem[] = [
                             :data="charts.licenses_by_status"
                             index="status"
                             category="count"
-                            :colors="chartPalette"
-                            :value-formatter="donutValueFormatter"
+                            :colors="[
+                                'hsl(var(--chart-1))',
+                                'hsl(var(--chart-2))',
+                                'hsl(var(--chart-3))',
+                            ]"
                             class="mx-auto h-[300px]"
                         />
                         <div
@@ -401,9 +287,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
             <!-- Platform Distribution -->
             <div class="grid gap-4 lg:grid-cols-2">
-                <Card
-                    class="overflow-hidden border-none bg-gradient-to-br from-amber-50/70 via-white to-slate-50 shadow-xl dark:from-[#1a120c] dark:via-[#0e0b08] dark:to-[#0a0806]"
-                >
+                <Card>
                     <CardHeader>
                         <CardTitle>Artifacts by Platform</CardTitle>
                     </CardHeader>
@@ -413,10 +297,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                             :data="charts.artifacts_by_platform"
                             index="platform"
                             :categories="['count']"
-                            :colors="[chartPalette[2]]"
-                            :rounded-corners="8"
-                            :y-formatter="platformValueFormatter"
-                            class="h-[260px]"
+                            :colors="['hsl(var(--chart-1))']"
+                            class="h-[250px]"
                         />
                         <div
                             v-else
@@ -456,11 +338,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <div class="flex items-center gap-2">
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="
-                                            getStatusVariant(
-                                                order.license_status,
-                                            )
-                                        "
+                                        :variant="getStatusVariant(
+                                            order.license_status,
+                                        )
+                                            "
                                     >
                                         {{ order.license_status }}
                                     </Badge>
