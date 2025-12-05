@@ -153,9 +153,12 @@ const donutValueFormatter = (value: number): string => value.toLocaleString();
 
 const platformValueFormatter = (
     tick: number | Date,
-    i?: number,
-    ticks?: Array<number | Date>,
+    _i?: number,
+    _ticks?: Array<number | Date>,
 ): string => {
+    void _i;
+    void _ticks;
+
     if (typeof tick === 'number') {
         return tick.toFixed(0);
     }
