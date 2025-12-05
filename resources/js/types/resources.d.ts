@@ -23,6 +23,7 @@ export interface Release {
     major: boolean;
     created_by: string | null;
     created_at: string;
+    artifacts_count?: number;
     artifacts?: ReleaseArtifact[];
 }
 

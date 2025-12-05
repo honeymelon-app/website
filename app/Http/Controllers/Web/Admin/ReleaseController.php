@@ -23,6 +23,7 @@ class ReleaseController extends Controller
     {
         $releases = Release::query()
             ->with('user')
+            ->withCount('artifacts')
             ->latest('published_at')
             ->paginate(20);
 

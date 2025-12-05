@@ -18,7 +18,7 @@ import releasesRoute from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
 import type { PaginatedResponse, Release } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
-import { Download, Eye, MoreHorizontal, Rocket } from 'lucide-vue-next';
+import { Eye, MoreHorizontal, PackageSearch, Rocket } from 'lucide-vue-next';
 import { h } from 'vue';
 
 interface Props {
@@ -53,6 +53,18 @@ const columns: Column<Release>[] = [
         class: 'font-mono text-xs text-muted-foreground',
     },
     {
+        key: 'commit_hash',
+        label: 'Commit',
+        headerClass: 'w-[110px]',
+        render: (row: Release) => {
+            return h(
+                'div',
+                { class: 'font-mono text-xs text-muted-foreground' },
+                row.commit_hash?.slice(0, 7) ?? '—',
+            );
+        },
+    },
+    {
         key: 'channel',
         label: 'Channel',
         headerClass: 'w-[100px]',
@@ -75,11 +87,25 @@ const columns: Column<Release>[] = [
         render: (row: Release) => {
             return row.major
                 ? h(
-                      Badge,
-                      { variant: 'destructive', class: 'text-xs' },
-                      { default: () => 'Major' },
-                  )
+                    Badge,
+                    { variant: 'destructive', class: 'text-xs' },
+                    { default: () => 'Major' },
+                )
                 : h('span', { class: 'text-muted-foreground' }, '—');
+        },
+    },
+    {
+        key: 'artifacts_count',
+        label: 'Artifacts',
+        headerClass: 'w-[110px] text-center',
+        class: 'text-center',
+        render: (row: Release) => {
+            const count = row.artifacts_count ?? 0;
+            return h(
+                Badge,
+                { variant: 'outline', class: 'font-mono text-xs' },
+                { default: () => `${count} file${count === 1 ? '' : 's'}` },
+            );
         },
     },
     {
@@ -173,21 +199,16 @@ const columns: Column<Release>[] = [
                                             ],
                                         },
                                     ),
-                                    h(
-                                        DropdownMenuItem,
-                                        {
-                                            onClick: () =>
-                                                downloadArtifacts(row),
-                                        },
-                                        {
-                                            default: () => [
-                                                h(Download, {
-                                                    class: 'mr-2 h-4 w-4',
-                                                }),
-                                                'Download Artifacts',
-                                            ],
-                                        },
-                                    ),
+                                    h(DropdownMenuItem, {
+                                        onClick: () => viewRelease(row, 'artifacts'),
+                                    }, {
+                                        default: () => [
+                                            h(PackageSearch, {
+                                                class: 'mr-2 h-4 w-4',
+                                            }),
+                                            'View Artifacts',
+                                        ],
+                                    }),
                                     h(DropdownMenuSeparator),
                                     h(
                                         DropdownMenuItem,
@@ -214,12 +235,9 @@ const columns: Column<Release>[] = [
 ];
 
 // Actions
-const viewRelease = (release: Release): void => {
-    router.visit(releasesRoute.show(release.id).url);
-};
-
-const downloadArtifacts = (release: Release): void => {
-    router.visit(releasesRoute.show(release.id).url);
+const viewRelease = (release: Release, section?: 'artifacts'): void => {
+    const url = `${releasesRoute.show(release.id).url}${section === 'artifacts' ? '#artifacts' : ''}`;
+    router.visit(url);
 };
 
 const publishRelease = (release: Release): void => {

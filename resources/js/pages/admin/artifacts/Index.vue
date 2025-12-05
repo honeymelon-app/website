@@ -31,6 +31,7 @@ import { formatDate, formatFileSize } from '@/lib/formatters';
 import { getSourceVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import artifactsRoute from '@/routes/admin/artifacts';
+import releasesRoute from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
 import type { Artifact, PaginatedResponse } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
@@ -220,24 +221,80 @@ const columns: Column<ArtifactWithSync>[] = [
         render: (row: ArtifactWithSync) => {
             return row.notarized
                 ? h(ShieldCheck, {
-                      class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
-                  })
+                    class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
+                })
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
     {
         key: 'release',
         label: 'Release',
-        headerClass: 'w-[100px]',
+        headerClass: 'w-[120px]',
         render: (row: ArtifactWithSync) => {
-            const version =
-                row.release?.version ??
-                row.release_id?.substring?.(0, 8) ??
-                'N/A';
+            const version = row.release?.version ?? row.release_id;
+            if (!version || !row.release_id) {
+                return h(
+                    'span',
+                    { class: 'text-muted-foreground text-sm' },
+                    'N/A',
+                );
+            }
+
             return h(
-                'div',
-                { class: 'font-mono text-xs text-muted-foreground truncate' },
-                version,
+                Button,
+                {
+                    variant: 'link',
+                    class: 'px-0 text-xs font-mono text-muted-foreground',
+                    onClick: () => viewRelease(row.release_id!),
+                },
+                { default: () => version },
+            );
+        },
+    },
+    {
+        key: 'sha256',
+        label: 'SHA256',
+        headerClass: 'w-[160px]',
+        render: (row: ArtifactWithSync) => {
+            if (!row.sha256) {
+                return h('span', { class: 'text-muted-foreground text-sm' }, '—');
+            }
+
+            const shortHash = `${row.sha256.substring(0, 10)}…`;
+
+            return h(
+                TooltipProvider,
+                {},
+                {
+                    default: () =>
+                        h(
+                            Tooltip,
+                            {},
+                            {
+                                default: () => [
+                                    h(
+                                        TooltipTrigger,
+                                        { asChild: true },
+                                        {
+                                            default: () =>
+                                                h(
+                                                    'span',
+                                                    {
+                                                        class: 'font-mono text-xs text-muted-foreground',
+                                                    },
+                                                    shortHash,
+                                                ),
+                                        },
+                                    ),
+                                    h(
+                                        TooltipContent,
+                                        {},
+                                        { default: () => row.sha256 },
+                                    ),
+                                ],
+                            },
+                        ),
+                },
             );
         },
     },
@@ -361,6 +418,10 @@ const columns: Column<ArtifactWithSync>[] = [
 // Actions
 const viewArtifact = (artifact: ArtifactWithSync): void => {
     router.visit(artifactsRoute.show(artifact.id).url);
+};
+
+const viewRelease = (releaseId: string): void => {
+    router.visit(releasesRoute.show(releaseId).url);
 };
 
 const downloadArtifact = (artifact: ArtifactWithSync): void => {

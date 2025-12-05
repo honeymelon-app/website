@@ -158,6 +158,40 @@ const columns: Column<License>[] = [
         },
     },
     {
+        key: 'activation_count',
+        label: 'Activations',
+        headerClass: 'w-[110px]',
+        render: (row: License) => {
+            return h(
+                Badge,
+                { variant: 'outline', class: 'font-mono text-xs' },
+                {
+                    default: () => `${row.activation_count} device${row.activation_count === 1 ? '' : 's'}`,
+                },
+            );
+        },
+    },
+    {
+        key: 'device_id',
+        label: 'Device ID',
+        headerClass: 'w-[160px]',
+        render: (row: License) => {
+            if (!row.device_id) {
+                return h(
+                    'span',
+                    { class: 'text-muted-foreground text-sm' },
+                    'Not activated',
+                );
+            }
+
+            return h(
+                'div',
+                { class: 'font-mono text-xs text-muted-foreground truncate' },
+                truncateId(row.device_id),
+            );
+        },
+    },
+    {
         key: 'created_at',
         label: 'Created',
         headerClass: 'w-[140px]',
@@ -239,21 +273,21 @@ const columns: Column<License>[] = [
                                             : null,
                                         row.status === 'active'
                                             ? h(
-                                                  DropdownMenuItem,
-                                                  {
-                                                      onClick: () =>
-                                                          revokeLicense(row),
-                                                      class: 'text-destructive focus:text-destructive',
-                                                  },
-                                                  {
-                                                      default: () => [
-                                                          h(ShieldOff, {
-                                                              class: 'mr-2 h-4 w-4',
-                                                          }),
-                                                          'Revoke License',
-                                                      ],
-                                                  },
-                                              )
+                                                DropdownMenuItem,
+                                                {
+                                                    onClick: () =>
+                                                        revokeLicense(row),
+                                                    class: 'text-destructive focus:text-destructive',
+                                                },
+                                                {
+                                                    default: () => [
+                                                        h(ShieldOff, {
+                                                            class: 'mr-2 h-4 w-4',
+                                                        }),
+                                                        'Revoke License',
+                                                    ],
+                                                },
+                                            )
                                             : null,
                                     ].filter(Boolean),
                             },
@@ -519,9 +553,8 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="
-                                    getStatusVariant(selectedLicense.status)
-                                "
+                                :variant="getStatusVariant(selectedLicense.status)
+                                    "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -603,7 +636,7 @@ const handlePageChange = (page: number): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                                isDetailsDialogOpen = false;
+                            isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />

@@ -17,7 +17,7 @@ import ordersRoute from '@/routes/admin/orders';
 import type { BreadcrumbItem } from '@/types';
 import type { Order, PaginatedResponse } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
-import { Eye, MoreHorizontal } from 'lucide-vue-next';
+import { BadgeCheck, Clock3, Eye, MoreHorizontal, RotateCcw } from 'lucide-vue-next';
 import { h } from 'vue';
 
 interface Props {
@@ -83,6 +83,54 @@ const columns: Column<Order>[] = [
                 { class: 'text-sm font-medium' },
                 row.formatted_amount,
             );
+        },
+    },
+    {
+        key: 'status',
+        label: 'Status',
+        headerClass: 'w-[110px]',
+        render: (row: Order) => {
+            const variant = row.is_refunded ? 'outline' : 'secondary';
+            const label = row.is_refunded ? 'Refunded' : 'Paid';
+            const Icon = row.is_refunded ? RotateCcw : BadgeCheck;
+
+            return h(
+                Badge,
+                { variant, class: 'gap-1 text-xs' },
+                {
+                    default: () => [
+                        h(Icon, { class: 'h-3.5 w-3.5' }),
+                        label,
+                    ],
+                },
+            );
+        },
+    },
+    {
+        key: 'refund_window',
+        label: 'Refund Window',
+        headerClass: 'w-[140px] text-center',
+        class: 'text-center',
+        render: (row: Order) => {
+            if (row.is_refunded) {
+                return h(
+                    'span',
+                    { class: 'text-muted-foreground text-sm' },
+                    'Processed',
+                );
+            }
+
+            return row.is_within_refund_window
+                ? h(
+                    'span',
+                    { class: 'text-emerald-600 dark:text-emerald-500 text-sm flex items-center justify-center gap-1' },
+                    [h(Clock3, { class: 'h-4 w-4' }), 'Open'],
+                )
+                : h(
+                    'span',
+                    { class: 'text-muted-foreground text-sm' },
+                    'Closed',
+                );
         },
     },
     {
@@ -180,6 +228,22 @@ const columns: Column<Order>[] = [
                                             ],
                                         },
                                     ),
+                                    row.can_be_refunded
+                                        ? h(
+                                            DropdownMenuItem,
+                                            {
+                                                onClick: () => refundOrder(row),
+                                            },
+                                            {
+                                                default: () => [
+                                                    h(RotateCcw, {
+                                                        class: 'mr-2 h-4 w-4',
+                                                    }),
+                                                    'Refund Order',
+                                                ],
+                                            },
+                                        )
+                                        : null,
                                 ],
                             },
                         ),
@@ -193,6 +257,30 @@ const columns: Column<Order>[] = [
 // Actions
 const viewOrder = (order: Order): void => {
     router.visit(ordersRoute.show(order.id).url);
+};
+
+const refundOrder = (order: Order): void => {
+    if (!order.can_be_refunded) {
+        return;
+    }
+
+    const confirmed = confirm(
+        `Refund order ${truncateId(order.id)}? This will revoke the associated license.`,
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    const reason = window.prompt('Refund reason (optional)')?.trim() ?? '';
+
+    router.post(
+        ordersRoute.refund(order.id).url,
+        { reason: reason || null },
+        {
+            preserveScroll: true,
+        },
+    );
 };
 
 const handlePageChange = (page: number): void => {
