@@ -221,8 +221,8 @@ const columns: Column<ArtifactWithSync>[] = [
         render: (row: ArtifactWithSync) => {
             return row.notarized
                 ? h(ShieldCheck, {
-                    class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
-                })
+                      class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
+                  })
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -257,7 +257,11 @@ const columns: Column<ArtifactWithSync>[] = [
         headerClass: 'w-[160px]',
         render: (row: ArtifactWithSync) => {
             if (!row.sha256) {
-                return h('span', { class: 'text-muted-foreground text-sm' }, '—');
+                return h(
+                    'span',
+                    { class: 'text-muted-foreground text-sm' },
+                    '—',
+                );
             }
 
             const shortHash = `${row.sha256.substring(0, 10)}…`;

@@ -17,7 +17,13 @@ import ordersRoute from '@/routes/admin/orders';
 import type { BreadcrumbItem } from '@/types';
 import type { Order, PaginatedResponse } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
-import { BadgeCheck, Clock3, Eye, MoreHorizontal, RotateCcw } from 'lucide-vue-next';
+import {
+    BadgeCheck,
+    Clock3,
+    Eye,
+    MoreHorizontal,
+    RotateCcw,
+} from 'lucide-vue-next';
 import { h } from 'vue';
 
 interface Props {
@@ -98,10 +104,7 @@ const columns: Column<Order>[] = [
                 Badge,
                 { variant, class: 'gap-1 text-xs' },
                 {
-                    default: () => [
-                        h(Icon, { class: 'h-3.5 w-3.5' }),
-                        label,
-                    ],
+                    default: () => [h(Icon, { class: 'h-3.5 w-3.5' }), label],
                 },
             );
         },
@@ -122,15 +125,17 @@ const columns: Column<Order>[] = [
 
             return row.is_within_refund_window
                 ? h(
-                    'span',
-                    { class: 'text-emerald-600 dark:text-emerald-500 text-sm flex items-center justify-center gap-1' },
-                    [h(Clock3, { class: 'h-4 w-4' }), 'Open'],
-                )
+                      'span',
+                      {
+                          class: 'text-emerald-600 dark:text-emerald-500 text-sm flex items-center justify-center gap-1',
+                      },
+                      [h(Clock3, { class: 'h-4 w-4' }), 'Open'],
+                  )
                 : h(
-                    'span',
-                    { class: 'text-muted-foreground text-sm' },
-                    'Closed',
-                );
+                      'span',
+                      { class: 'text-muted-foreground text-sm' },
+                      'Closed',
+                  );
         },
     },
     {
@@ -230,19 +235,20 @@ const columns: Column<Order>[] = [
                                     ),
                                     row.can_be_refunded
                                         ? h(
-                                            DropdownMenuItem,
-                                            {
-                                                onClick: () => refundOrder(row),
-                                            },
-                                            {
-                                                default: () => [
-                                                    h(RotateCcw, {
-                                                        class: 'mr-2 h-4 w-4',
-                                                    }),
-                                                    'Refund Order',
-                                                ],
-                                            },
-                                        )
+                                              DropdownMenuItem,
+                                              {
+                                                  onClick: () =>
+                                                      refundOrder(row),
+                                              },
+                                              {
+                                                  default: () => [
+                                                      h(RotateCcw, {
+                                                          class: 'mr-2 h-4 w-4',
+                                                      }),
+                                                      'Refund Order',
+                                                  ],
+                                              },
+                                          )
                                         : null,
                                 ],
                             },

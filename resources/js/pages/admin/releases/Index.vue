@@ -87,10 +87,10 @@ const columns: Column<Release>[] = [
         render: (row: Release) => {
             return row.major
                 ? h(
-                    Badge,
-                    { variant: 'destructive', class: 'text-xs' },
-                    { default: () => 'Major' },
-                )
+                      Badge,
+                      { variant: 'destructive', class: 'text-xs' },
+                      { default: () => 'Major' },
+                  )
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -199,16 +199,21 @@ const columns: Column<Release>[] = [
                                             ],
                                         },
                                     ),
-                                    h(DropdownMenuItem, {
-                                        onClick: () => viewRelease(row, 'artifacts'),
-                                    }, {
-                                        default: () => [
-                                            h(PackageSearch, {
-                                                class: 'mr-2 h-4 w-4',
-                                            }),
-                                            'View Artifacts',
-                                        ],
-                                    }),
+                                    h(
+                                        DropdownMenuItem,
+                                        {
+                                            onClick: () =>
+                                                viewRelease(row, 'artifacts'),
+                                        },
+                                        {
+                                            default: () => [
+                                                h(PackageSearch, {
+                                                    class: 'mr-2 h-4 w-4',
+                                                }),
+                                                'View Artifacts',
+                                            ],
+                                        },
+                                    ),
                                     h(DropdownMenuSeparator),
                                     h(
                                         DropdownMenuItem,
