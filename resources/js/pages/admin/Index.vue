@@ -11,7 +11,6 @@ import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { defineComponent, h, type PropType } from 'vue';
 import {
     ArrowDownRight,
     ArrowUpRight,
@@ -20,6 +19,7 @@ import {
     ShieldCheck,
     TrendingUp,
 } from 'lucide-vue-next';
+import { defineComponent, h, type PropType } from 'vue';
 
 interface Metrics {
     total_orders: number;
@@ -101,35 +101,67 @@ const OrdersTooltip = defineComponent({
         };
 
         return () =>
-            h('div', { class: 'rounded-xl border bg-popover/90 px-3 py-2 shadow-lg backdrop-blur' }, [
-                h(
-                    'div',
-                    { class: 'text-[11px] font-medium uppercase tracking-wide text-muted-foreground' },
-                    props.title,
-                ),
-                ...props.data.map((item) =>
+            h(
+                'div',
+                {
+                    class: 'rounded-xl border bg-popover/90 px-3 py-2 shadow-lg backdrop-blur',
+                },
+                [
                     h(
                         'div',
-                        { class: 'flex items-center justify-between gap-3 py-1' },
-                        [
-                            h('div', { class: 'flex items-center gap-2' }, [
-                                h('span', {
-                                    class: 'h-2 w-2 rounded-full',
-                                    style: { backgroundColor: item.color ?? 'hsl(var(--chart-1))' },
-                                }),
-                                h('span', { class: 'text-sm text-foreground/80' }, label(item.name)),
-                            ]),
-                            h('span', { class: 'text-sm font-semibold' }, formatValue(item.name, item.value)),
-                        ],
+                        {
+                            class: 'text-[11px] font-medium uppercase tracking-wide text-muted-foreground',
+                        },
+                        props.title,
                     ),
-                ),
-            ]);
+                    ...props.data.map((item) =>
+                        h(
+                            'div',
+                            {
+                                class: 'flex items-center justify-between gap-3 py-1',
+                            },
+                            [
+                                h('div', { class: 'flex items-center gap-2' }, [
+                                    h('span', {
+                                        class: 'h-2 w-2 rounded-full',
+                                        style: {
+                                            backgroundColor:
+                                                item.color ??
+                                                'hsl(var(--chart-1))',
+                                        },
+                                    }),
+                                    h(
+                                        'span',
+                                        { class: 'text-sm text-foreground/80' },
+                                        label(item.name),
+                                    ),
+                                ]),
+                                h(
+                                    'span',
+                                    { class: 'text-sm font-semibold' },
+                                    formatValue(item.name, item.value),
+                                ),
+                            ],
+                        ),
+                    ),
+                ],
+            );
     },
 });
 
 const donutValueFormatter = (value: number): string => value.toLocaleString();
 
-const platformValueFormatter = (value: number): string => value.toFixed(0);
+const platformValueFormatter = (
+    tick: number | Date,
+    i?: number,
+    ticks?: Array<number | Date>,
+): string => {
+    if (typeof tick === 'number') {
+        return tick.toFixed(0);
+    }
+
+    return '';
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -298,7 +330,7 @@ const breadcrumbs: BreadcrumbItem[] = [
             <div class="grid gap-4 lg:grid-cols-7">
                 <!-- Orders & Revenue Over Time -->
                 <Card
-                    class="lg:col-span-4 overflow-hidden border-none bg-gradient-to-br from-amber-50/80 via-white to-amber-100/60 shadow-xl dark:from-[#1a120a] dark:via-[#0e0805] dark:to-[#0b0704]"
+                    class="overflow-hidden border-none bg-gradient-to-br from-amber-50/80 via-white to-amber-100/60 shadow-xl lg:col-span-4 dark:from-[#1a120a] dark:via-[#0e0805] dark:to-[#0b0704]"
                 >
                     <CardHeader>
                         <CardTitle>Orders & Revenue (Last 30 Days)</CardTitle>
@@ -314,7 +346,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 (tick: number | Date) =>
                                     typeof tick === 'number'
                                         ? formatDate(
-                                              charts.orders_over_time[tick]?.date || '',
+                                              charts.orders_over_time[tick]
+                                                  ?.date || '',
                                           )
                                         : ''
                             "
@@ -338,7 +371,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
                 <!-- License Status Distribution -->
                 <Card
-                    class="lg:col-span-3 overflow-hidden border-none bg-gradient-to-br from-slate-50 via-white to-amber-50/70 shadow-xl dark:from-[#0e0d0b] dark:via-[#0b0a08] dark:to-[#1a120c]"
+                    class="overflow-hidden border-none bg-gradient-to-br from-slate-50 via-white to-amber-50/70 shadow-xl lg:col-span-3 dark:from-[#0e0d0b] dark:via-[#0b0a08] dark:to-[#1a120c]"
                 >
                     <CardHeader>
                         <CardTitle>License Status Distribution</CardTitle>
@@ -365,7 +398,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 
             <!-- Platform Distribution -->
             <div class="grid gap-4 lg:grid-cols-2">
-                <Card class="overflow-hidden border-none bg-gradient-to-br from-amber-50/70 via-white to-slate-50 shadow-xl dark:from-[#1a120c] dark:via-[#0e0b08] dark:to-[#0a0806]">
+                <Card
+                    class="overflow-hidden border-none bg-gradient-to-br from-amber-50/70 via-white to-slate-50 shadow-xl dark:from-[#1a120c] dark:via-[#0e0b08] dark:to-[#0a0806]"
+                >
                     <CardHeader>
                         <CardTitle>Artifacts by Platform</CardTitle>
                     </CardHeader>
