@@ -219,8 +219,7 @@ const viewRelease = (release: Release): void => {
 };
 
 const downloadArtifacts = (release: Release): void => {
-    console.log('Download artifacts for:', release.version);
-    // Implement download logic
+    router.visit(releasesRoute.show(release.id).url);
 };
 
 const publishRelease = (release: Release): void => {

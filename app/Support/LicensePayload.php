@@ -29,7 +29,7 @@ final class LicensePayload
     {
         $licenseId = self::uuidToBinary($license->getKey());
         $orderId = self::uuidToBinary((string) $license->order_id);
-        $maxMajorVersion = (int) max(1, min(255, $license->max_major_version ?? 1));
+        $maxMajorVersion = (int) max(0, min(255, $license->max_major_version ?? 0));
         $issuedTimestamp = max(0, ($issuedAt ?? now())->getTimestamp());
 
         $payload = pack('C', self::VERSION);

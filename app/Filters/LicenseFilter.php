@@ -45,7 +45,7 @@ class LicenseFilter extends Filter
     protected array $validationRules = [
         'status' => ['nullable', 'in:active,revoked,expired'],
         'order_id' => ['nullable', 'uuid'],
-        'max_major_version' => ['nullable', 'integer', 'min:1'],
+        'max_major_version' => ['nullable', 'integer', 'min:0'],
         'search' => ['nullable', 'string', 'max:4'],
         'sort' => ['nullable', 'string'],
     ];

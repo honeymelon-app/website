@@ -41,6 +41,18 @@
     --color-destructive: var(--destructive);
     --color-destructive-foreground: var(--destructive-foreground);
 
+    --color-gray-50: var(--gray-50);
+    --color-gray-100: var(--gray-100);
+    --color-gray-200: var(--gray-200);
+    --color-gray-300: var(--gray-300);
+    --color-gray-400: var(--gray-400);
+    --color-gray-500: var(--gray-500);
+    --color-gray-600: var(--gray-600);
+    --color-gray-700: var(--gray-700);
+    --color-gray-800: var(--gray-800);
+    --color-gray-900: var(--gray-900);
+    --color-gray-950: var(--gray-950);
+
     --color-border: var(--border);
     --color-input: var(--input);
     --color-ring: var(--ring);
@@ -98,6 +110,7 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
+
     *,
     ::after,
     ::before,
@@ -108,6 +121,7 @@
 }
 
 @layer utilities {
+
     body,
     html {
         --font-sans:
@@ -124,7 +138,7 @@
     --popover: hsl(0 0% 100%);
     --popover-foreground: hsl(30 35% 20%);
     --primary: hsl(34 72% 62%);
-    --primary-foreground: hsl(30 35% 20%);
+    --primary-foreground: hsl(0 0% 100%);
     --secondary: hsl(42 81% 88%);
     --secondary-foreground: hsl(30 35% 20%);
     --muted: hsl(45 100% 95%);
@@ -136,6 +150,17 @@
     --border: hsl(42 65% 90%);
     --input: hsl(42 65% 85%);
     --ring: hsl(34 72% 62%);
+    --gray-50: hsl(34 45% 98%);
+    --gray-100: hsl(34 38% 95%);
+    --gray-200: hsl(33 30% 90%);
+    --gray-300: hsl(32 25% 85%);
+    --gray-400: hsl(32 20% 75%);
+    --gray-500: hsl(31 18% 65%);
+    --gray-600: hsl(31 16% 55%);
+    --gray-700: hsl(30 14% 45%);
+    --gray-800: hsl(29 12% 36%);
+    --gray-900: hsl(28 12% 28%);
+    --gray-950: hsl(27 10% 20%);
     --chart-1: hsl(34 72% 62%);
     --chart-2: hsl(55 72% 66%);
     --chart-3: hsl(28 67% 57%);
@@ -161,7 +186,7 @@
     --popover: hsl(30 20% 10%);
     --popover-foreground: hsl(45 85% 95%);
     --primary: hsl(34 72% 62%);
-    --primary-foreground: hsl(30 35% 20%);
+    --primary-foreground: hsl(0 0% 100%);
     --secondary: hsl(28 40% 25%);
     --secondary-foreground: hsl(45 85% 95%);
     --muted: hsl(30 20% 15%);
@@ -173,6 +198,17 @@
     --border: hsl(30 20% 18%);
     --input: hsl(30 20% 18%);
     --ring: hsl(34 72% 62%);
+    --gray-50: hsl(33 30% 92%);
+    --gray-100: hsl(32 26% 86%);
+    --gray-200: hsl(31 24% 78%);
+    --gray-300: hsl(31 20% 68%);
+    --gray-400: hsl(30 18% 58%);
+    --gray-500: hsl(30 18% 49%);
+    --gray-600: hsl(30 17% 40%);
+    --gray-700: hsl(29 16% 32%);
+    --gray-800: hsl(28 15% 25%);
+    --gray-900: hsl(27 12% 18%);
+    --gray-950: hsl(26 10% 12%);
     --chart-1: hsl(34 72% 62%);
     --chart-2: hsl(55 72% 66%);
     --chart-3: hsl(28 67% 57%);
@@ -224,6 +260,7 @@
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {

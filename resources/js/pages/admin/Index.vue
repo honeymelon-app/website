@@ -11,6 +11,7 @@ import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
+import { defineComponent, h, type PropType } from 'vue';
 import {
     ArrowDownRight,
     ArrowUpRight,
@@ -62,6 +63,73 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const chartPalette = [
+    'hsl(var(--chart-1))',
+    'hsl(var(--chart-3))',
+    'hsl(var(--chart-4))',
+    'hsl(var(--chart-2))',
+];
+
+type TooltipDatum = { name: string; color?: string; value: number };
+
+const OrdersTooltip = defineComponent({
+    name: 'OrdersTooltip',
+    props: {
+        title: {
+            type: String,
+            required: true,
+        },
+        data: {
+            type: Array as PropType<TooltipDatum[]>,
+            default: () => [],
+        },
+    },
+    setup(props) {
+        const formatValue = (name: string, value: number): string => {
+            if (name === 'revenue') {
+                return formatCurrency(Math.max(0, value * 100));
+            }
+
+            return value.toLocaleString();
+        };
+
+        const label = (name: string): string => {
+            if (name === 'revenue') return 'Revenue';
+            if (name === 'orders') return 'Orders';
+            return name;
+        };
+
+        return () =>
+            h('div', { class: 'rounded-xl border bg-popover/90 px-3 py-2 shadow-lg backdrop-blur' }, [
+                h(
+                    'div',
+                    { class: 'text-[11px] font-medium uppercase tracking-wide text-muted-foreground' },
+                    props.title,
+                ),
+                ...props.data.map((item) =>
+                    h(
+                        'div',
+                        { class: 'flex items-center justify-between gap-3 py-1' },
+                        [
+                            h('div', { class: 'flex items-center gap-2' }, [
+                                h('span', {
+                                    class: 'h-2 w-2 rounded-full',
+                                    style: { backgroundColor: item.color ?? 'hsl(var(--chart-1))' },
+                                }),
+                                h('span', { class: 'text-sm text-foreground/80' }, label(item.name)),
+                            ]),
+                            h('span', { class: 'text-sm font-semibold' }, formatValue(item.name, item.value)),
+                        ],
+                    ),
+                ),
+            ]);
+    },
+});
+
+const donutValueFormatter = (value: number): string => value.toLocaleString();
+
+const platformValueFormatter = (value: number): string => value.toFixed(0);
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -229,7 +297,9 @@ const breadcrumbs: BreadcrumbItem[] = [
             <!-- Charts Row -->
             <div class="grid gap-4 lg:grid-cols-7">
                 <!-- Orders & Revenue Over Time -->
-                <Card class="lg:col-span-4">
+                <Card
+                    class="lg:col-span-4 overflow-hidden border-none bg-gradient-to-br from-amber-50/80 via-white to-amber-100/60 shadow-xl dark:from-[#1a120a] dark:via-[#0e0805] dark:to-[#0b0704]"
+                >
                     <CardHeader>
                         <CardTitle>Orders & Revenue (Last 30 Days)</CardTitle>
                     </CardHeader>
@@ -239,18 +309,23 @@ const breadcrumbs: BreadcrumbItem[] = [
                             :data="charts.orders_over_time"
                             index="date"
                             :categories="['orders', 'revenue']"
-                            :colors="[
-                                'hsl(var(--chart-1))',
-                                'hsl(var(--chart-2))',
-                            ]"
-                            :y-formatter="
-                                (tick: number | Date) => {
-                                    return typeof tick === 'number'
-                                        ? tick.toFixed(0)
-                                        : '';
-                                }
+                            :colors="[chartPalette[0], chartPalette[1]]"
+                            :x-formatter="
+                                (tick: number | Date) =>
+                                    typeof tick === 'number'
+                                        ? formatDate(
+                                              charts.orders_over_time[tick]?.date || '',
+                                          )
+                                        : ''
                             "
-                            class="h-[300px]"
+                            :y-formatter="
+                                (tick: number | Date) =>
+                                    typeof tick === 'number'
+                                        ? tick.toLocaleString()
+                                        : ''
+                            "
+                            :custom-tooltip="OrdersTooltip"
+                            class="h-[320px]"
                         />
                         <div
                             v-else
@@ -262,7 +337,9 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </Card>
 
                 <!-- License Status Distribution -->
-                <Card class="lg:col-span-3">
+                <Card
+                    class="lg:col-span-3 overflow-hidden border-none bg-gradient-to-br from-slate-50 via-white to-amber-50/70 shadow-xl dark:from-[#0e0d0b] dark:via-[#0b0a08] dark:to-[#1a120c]"
+                >
                     <CardHeader>
                         <CardTitle>License Status Distribution</CardTitle>
                     </CardHeader>
@@ -272,11 +349,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                             :data="charts.licenses_by_status"
                             index="status"
                             category="count"
-                            :colors="[
-                                'hsl(var(--chart-1))',
-                                'hsl(var(--chart-2))',
-                                'hsl(var(--chart-3))',
-                            ]"
+                            :colors="chartPalette"
+                            :value-formatter="donutValueFormatter"
                             class="mx-auto h-[300px]"
                         />
                         <div
@@ -291,7 +365,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
             <!-- Platform Distribution -->
             <div class="grid gap-4 lg:grid-cols-2">
-                <Card>
+                <Card class="overflow-hidden border-none bg-gradient-to-br from-amber-50/70 via-white to-slate-50 shadow-xl dark:from-[#1a120c] dark:via-[#0e0b08] dark:to-[#0a0806]">
                     <CardHeader>
                         <CardTitle>Artifacts by Platform</CardTitle>
                     </CardHeader>
@@ -301,8 +375,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                             :data="charts.artifacts_by_platform"
                             index="platform"
                             :categories="['count']"
-                            :colors="['hsl(var(--chart-1))']"
-                            class="h-[250px]"
+                            :colors="[chartPalette[2]]"
+                            :rounded-corners="8"
+                            :y-formatter="platformValueFormatter"
+                            class="h-[260px]"
                         />
                         <div
                             v-else

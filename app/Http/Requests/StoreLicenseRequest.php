@@ -25,7 +25,7 @@ class StoreLicenseRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email', 'max:255'],
-            'max_major_version' => ['required', 'integer', 'min:1', 'max:999'],
+            'max_major_version' => ['required', 'integer', 'min:0', 'max:999'],
         ];
     }
 }

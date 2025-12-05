@@ -45,12 +45,13 @@ import {
     Plus,
     ShieldOff,
 } from 'lucide-vue-next';
-import { h, ref } from 'vue';
+import { computed, h, ref } from 'vue';
 
 interface Props {
     licenses: PaginatedResponse<License>;
     license_key?: string;
     license_email?: string;
+    available_versions: number[];
 }
 
 const props = defineProps<Props>();
@@ -81,10 +82,24 @@ const generatedLicenseEmail = ref(props.license_email || '');
 // Use clipboard composable
 const { copy: copyToClipboard, copied: isCopied } = useCopyToClipboard();
 
+const sortedMajorVersions = computed(() =>
+    [...(props.available_versions ?? [])].sort((a, b) => b - a),
+);
+
+const versionOptions = computed(() => [
+    ...sortedMajorVersions.value.map((major) => ({
+        value: major.toString(),
+        label: `Version ${major}.x`,
+    })),
+    { value: '999', label: 'Lifetime (All Versions)' },
+]);
+
+const defaultMaxMajorVersion = versionOptions.value[0]?.value ?? '1';
+
 // Issue license form
 const issueForm = useForm({
     email: '',
-    max_major_version: '1',
+    max_major_version: defaultMaxMajorVersion,
 });
 
 // Column definitions
@@ -359,19 +374,13 @@ const handlePageChange = (page: number): void => {
                                             />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="1"
-                                                >Version 1.x</SelectItem
+                                            <SelectItem
+                                                v-for="option in versionOptions"
+                                                :key="option.value"
+                                                :value="option.value"
                                             >
-                                            <SelectItem value="2"
-                                                >Version 2.x</SelectItem
-                                            >
-                                            <SelectItem value="3"
-                                                >Version 3.x</SelectItem
-                                            >
-                                            <SelectItem value="999"
-                                                >Lifetime (All
-                                                Versions)</SelectItem
-                                            >
+                                                {{ option.label }}
+                                            </SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <p

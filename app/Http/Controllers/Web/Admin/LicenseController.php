@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web\Admin;
 
+use App\Enums\ReleaseChannel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLicenseRequest;
 use App\Http\Resources\LicenseResource;
 use App\Models\License;
 use App\Models\Order;
+use App\Models\Release;
 use App\Services\LicenseService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -23,6 +25,20 @@ class LicenseController extends Controller
      */
     public function index(): Response
     {
+        $availableMajorVersions = Release::query()
+            ->whereIn('channel', [
+                ReleaseChannel::STABLE,
+                ReleaseChannel::ALPHA,
+            ])
+            ->published()
+            ->orderByDesc('published_at')
+            ->pluck('version')
+            ->map(static fn (string $version): int => (int) explode('.', $version)[0])
+            ->filter(static fn (int $major): bool => $major >= 0 && $major < 999)
+            ->unique()
+            ->values()
+            ->all();
+
         $licenses = License::query()
             ->with('order')
             ->latest('created_at')
@@ -46,6 +62,7 @@ class LicenseController extends Controller
                     'next' => $licenses->nextPageUrl(),
                 ],
             ],
+            'available_versions' => $availableMajorVersions,
         ]);
     }
 
