@@ -16,7 +16,7 @@ import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
 import releases from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
-import type { Artifact, Release } from '@/types/resources';
+import type { ArtifactWithSync } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import {
     AlertTriangle,
@@ -29,20 +29,6 @@ import {
     XCircle,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
-
-interface StorageStatus {
-    synced: boolean;
-    type: 'github' | 'r2' | 'missing_path' | 'not_found' | 'error';
-    message: string;
-    storage_size?: number;
-    size_match?: boolean;
-}
-
-interface ArtifactWithSync extends Artifact {
-    storage_status: StorageStatus;
-    download_url?: string;
-    release?: Release;
-}
 
 interface Props {
     artifact: ArtifactWithSync;
@@ -232,9 +218,9 @@ const handleDelete = () => {
                                 }}, R2={{
                                     artifact.storage_status.storage_size
                                         ? formatFileSize(
-                                              artifact.storage_status
-                                                  .storage_size,
-                                          )
+                                            artifact.storage_status
+                                                .storage_size,
+                                        )
                                         : 'N/A'
                                 }})
                             </template>
@@ -405,9 +391,8 @@ const handleDelete = () => {
                                 @click="downloadArtifact"
                                 size="sm"
                                 variant="outline"
-                                :disabled="
-                                    !artifact.download_url && !artifact.url
-                                "
+                                :disabled="!artifact.download_url && !artifact.url
+                                    "
                             >
                                 <Download class="h-4 w-4" />
                             </Button>

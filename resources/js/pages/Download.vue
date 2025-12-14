@@ -26,7 +26,7 @@ import {
 } from 'lucide-vue-next';
 
 import faqsData from '@/content/faqs.json';
-import { Artifact } from '@/types/api';
+import type { Artifact } from '@/types/resources';
 
 const faqs = faqsData;
 

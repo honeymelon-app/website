@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ConfirmDialog } from '@/components/admin';
 import { DataTable, type Column } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,14 +10,16 @@ import {
     DropdownMenuLabel,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDate, truncateId } from '@/lib/formatters';
 import { getProviderVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import ordersRoute from '@/routes/admin/orders';
+import orders from '@/routes/admin/orders';
 import type { BreadcrumbItem } from '@/types';
 import type { Order, PaginatedResponse } from '@/types/resources';
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import {
     BadgeCheck,
     Clock3,
@@ -24,7 +27,7 @@ import {
     MoreHorizontal,
     RotateCcw,
 } from 'lucide-vue-next';
-import { h } from 'vue';
+import { h, ref } from 'vue';
 
 interface Props {
     orders: PaginatedResponse<Order>;
@@ -39,9 +42,16 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Orders',
-        href: ordersRoute.index().url,
+        href: orders.index().url,
     },
 ];
+
+// Refund dialog state
+const showRefundDialog = ref(false);
+const orderToRefund = ref<Order | null>(null);
+const refundForm = useForm({
+    reason: '',
+});
 
 // Column definitions
 const columns: Column<Order>[] = [
@@ -125,17 +135,17 @@ const columns: Column<Order>[] = [
 
             return row.is_within_refund_window
                 ? h(
-                      'span',
-                      {
-                          class: 'text-emerald-600 dark:text-emerald-500 text-sm flex items-center justify-center gap-1',
-                      },
-                      [h(Clock3, { class: 'h-4 w-4' }), 'Open'],
-                  )
+                    'span',
+                    {
+                        class: 'text-emerald-600 dark:text-emerald-500 text-sm flex items-center justify-center gap-1',
+                    },
+                    [h(Clock3, { class: 'h-4 w-4' }), 'Open'],
+                )
                 : h(
-                      'span',
-                      { class: 'text-muted-foreground text-sm' },
-                      'Closed',
-                  );
+                    'span',
+                    { class: 'text-muted-foreground text-sm' },
+                    'Closed',
+                );
         },
     },
     {
@@ -235,20 +245,20 @@ const columns: Column<Order>[] = [
                                     ),
                                     row.can_be_refunded
                                         ? h(
-                                              DropdownMenuItem,
-                                              {
-                                                  onClick: () =>
-                                                      refundOrder(row),
-                                              },
-                                              {
-                                                  default: () => [
-                                                      h(RotateCcw, {
-                                                          class: 'mr-2 h-4 w-4',
-                                                      }),
-                                                      'Refund Order',
-                                                  ],
-                                              },
-                                          )
+                                            DropdownMenuItem,
+                                            {
+                                                onClick: () =>
+                                                    openRefundDialog(row),
+                                            },
+                                            {
+                                                default: () => [
+                                                    h(RotateCcw, {
+                                                        class: 'mr-2 h-4 w-4',
+                                                    }),
+                                                    'Refund Order',
+                                                ],
+                                            },
+                                        )
                                         : null,
                                 ],
                             },
@@ -262,35 +272,32 @@ const columns: Column<Order>[] = [
 
 // Actions
 const viewOrder = (order: Order): void => {
-    router.visit(ordersRoute.show(order.id).url);
+    router.visit(orders.show(order.id).url);
 };
 
-const refundOrder = (order: Order): void => {
-    if (!order.can_be_refunded) {
+const openRefundDialog = (order: Order): void => {
+    orderToRefund.value = order;
+    refundForm.reset();
+    showRefundDialog.value = true;
+};
+
+const processRefund = (): void => {
+    if (!orderToRefund.value) {
         return;
     }
 
-    const confirmed = confirm(
-        `Refund order ${truncateId(order.id)}? This will revoke the associated license.`,
-    );
-
-    if (!confirmed) {
-        return;
-    }
-
-    const reason = window.prompt('Refund reason (optional)')?.trim() ?? '';
-
-    router.post(
-        ordersRoute.refund(order.id).url,
-        { reason: reason || null },
-        {
-            preserveScroll: true,
+    refundForm.post(orders.refund(orderToRefund.value.id).url, {
+        preserveScroll: true,
+        onSuccess: () => {
+            showRefundDialog.value = false;
+            orderToRefund.value = null;
+            refundForm.reset();
         },
-    );
+    });
 };
 
 const handlePageChange = (page: number): void => {
-    router.visit(ordersRoute.index().url, {
+    router.visit(orders.index().url, {
         data: { page },
         preserveState: true,
         preserveScroll: true,
@@ -326,5 +333,38 @@ const handlePageChange = (page: number): void => {
                 />
             </div>
         </div>
+
+        <!-- Refund Confirmation Dialog -->
+        <ConfirmDialog
+            v-model:open="showRefundDialog"
+            title="Refund Order"
+            confirm-label="Process Refund"
+            :loading="refundForm.processing"
+            :show-trigger="false"
+            @confirm="processRefund"
+        >
+            <p class="mb-4">
+                Are you sure you want to refund order
+                <code class="rounded bg-muted px-1 py-0.5 font-mono text-sm">{{
+                    orderToRefund ? truncateId(orderToRefund.id) : ''
+                }}</code
+                >?
+            </p>
+            <ul class="mb-4 list-disc space-y-1 pl-6 text-sm">
+                <li>Process a full refund through the payment provider</li>
+                <li>Revoke the associated license</li>
+            </ul>
+            <div class="space-y-2">
+                <Label for="reason">Reason (optional)</Label>
+                <Input
+                    id="reason"
+                    v-model="refundForm.reason"
+                    placeholder="Enter refund reason..."
+                />
+            </div>
+            <p class="mt-4 text-sm font-medium text-destructive">
+                This action cannot be undone.
+            </p>
+        </ConfirmDialog>
     </AppLayout>
 </template>

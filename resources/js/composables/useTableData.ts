@@ -1,4 +1,5 @@
-import type { FilterParams, PaginatedResponse } from '@/types/api';
+import type { FilterParams } from '@/types/api';
+import type { PaginatedResponse } from '@/types/resources';
 import { computed, ref } from 'vue';
 
 export function useTableData<T>(

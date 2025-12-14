@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ConfirmDialog, PageHeader } from '@/components/admin';
+import { ConfirmDialog, FlashMessages, PageHeader } from '@/components/admin';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,21 +15,19 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDateTime, truncateId } from '@/lib/formatters';
 import { getProviderVariant, getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import licensesRoute from '@/routes/admin/licenses';
-import ordersRoute from '@/routes/admin/orders';
+import licenses from '@/routes/admin/licenses';
+import orders from '@/routes/admin/orders';
 import type { BreadcrumbItem } from '@/types';
 import type { License, Order } from '@/types/resources';
-import { Head, router, useForm, usePage } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import {
-    AlertTriangle,
-    CheckCircle,
     CreditCard,
     ExternalLink,
     Mail,
     RotateCcw,
     Shield,
 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 
 interface ExtendedOrder extends Order {
     license?: License | null;
@@ -41,8 +39,6 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const page = usePage();
-
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
@@ -50,11 +46,11 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Orders',
-        href: ordersRoute.index().url,
+        href: orders.index().url,
     },
     {
         title: truncateId(props.order.id),
-        href: ordersRoute.show(props.order.id).url,
+        href: orders.show(props.order.id).url,
     },
 ];
 
@@ -63,14 +59,6 @@ const showRefundDialog = ref(false);
 const refundForm = useForm({
     reason: '',
 });
-
-// Flash messages
-const successMessage = computed(
-    () => page.props.flash?.success as string | undefined,
-);
-const errorMessage = computed(
-    () => page.props.flash?.error as string | undefined,
-);
 
 // Get Stripe dashboard URL for the order
 const getStripeUrl = (): string | null => {
@@ -87,13 +75,13 @@ const getStripeUrl = (): string | null => {
 // Navigate to license
 const viewLicense = (): void => {
     if (props.order.license?.id) {
-        router.visit(licensesRoute.show(props.order.license.id).url);
+        router.visit(licenses.show(props.order.license.id).url);
     }
 };
 
 // Refund actions
 const processRefund = (): void => {
-    refundForm.post(ordersRoute.refund(props.order.id).url, {
+    refundForm.post(orders.refund(props.order.id).url, {
         preserveScroll: true,
         onSuccess: () => {
             showRefundDialog.value = false;
@@ -112,32 +100,7 @@ const processRefund = (): void => {
         >
             <div class="flex flex-col gap-6">
                 <!-- Flash Messages -->
-                <div
-                    v-if="successMessage"
-                    class="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950"
-                >
-                    <CheckCircle
-                        class="h-5 w-5 text-green-600 dark:text-green-400"
-                    />
-                    <p
-                        class="text-sm font-medium text-green-800 dark:text-green-200"
-                    >
-                        {{ successMessage }}
-                    </p>
-                </div>
-                <div
-                    v-if="errorMessage"
-                    class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
-                >
-                    <AlertTriangle
-                        class="h-5 w-5 text-red-600 dark:text-red-400"
-                    />
-                    <p
-                        class="text-sm font-medium text-red-800 dark:text-red-200"
-                    >
-                        {{ errorMessage }}
-                    </p>
-                </div>
+                <FlashMessages />
 
                 <!-- Refunded Banner -->
                 <div
@@ -166,7 +129,7 @@ const processRefund = (): void => {
                 <PageHeader
                     title="Order Details"
                     description="View order information and associated license."
-                    :back-url="ordersRoute.index().url"
+                    :back-url="orders.index().url"
                 >
                     <template #badges>
                         <Badge
@@ -293,9 +256,8 @@ const processRefund = (): void => {
                                     >Provider</span
                                 >
                                 <Badge
-                                    :variant="
-                                        getProviderVariant(order.provider)
-                                    "
+                                    :variant="getProviderVariant(order.provider)
+                                        "
                                     class="w-fit capitalize"
                                 >
                                     {{ order.provider }}
@@ -362,11 +324,10 @@ const processRefund = (): void => {
                                             >Status</span
                                         >
                                         <Badge
-                                            :variant="
-                                                getStatusVariant(
-                                                    order.license.status,
-                                                )
-                                            "
+                                            :variant="getStatusVariant(
+                                                order.license.status,
+                                            )
+                                                "
                                             class="w-fit capitalize"
                                         >
                                             {{ order.license.status }}

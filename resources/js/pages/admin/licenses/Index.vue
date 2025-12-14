@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ConfirmDialog } from '@/components/admin';
 import { DataTable, type Column } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -33,7 +34,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDate, formatDateTime, truncateId } from '@/lib/formatters';
 import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import licensesRoute from '@/routes/admin/licenses';
+import licenses from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
 import type { License, PaginatedResponse } from '@/types/resources';
 import { Head, router, useForm } from '@inertiajs/vue3';
@@ -63,7 +64,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Licenses',
-        href: licensesRoute.index().url,
+        href: licenses.index().url,
     },
 ];
 
@@ -78,6 +79,13 @@ const selectedLicense = ref<License | null>(null);
 const isSuccessDialogOpen = ref(!!props.license_key);
 const generatedLicenseKey = ref(props.license_key || '');
 const generatedLicenseEmail = ref(props.license_email || '');
+
+// Revoke dialog state
+const isRevokeDialogOpen = ref(false);
+const licenseToRevoke = ref<License | null>(null);
+const revokeForm = useForm({
+    reason: '',
+});
 
 // Use clipboard composable
 const { copy: copyToClipboard, copied: isCopied } = useCopyToClipboard();
@@ -274,21 +282,21 @@ const columns: Column<License>[] = [
                                             : null,
                                         row.status === 'active'
                                             ? h(
-                                                  DropdownMenuItem,
-                                                  {
-                                                      onClick: () =>
-                                                          revokeLicense(row),
-                                                      class: 'text-destructive focus:text-destructive',
-                                                  },
-                                                  {
-                                                      default: () => [
-                                                          h(ShieldOff, {
-                                                              class: 'mr-2 h-4 w-4',
-                                                          }),
-                                                          'Revoke License',
-                                                      ],
-                                                  },
-                                              )
+                                                DropdownMenuItem,
+                                                {
+                                                    onClick: () =>
+                                                        revokeLicense(row),
+                                                    class: 'text-destructive focus:text-destructive',
+                                                },
+                                                {
+                                                    default: () => [
+                                                        h(ShieldOff, {
+                                                            class: 'mr-2 h-4 w-4',
+                                                        }),
+                                                        'Revoke License',
+                                                    ],
+                                                },
+                                            )
                                             : null,
                                     ].filter(Boolean),
                             },
@@ -307,23 +315,28 @@ const viewLicense = (license: License): void => {
 };
 
 const revokeLicense = (license: License): void => {
-    if (
-        confirm(
-            `Are you sure you want to revoke license ${license.id.substring(0, 8)}?`,
-        )
-    ) {
-        router.post(
-            '/api/admin/licenses/revoke',
-            { license_id: license.id },
-            {
-                preserveScroll: true,
-            },
-        );
+    licenseToRevoke.value = license;
+    revokeForm.reset();
+    isRevokeDialogOpen.value = true;
+};
+
+const processRevoke = (): void => {
+    if (!licenseToRevoke.value) {
+        return;
     }
+
+    revokeForm.post(`/admin/licenses/${licenseToRevoke.value.id}/revoke`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            isRevokeDialogOpen.value = false;
+            licenseToRevoke.value = null;
+            revokeForm.reset();
+        },
+    });
 };
 
 const handleIssueLicense = (): void => {
-    issueForm.post(licensesRoute.store().url, {
+    issueForm.post(licenses.store().url, {
         preserveScroll: true,
         onSuccess: () => {
             isIssueDialogOpen.value = false;
@@ -333,7 +346,7 @@ const handleIssueLicense = (): void => {
 };
 
 const handlePageChange = (page: number): void => {
-    router.visit(licensesRoute.index().url, {
+    router.visit(licenses.index().url, {
         data: { page },
         preserveState: true,
         preserveScroll: true,
@@ -554,9 +567,8 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="
-                                    getStatusVariant(selectedLicense.status)
-                                "
+                                :variant="getStatusVariant(selectedLicense.status)
+                                    "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -638,7 +650,7 @@ const handlePageChange = (page: number): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                                isDetailsDialogOpen = false;
+                            isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />
@@ -648,5 +660,38 @@ const handlePageChange = (page: number): void => {
                 </div>
             </DialogContent>
         </Dialog>
+
+        <!-- Revoke Confirmation Dialog -->
+        <ConfirmDialog
+            v-model:open="isRevokeDialogOpen"
+            title="Revoke License"
+            confirm-label="Revoke License"
+            :loading="revokeForm.processing"
+            :show-trigger="false"
+            @confirm="processRevoke"
+        >
+            <p class="mb-4">
+                Are you sure you want to revoke license
+                <code class="rounded bg-muted px-1 py-0.5 font-mono text-sm">{{
+                    licenseToRevoke ? truncateId(licenseToRevoke.id) : ''
+                }}</code
+                >?
+            </p>
+            <ul class="mb-4 list-disc space-y-1 pl-6 text-sm">
+                <li>The license will no longer be valid for activation</li>
+                <li>Already activated installations will continue to work</li>
+            </ul>
+            <div class="space-y-2">
+                <Label for="revoke-reason">Reason (optional)</Label>
+                <Input
+                    id="revoke-reason"
+                    v-model="revokeForm.reason"
+                    placeholder="Enter revocation reason..."
+                />
+            </div>
+            <p class="mt-4 text-sm font-medium text-destructive">
+                This action cannot be undone.
+            </p>
+        </ConfirmDialog>
     </AppLayout>
 </template>

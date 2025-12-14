@@ -25,7 +25,8 @@ export function formatFileSize(bytes: number | null | undefined): string {
  * Format an ISO date string into a localized date string.
  * @param dateString - ISO date string to format
  * @param options - Intl.DateTimeFormat options (defaults to short date)
- * @returns Formatted date string or "N/A" if invalid
+ * @param fallback - String to return for null/undefined dates (defaults to "N/A")
+ * @returns Formatted date string or fallback if invalid
  */
 export function formatDate(
     dateString: string | null | undefined,
@@ -34,32 +35,41 @@ export function formatDate(
         month: 'short',
         day: 'numeric',
     },
+    fallback: string = 'N/A',
 ): string {
     if (!dateString) {
-        return 'N/A';
+        return fallback;
     }
 
     try {
         const date = new Date(dateString);
         return date.toLocaleDateString('en-US', options);
     } catch {
-        return 'N/A';
+        return fallback;
     }
 }
 
 /**
  * Format an ISO date string into a localized date and time string.
  * @param dateString - ISO date string to format
- * @returns Formatted datetime string or "N/A" if invalid
+ * @param fallback - String to return for null/undefined dates (defaults to "N/A")
+ * @returns Formatted datetime string or fallback if invalid
  */
-export function formatDateTime(dateString: string | null | undefined): string {
-    return formatDate(dateString, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+export function formatDateTime(
+    dateString: string | null | undefined,
+    fallback: string = 'N/A',
+): string {
+    return formatDate(
+        dateString,
+        {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        },
+        fallback,
+    );
 }
 
 /**

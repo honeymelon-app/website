@@ -1,15 +1,6 @@
 <script setup lang="ts">
+import { ConfirmDialog } from '@/components/admin';
 import { DataTable, type Column } from '@/components/data-table';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -30,10 +21,10 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDate, formatFileSize } from '@/lib/formatters';
 import { getSourceVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import artifactsRoute from '@/routes/admin/artifacts';
-import releasesRoute from '@/routes/admin/releases';
+import artifacts from '@/routes/admin/artifacts';
+import releases from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
-import type { Artifact, PaginatedResponse } from '@/types/resources';
+import type { ArtifactWithSync, PaginatedResponse } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import {
     AlertTriangle,
@@ -49,18 +40,6 @@ import {
 } from 'lucide-vue-next';
 import { h, ref } from 'vue';
 
-interface StorageStatus {
-    synced: boolean;
-    type: 'github' | 'r2' | 'missing_path' | 'not_found' | 'error';
-    message: string;
-    storage_size?: number;
-    size_match?: boolean;
-}
-
-interface ArtifactWithSync extends Artifact {
-    storage_status: StorageStatus;
-}
-
 interface Props {
     artifacts: PaginatedResponse<ArtifactWithSync>;
 }
@@ -74,7 +53,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Artifacts',
-        href: artifactsRoute.index().url,
+        href: artifacts.index().url,
     },
 ];
 
@@ -221,8 +200,8 @@ const columns: Column<ArtifactWithSync>[] = [
         render: (row: ArtifactWithSync) => {
             return row.notarized
                 ? h(ShieldCheck, {
-                      class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
-                  })
+                    class: 'h-4 w-4 text-green-600 dark:text-green-500 inline',
+                })
                 : h('span', { class: 'text-muted-foreground' }, '—');
         },
     },
@@ -421,11 +400,11 @@ const columns: Column<ArtifactWithSync>[] = [
 
 // Actions
 const viewArtifact = (artifact: ArtifactWithSync): void => {
-    router.visit(artifactsRoute.show(artifact.id).url);
+    router.visit(artifacts.show(artifact.id).url);
 };
 
 const viewRelease = (releaseId: string): void => {
-    router.visit(releasesRoute.show(releaseId).url);
+    router.visit(releases.show(releaseId).url);
 };
 
 const downloadArtifact = (artifact: ArtifactWithSync): void => {
@@ -447,7 +426,7 @@ const confirmDelete = (artifact: ArtifactWithSync): void => {
 const handleDelete = (): void => {
     if (!artifactToDelete.value) return;
 
-    router.delete(artifactsRoute.destroy(artifactToDelete.value.id).url, {
+    router.delete(artifacts.destroy(artifactToDelete.value.id).url, {
         onSuccess: () => {
             showDeleteDialog.value = false;
             artifactToDelete.value = null;
@@ -461,7 +440,7 @@ const cancelDelete = (): void => {
 };
 
 const handlePageChange = (page: number): void => {
-    router.visit(artifactsRoute.index().url, {
+    router.visit(artifacts.index().url, {
         data: { page },
         preserveState: true,
         preserveScroll: true,
@@ -490,48 +469,36 @@ const handlePageChange = (page: number): void => {
                     :columns="columns"
                     :data="props.artifacts.data"
                     :meta="props.artifacts.meta"
-                    empty-message="No artifacts found."
+                    empty-message="No artifacts found. Artifacts are created when releases are synced from GitHub."
                     @page-change="handlePageChange"
                 />
             </div>
         </div>
 
         <!-- Delete Confirmation Dialog -->
-        <AlertDialog
-            :open="showDeleteDialog"
-            @update:open="showDeleteDialog = $event"
+        <ConfirmDialog
+            v-model:open="showDeleteDialog"
+            title="Delete Artifact"
+            confirm-label="Delete"
+            :show-trigger="false"
+            @confirm="handleDelete"
+            @cancel="cancelDelete"
         >
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Artifact</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Are you sure you want to delete "{{
-                            artifactToDelete?.filename
-                        }}"?
-                        <span
-                            v-if="
-                                artifactToDelete?.source === 'r2' ||
-                                artifactToDelete?.source === 's3'
-                            "
-                            class="mt-2 block font-medium text-destructive"
-                        >
-                            This will also delete the file from R2 storage.
-                        </span>
-                        This action cannot be undone.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel @click="cancelDelete">
-                        Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                        @click="handleDelete"
-                        class="bg-destructive hover:bg-destructive/90"
-                    >
-                        Delete
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+            <p>
+                Are you sure you want to delete "{{
+                    artifactToDelete?.filename
+                }}"?
+            </p>
+            <p
+                v-if="
+                    artifactToDelete?.source === 'r2' ||
+                    artifactToDelete?.source === 's3'
+                "
+                class="mt-2 font-medium text-destructive"
+            >
+                This will also delete the file from R2 storage.
+            </p>
+            <p class="mt-2">This action cannot be undone.</p>
+        </ConfirmDialog>
     </AppLayout>
 </template>

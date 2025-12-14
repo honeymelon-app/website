@@ -44,6 +44,24 @@ export interface Artifact {
     download_url?: string;
 }
 
+/**
+ * Storage synchronization status for artifacts
+ */
+export interface StorageStatus {
+    synced: boolean;
+    type: 'github' | 'r2' | 'missing_path' | 'not_found' | 'error';
+    message: string;
+    storage_size?: number;
+    size_match?: boolean;
+}
+
+/**
+ * Artifact with storage sync status
+ */
+export interface ArtifactWithSync extends Artifact {
+    storage_status: StorageStatus;
+}
+
 export interface Update {
     id: string;
     release_id: string;

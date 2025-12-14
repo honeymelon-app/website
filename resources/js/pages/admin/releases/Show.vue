@@ -15,7 +15,7 @@ import { Separator } from '@/components/ui/separator';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDateTime, formatFileSize } from '@/lib/formatters';
 import { dashboard } from '@/routes';
-import releasesRoute from '@/routes/admin/releases';
+import releases from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
 import type { Release, ReleaseArtifact } from '@/types/resources';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -45,7 +45,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Releases',
-        href: releasesRoute.index().url,
+        href: releases.index().url,
     },
     {
         title: props.release.version,
@@ -94,7 +94,7 @@ const deleteForm = useForm({});
 
 const deleteRelease = () => {
     isDeleting.value = true;
-    deleteForm.delete(releasesRoute.destroy(props.release.id).url, {
+    deleteForm.delete(releases.destroy(props.release.id).url, {
         preserveScroll: true,
         onSuccess: () => {
             deleteDialogOpen.value = false;
@@ -110,11 +110,14 @@ const deleteRelease = () => {
     <Head :title="`Release ${release.version}`" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-6 p-6">
-            <!-- Header -->
-            <PageHeader
+        <div
+            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
+        >
+            <div class="flex flex-col gap-6">
+                <!-- Header -->
+                <PageHeader
                 :title="release.version"
-                :back-url="releasesRoute.index().url"
+                :back-url="releases.index().url"
             >
                 <template #title>
                     <span class="font-mono text-3xl font-bold tracking-tight">
@@ -123,11 +126,10 @@ const deleteRelease = () => {
                 </template>
                 <template #badges>
                     <Badge
-                        :variant="
-                            release.channel === 'stable'
-                                ? 'default'
-                                : 'secondary'
-                        "
+                        :variant="release.channel === 'stable'
+                            ? 'default'
+                            : 'secondary'
+                            "
                         class="capitalize"
                     >
                         {{ release.channel }}
@@ -303,6 +305,7 @@ const deleteRelease = () => {
                     </div>
                 </CardContent>
             </Card>
+            </div>
         </div>
     </AppLayout>
 </template>

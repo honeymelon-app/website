@@ -57,12 +57,10 @@ onUnmounted(() => {
                         <Button as-child variant="ghost">
                             <a
                                 href="https://docs.honeymelon.app"
-                                target="_blank"
                                 rel="noopener noreferrer"
                                 class="inline-flex items-center gap-1.5"
                             >
                                 Docs
-                                <ExternalLink class="h-3 w-3" />
                             </a>
                         </Button>
                         <Button as-child>

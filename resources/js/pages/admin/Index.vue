@@ -49,9 +49,9 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
-    licenses_by_status: Array<{ status: string; count: number }>;
-    artifacts_by_platform: Array<{ platform: string; count: number }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
+    licenses_by_status: Array<{ status: string; count: number; }>;
+    artifacts_by_platform: Array<{ platform: string; count: number; }>;
 }
 
 interface Props {
@@ -75,7 +75,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-6 p-6">
+        <div
+            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
+        >
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
@@ -112,11 +114,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="
-                                    metrics.orders_change >= 0
+                                :class="metrics.orders_change >= 0
                                         ? 'text-green-500'
                                         : 'text-red-500'
-                                "
+                                    "
                             >
                                 {{ Math.abs(metrics.orders_change) }}%
                             </span>
@@ -151,11 +152,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="
-                                    metrics.revenue_change >= 0
+                                :class="metrics.revenue_change >= 0
                                         ? 'text-green-500'
                                         : 'text-red-500'
-                                "
+                                    "
                             >
                                 {{ Math.abs(metrics.revenue_change) }}%
                             </span>
@@ -190,11 +190,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 class="size-4 text-red-500"
                             />
                             <span
-                                :class="
-                                    metrics.licenses_change >= 0
+                                :class="metrics.licenses_change >= 0
                                         ? 'text-green-500'
                                         : 'text-red-500'
-                                "
+                                    "
                             >
                                 {{ Math.abs(metrics.licenses_change) }}%
                             </span>
@@ -243,13 +242,12 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 'hsl(var(--chart-1))',
                                 'hsl(var(--chart-2))',
                             ]"
-                            :y-formatter="
-                                (tick: number | Date) => {
+                            :y-formatter="(tick: number | Date) => {
                                     return typeof tick === 'number'
                                         ? tick.toFixed(0)
                                         : '';
                                 }
-                            "
+                                "
                             class="h-[300px]"
                         />
                         <div
@@ -342,11 +340,10 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <div class="flex items-center gap-2">
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="
-                                            getStatusVariant(
-                                                order.license_status,
-                                            )
-                                        "
+                                        :variant="getStatusVariant(
+                                            order.license_status,
+                                        )
+                                            "
                                     >
                                         {{ order.license_status }}
                                     </Badge>

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ReleaseCollection;
 use App\Http\Resources\ReleaseResource;
 use App\Models\Release;
 use App\Services\GithubService;
@@ -28,23 +29,7 @@ class ReleaseController extends Controller
             ->paginate(20);
 
         return Inertia::render('admin/releases/Index', [
-            'releases' => [
-                'data' => ReleaseResource::collection($releases->items())->resolve(),
-                'meta' => [
-                    'current_page' => $releases->currentPage(),
-                    'from' => $releases->firstItem(),
-                    'last_page' => $releases->lastPage(),
-                    'per_page' => $releases->perPage(),
-                    'to' => $releases->lastItem(),
-                    'total' => $releases->total(),
-                ],
-                'links' => [
-                    'first' => $releases->url(1),
-                    'last' => $releases->url($releases->lastPage()),
-                    'prev' => $releases->previousPageUrl(),
-                    'next' => $releases->nextPageUrl(),
-                ],
-            ],
+            'releases' => new ReleaseCollection($releases),
         ]);
     }
 
