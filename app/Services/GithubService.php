@@ -148,4 +148,72 @@ class GithubService
 
         return true;
     }
+
+    /**
+     * Fetch all releases from GitHub repository.
+     *
+     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, assets: array<int, array{name: string, url: string, size: int}>}>
+     */
+    public function fetchAllReleases(int $perPage = 100): array
+    {
+        $releases = [];
+        $page = 1;
+
+        do {
+            $response = $this->client()
+                ->get("/repos/{$this->owner}/{$this->repo}/releases", [
+                    'per_page' => $perPage,
+                    'page' => $page,
+                ])
+                ->throw();
+
+            $data = $response->json();
+
+            if (empty($data)) {
+                break;
+            }
+
+            foreach ($data as $release) {
+                $releases[] = [
+                    'id' => $release['id'],
+                    'tag' => $release['tag_name'],
+                    'name' => $release['name'] ?? $release['tag_name'],
+                    'notes' => $release['body'] ?? '',
+                    'published_at' => $release['published_at'] ?? now()->toIso8601String(),
+                    'prerelease' => $release['prerelease'] ?? false,
+                    'draft' => $release['draft'] ?? false,
+                    'target_commitish' => $release['target_commitish'] ?? null,
+                    'assets' => collect($release['assets'] ?? [])->map(fn (array $asset) => [
+                        'name' => $asset['name'],
+                        'url' => $asset['browser_download_url'],
+                        'size' => $asset['size'],
+                    ])->toArray(),
+                ];
+            }
+
+            $page++;
+        } while (count($data) === $perPage);
+
+        return $releases;
+    }
+
+    /**
+     * Download an asset's content to get SHA256 or signature files.
+     */
+    public function downloadAssetContent(string $url): ?string
+    {
+        try {
+            $response = $this->client()
+                ->withHeaders(['Accept' => 'application/octet-stream'])
+                ->get($url);
+
+            if ($response->successful()) {
+                return $response->body();
+            }
+        } catch (\Throwable) {
+            // Silently fail - asset may not be accessible
+        }
+
+        return null;
+    }
 }

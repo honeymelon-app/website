@@ -579,16 +579,13 @@ const keyFeatures = keyFeaturesData;
             </div>
         </section>
 
-        <!-- CTA Section with gradient -->
+        <!-- CTA Section -->
         <section class="py-16">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <AnimatedSection>
                     <Card
-                        class="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-background transition-all duration-500 hover:border-primary/30"
+                        class="relative overflow-hidden border-2 border-primary/20 bg-muted/30 transition-all duration-500 hover:border-primary/30"
                     >
-                        <div
-                            class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.DEFAULT/10%),transparent)]"
-                        />
                         <CardContent
                             class="flex flex-col items-center gap-6 py-14 text-center"
                         >

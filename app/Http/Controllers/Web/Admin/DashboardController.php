@@ -5,15 +5,21 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\RedirectResponse;
+use App\Services\DashboardService;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(): RedirectResponse
+    public function __construct(private DashboardService $dashboardService) {}
+
+    public function index(): Response
     {
-        return redirect()->route('admin.dashboard');
+        return Inertia::render('admin/Index', [
+            'metrics' => $this->dashboardService->getMetrics(),
+            'recent_orders' => $this->dashboardService->getRecentOrders(),
+            'recent_licenses' => $this->dashboardService->getRecentLicenses(),
+            'charts' => $this->dashboardService->getChartData(),
+        ]);
     }
 }

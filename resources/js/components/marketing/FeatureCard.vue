@@ -28,19 +28,13 @@ const { elementRef, isVisible } = useScrollAnimation({
     <div
         ref="elementRef"
         class="transition-all duration-500 ease-out"
-        :class="
-            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-        "
+        :class="isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+            "
         :style="{ transitionDelay: `${delay}ms` }"
     >
         <Card
-            class="group relative h-full overflow-hidden border-border/50 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+            class="group relative h-full overflow-hidden border-border/50 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:bg-muted/30"
         >
-            <!-- Subtle gradient overlay on hover -->
-            <div
-                class="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-            />
-
             <CardHeader class="pb-4">
                 <div
                     v-if="icon"

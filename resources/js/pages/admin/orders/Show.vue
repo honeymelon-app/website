@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ConfirmDialog, FlashMessages, PageHeader } from '@/components/admin';
+import { ConfirmDialog, PageHeader } from '@/components/admin';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +28,9 @@ import {
     Shield,
 } from 'lucide-vue-next';
 import { ref } from 'vue';
+import { useFlashMessages } from '@/composables/useFlashMessages';
+
+useFlashMessages();
 
 interface ExtendedOrder extends Order {
     license?: License | null;
@@ -99,9 +102,6 @@ const processRefund = (): void => {
             class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
-                <!-- Flash Messages -->
-                <FlashMessages />
-
                 <!-- Refunded Banner -->
                 <div
                     v-if="order.is_refunded"

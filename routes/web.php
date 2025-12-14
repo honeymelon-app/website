@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Web\Admin\ArtifactController;
+use App\Http\Controllers\Web\Admin\DashboardController;
 use App\Http\Controllers\Web\Admin\LicenseController;
 use App\Http\Controllers\Web\Admin\OrderController;
 use App\Http\Controllers\Web\Admin\ReleaseController;
@@ -67,7 +67,7 @@ Route::middleware('auth')->group(function () {
     Route::get('dashboard', fn () => redirect()->route('admin.dashboard'))->name('dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('releases', ReleaseController::class)->only(['index', 'show', 'destroy']);
         Route::resource('artifacts', ArtifactController::class)->only(['index', 'show', 'destroy']);
         Route::resource('licenses', LicenseController::class)->only(['index', 'show', 'store']);

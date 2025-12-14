@@ -35,11 +35,6 @@ onMounted(() => {
     <section
         class="relative overflow-hidden border-b border-border/40 py-20 sm:py-28"
     >
-        <!-- Animated gradient background -->
-        <div
-            class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.DEFAULT/15%),transparent)] opacity-0 transition-opacity duration-1000"
-            :class="{ 'opacity-100': isVisible }"
-        />
         <!-- Subtle grid pattern overlay -->
         <div
             class="absolute inset-0 -z-10 bg-[linear-gradient(to_right,theme(colors.border/5%)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border/5%)_1px,transparent_1px)] bg-[size:4rem_4rem]"
@@ -51,11 +46,10 @@ onMounted(() => {
                     v-if="badge"
                     variant="outline"
                     class="mb-6 border-primary/50 px-4 py-1.5 text-sm transition-all duration-500 ease-out"
-                    :class="
-                        isVisible
+                    :class="isVisible
                             ? 'translate-y-0 opacity-100'
                             : '-translate-y-2 opacity-0'
-                    "
+                        "
                 >
                     <component
                         v-if="badgeIcon"
@@ -67,17 +61,16 @@ onMounted(() => {
 
                 <!-- Title with staggered fade-in -->
                 <h1
-                    class="mb-6 max-w-4xl bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-4xl leading-tight font-bold tracking-tight text-transparent transition-all delay-100 duration-600 ease-out sm:text-5xl md:text-6xl lg:text-7xl lg:leading-tight"
-                    :class="
-                        isVisible
+                    class="mb-6 max-w-4xl text-4xl leading-tight font-bold tracking-tight text-foreground transition-all delay-100 duration-600 ease-out sm:text-5xl md:text-6xl lg:text-7xl lg:leading-tight"
+                    :class="isVisible
                             ? 'translate-y-0 opacity-100'
                             : 'translate-y-4 opacity-0'
-                    "
+                        "
                 >
                     {{ title }}
                     <span
                         v-if="highlightedText"
-                        class="bg-gradient-to-r from-primary via-primary/80 to-primary bg-clip-text"
+                        class="text-primary"
                         >{{ highlightedText }}</span
                     >
                 </h1>
@@ -85,11 +78,10 @@ onMounted(() => {
                 <!-- Description with fade-in -->
                 <p
                     class="mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground transition-all delay-200 duration-600 ease-out sm:text-xl"
-                    :class="
-                        isVisible
+                    :class="isVisible
                             ? 'translate-y-0 opacity-100'
                             : 'translate-y-4 opacity-0'
-                    "
+                        "
                 >
                     {{ description }}
                 </p>
@@ -97,11 +89,10 @@ onMounted(() => {
                 <!-- Actions slot with fade-in -->
                 <div
                     class="transition-all delay-300 duration-600 ease-out"
-                    :class="
-                        isVisible
+                    :class="isVisible
                             ? 'translate-y-0 opacity-100'
                             : 'translate-y-4 opacity-0'
-                    "
+                        "
                 >
                     <slot name="actions" />
                 </div>
@@ -109,11 +100,10 @@ onMounted(() => {
                 <!-- Footer slot with fade-in -->
                 <div
                     class="w-full transition-all delay-400 duration-700 ease-out"
-                    :class="
-                        isVisible
+                    :class="isVisible
                             ? 'translate-y-0 opacity-100'
                             : 'translate-y-6 opacity-0'
-                    "
+                        "
                 >
                     <slot name="footer" />
                 </div>

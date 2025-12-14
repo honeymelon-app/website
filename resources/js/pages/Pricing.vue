@@ -27,10 +27,45 @@ import {
     X,
     Zap,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+
+interface Product {
+    slug: string;
+    name: string;
+    description: string;
+    price_cents: number;
+    currency: string;
+    formatted_price: string;
+}
 
 const isCheckingOut = ref(false);
 const checkoutError = ref<string | null>(null);
+const product = ref<Product | null>(null);
+const isLoadingProduct = ref(true);
+
+const formattedPrice = computed(() => {
+    if (!product.value) return '$29';
+    return product.value.formatted_price;
+});
+
+const priceNumber = computed(() => {
+    if (!product.value) return '29';
+    return (product.value.price_cents / 100).toString();
+});
+
+onMounted(async () => {
+    try {
+        const response = await fetch('/api/products/honeymelon');
+        if (response.ok) {
+            const data = await response.json();
+            product.value = data.product;
+        }
+    } catch (error) {
+        console.error('Failed to fetch product:', error);
+    } finally {
+        isLoadingProduct.value = false;
+    }
+});
 
 async function startCheckout() {
     if (isCheckingOut.value) return;
@@ -47,8 +82,7 @@ async function startCheckout() {
             },
             body: JSON.stringify({
                 provider: 'stripe',
-                amount: 2900,
-                currency: 'usd',
+                product_slug: 'honeymelon',
                 success_url: `${window.location.origin}/download?success=true`,
                 cancel_url: `${window.location.origin}/pricing?cancelled=true`,
             }),
@@ -201,9 +235,6 @@ const comparisonFeatures = [
                         <Card
                             class="group relative overflow-hidden border-2 border-primary/20 transition-all duration-500 hover:-translate-y-1 hover:border-primary/30"
                         >
-                            <div
-                                class="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 via-background to-background transition-opacity duration-500 group-hover:from-primary/10"
-                            />
                             <CardHeader
                                 class="border-b border-border/50 pb-8 text-center"
                             >
@@ -213,7 +244,7 @@ const comparisonFeatures = [
                                 <div
                                     class="mb-4 flex items-baseline justify-center gap-2"
                                 >
-                                    <span class="text-6xl font-bold">$29</span>
+                                    <span class="text-6xl font-bold">${{ priceNumber }}</span>
                                     <span class="text-xl text-muted-foreground">
                                         USD
                                     </span>
@@ -323,12 +354,12 @@ const comparisonFeatures = [
                                         <tbody>
                                             <tr
                                                 v-for="(
-                                                    item, index
+item, index
                                                 ) in comparisonFeatures"
                                                 :key="item.feature"
                                                 :class="[
                                                     index !==
-                                                    comparisonFeatures.length -
+                                                        comparisonFeatures.length -
                                                         1
                                                         ? 'border-b border-border/50'
                                                         : '',
@@ -350,9 +381,8 @@ const comparisonFeatures = [
                                                         >
                                                             <Check
                                                                 class="h-4 w-4 text-primary"
-                                                                :stroke-width="
-                                                                    3
-                                                                "
+                                                                :stroke-width="3
+                                                                    "
                                                             />
                                                         </div>
                                                         <X
@@ -374,9 +404,8 @@ const comparisonFeatures = [
                                                         >
                                                             <Check
                                                                 class="h-4 w-4 text-muted-foreground"
-                                                                :stroke-width="
-                                                                    2
-                                                                "
+                                                                :stroke-width="2
+                                                                    "
                                                             />
                                                         </div>
                                                         <X
@@ -568,11 +597,8 @@ const comparisonFeatures = [
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <AnimatedSection>
                     <Card
-                        class="relative overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/10 via-primary/5 to-background transition-all duration-500 hover:border-primary/30"
+                        class="relative overflow-hidden border-2 border-primary/20 bg-muted/30 transition-all duration-500 hover:border-primary/30"
                     >
-                        <div
-                            class="absolute inset-0 -z-10 bg-[radial-gradient(45rem_50rem_at_top,theme(colors.primary.DEFAULT/10%),transparent)]"
-                        />
                         <CardContent
                             class="flex flex-col items-center gap-6 py-14 text-center"
                         >

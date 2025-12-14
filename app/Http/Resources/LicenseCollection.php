@@ -18,33 +18,4 @@ class LicenseCollection extends ResourceCollection
     {
         return $this->collection->map(fn ($item) => new LicenseResource($item))->all();
     }
-
-    /**
-     * Get additional data that should be returned with the resource array.
-     *
-     * @return array<string, mixed>
-     */
-    public function with(Request $request): array
-    {
-        if (! $this->resource instanceof \Illuminate\Pagination\AbstractPaginator) {
-            return [];
-        }
-
-        return [
-            'meta' => [
-                'current_page' => $this->resource->currentPage(),
-                'from' => $this->resource->firstItem(),
-                'last_page' => $this->resource->lastPage(),
-                'per_page' => $this->resource->perPage(),
-                'to' => $this->resource->lastItem(),
-                'total' => $this->resource->total(),
-            ],
-            'links' => [
-                'first' => $this->resource->url(1),
-                'last' => $this->resource->url($this->resource->lastPage()),
-                'prev' => $this->resource->previousPageUrl(),
-                'next' => $this->resource->nextPageUrl(),
-            ],
-        ];
-    }
 }

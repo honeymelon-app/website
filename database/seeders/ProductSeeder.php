@@ -18,6 +18,9 @@ class ProductSeeder extends Seeder
                 'name' => 'Honeymelon',
                 'description' => 'A powerful, privacy-first video converter for macOS. Convert videos between formats quickly and easily, all offline.',
                 'stripe_product_id' => config('services.stripe.honeymelon_product_id'),
+                'stripe_price_id' => config('services.stripe.honeymelon_price_id'),
+                'price_cents' => 2900,
+                'currency' => 'usd',
                 'is_active' => true,
             ]
         );
