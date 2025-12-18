@@ -1,9 +1,4 @@
 <script setup lang="ts">
-import Card from '@/components/ui/card/Card.vue';
-import CardContent from '@/components/ui/card/CardContent.vue';
-import CardDescription from '@/components/ui/card/CardDescription.vue';
-import CardHeader from '@/components/ui/card/CardHeader.vue';
-import CardTitle from '@/components/ui/card/CardTitle.vue';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import type { Component } from 'vue';
 
@@ -32,27 +27,23 @@ const { elementRef, isVisible } = useScrollAnimation({
             "
         :style="{ transitionDelay: `${delay}ms` }"
     >
-        <Card
-            class="group relative h-full overflow-hidden border-border/50 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:bg-muted/30"
-        >
-            <CardHeader class="pb-4">
-                <div
-                    v-if="icon"
-                    class="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/15"
-                >
-                    <component
-                        :is="icon"
-                        class="h-7 w-7 text-primary"
-                        :stroke-width="1.5"
-                    />
-                </div>
-                <CardTitle class="text-xl">{{ title }}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <CardDescription class="text-base leading-relaxed">
-                    {{ description }}
-                </CardDescription>
-            </CardContent>
-        </Card>
+        <div class="group relative">
+            <div
+                v-if="icon"
+                class="mb-4 flex size-10 items-center justify-center rounded-lg bg-muted"
+            >
+                <component
+                    :is="icon"
+                    class="size-5 text-foreground"
+                    :stroke-width="1.5"
+                />
+            </div>
+            <h3 class="text-base font-semibold text-foreground">
+                {{ title }}
+            </h3>
+            <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {{ description }}
+            </p>
+        </div>
     </div>
 </template>

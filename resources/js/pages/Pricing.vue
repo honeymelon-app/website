@@ -43,11 +43,6 @@ const checkoutError = ref<string | null>(null);
 const product = ref<Product | null>(null);
 const isLoadingProduct = ref(true);
 
-const formattedPrice = computed(() => {
-    if (!product.value) return '$29';
-    return product.value.formatted_price;
-});
-
 const priceNumber = computed(() => {
     if (!product.value) return '29';
     return (product.value.price_cents / 100).toString();
