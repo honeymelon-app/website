@@ -11,7 +11,7 @@ use App\Http\Resources\ReleaseResource;
 use App\Models\Release;
 use Illuminate\Http\Request;
 
-class ReleaseController extends Controller
+final class ReleaseController extends Controller
 {
     /**
      * Display a listing of releases.

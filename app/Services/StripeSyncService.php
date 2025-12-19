@@ -10,7 +10,7 @@ use Stripe\Price;
 use Stripe\Product as StripeProduct;
 use Stripe\Stripe;
 
-class StripeSyncService
+final class StripeSyncService
 {
     public function __construct()
     {

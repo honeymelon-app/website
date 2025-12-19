@@ -123,4 +123,18 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Default Admin User
+    |--------------------------------------------------------------------------
+    |
+    | These values are used by the DefaultUserSeeder to create the initial
+    | admin user. Set these in your .env file for production deployments.
+    |
+    */
+
+    'admin_email' => env('ADMIN_EMAIL', 'admin@honeymelon.app'),
+
+    'admin_password' => env('ADMIN_PASSWORD', 'changeme'),
+
 ];

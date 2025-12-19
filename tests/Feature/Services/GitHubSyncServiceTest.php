@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Services;
 
+use App\Contracts\GitRepository;
 use App\Enums\ReleaseChannel;
 use App\Models\Artifact;
 use App\Models\Release;
-use App\Services\GithubService;
 use App\Services\GitHubSyncService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -46,7 +46,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
@@ -96,7 +96,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
@@ -133,7 +133,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
@@ -165,7 +165,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
@@ -196,7 +196,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
@@ -225,7 +225,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
@@ -267,7 +267,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
@@ -324,7 +324,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
@@ -379,7 +379,7 @@ class GitHubSyncServiceTest extends TestCase
             ],
         ];
 
-        $this->mock(GithubService::class, function (MockInterface $mock) use ($githubReleases) {
+        $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);

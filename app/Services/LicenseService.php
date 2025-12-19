@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\LicenseManager;
 use App\Enums\LicenseStatus;
+use App\Events\LicenseIssued;
+use App\Events\LicenseRevoked;
 use App\Models\License;
 use App\Support\LicenseBundle;
 use App\Support\LicenseCodec;
@@ -14,7 +17,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
 
-class LicenseService
+final class LicenseService implements LicenseManager
 {
     /**
      * Issue a new signed license for an order.
@@ -52,7 +55,11 @@ class LicenseService
             'key_last_6' => substr($bundle['key'], -6),
         ]);
 
-        return $license->refresh();
+        $license->refresh();
+
+        LicenseIssued::dispatch($license);
+
+        return $license;
     }
 
     /**
@@ -111,6 +118,8 @@ class LicenseService
         Cache::forget("license:valid:{$license->key}");
 
         Log::info('License revoked', ['license_id' => $license->id]);
+
+        LicenseRevoked::dispatch($license, 'manual');
     }
 
     /**

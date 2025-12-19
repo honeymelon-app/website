@@ -6,6 +6,13 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
+/**
+ * Main database seeder for the application.
+ *
+ * By default, only seeds essential data (DefaultUserSeeder, ProductSeeder).
+ * Use --class=DummyDataSeeder for development data.
+ * Use --class=TestSetupSeeder for test fixtures.
+ */
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -14,7 +21,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            AdminUserSeeder::class,
+            DefaultUserSeeder::class,
             ProductSeeder::class,
         ]);
     }

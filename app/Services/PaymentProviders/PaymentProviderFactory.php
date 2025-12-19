@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Services\PaymentProviders;
 
 use App\Contracts\PaymentProvider;
+use App\Contracts\PaymentProviderResolver;
+use Illuminate\Container\Attributes\Singleton;
 use InvalidArgumentException;
 
-class PaymentProviderFactory
+#[Singleton]
+final class PaymentProviderFactory implements PaymentProviderResolver
 {
     public function __construct(
         private readonly StripePaymentProvider $stripe

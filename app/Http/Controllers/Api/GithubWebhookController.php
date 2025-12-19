@@ -11,7 +11,7 @@ use App\Jobs\ProcessGithubReleaseJob;
 use App\Models\Release;
 use Illuminate\Http\JsonResponse;
 
-class GithubWebhookController extends Controller
+final class GithubWebhookController extends Controller
 {
     /**
      * Handle incoming GitHub release webhook.

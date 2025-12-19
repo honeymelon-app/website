@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Product;
 use App\Models\Release;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -38,6 +39,7 @@ class ReleaseFactory extends Factory
 
         return [
             // id is UUID via HasUuids
+            'product_id' => Product::factory(),
             'version' => $version,
             'tag' => "v{$version}",
             'commit_hash' => bin2hex(random_bytes(20)), // 40-hex like git SHA1
@@ -52,7 +54,7 @@ class ReleaseFactory extends Factory
     /**
      * Configure the factory for a stable release.
      */
-    public function stable(): self
+    public function stable(): static
     {
         return $this->state(fn () => ['channel' => 'stable']);
     }
@@ -60,7 +62,7 @@ class ReleaseFactory extends Factory
     /**
      * Configure the factory for a beta release.
      */
-    public function beta(): self
+    public function beta(): static
     {
         return $this->state(fn () => ['channel' => 'beta']);
     }
@@ -68,7 +70,7 @@ class ReleaseFactory extends Factory
     /**
      * Configure the factory for a major release.
      */
-    public function majorRelease(): self
+    public function majorRelease(): static
     {
         return $this->state(function () {
             $maj = fake()->numberBetween(1, 3);
@@ -85,7 +87,7 @@ class ReleaseFactory extends Factory
     /**
      * Configure the factory for a specific version and channel.
      */
-    public function forVersion(string $version, string $channel = 'stable'): self
+    public function forVersion(string $version, string $channel = 'stable'): static
     {
         return $this->state(function () use ($version, $channel) {
             return [
@@ -94,5 +96,15 @@ class ReleaseFactory extends Factory
                 'channel' => $channel,
             ];
         });
+    }
+
+    /**
+     * Configure the factory for a specific product.
+     */
+    public function forProduct(Product $product): static
+    {
+        return $this->state(fn () => [
+            'product_id' => $product->id,
+        ]);
     }
 }

@@ -84,6 +84,11 @@ class LicenseFactory extends Factory
         return $this->state(fn () => ['status' => LicenseStatus::EXPIRED]);
     }
 
+    public function active(): self
+    {
+        return $this->state(fn () => ['status' => LicenseStatus::ACTIVE]);
+    }
+
     public function activated(): self
     {
         return $this->state(fn () => [

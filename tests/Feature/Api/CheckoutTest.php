@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Tests\Feature\Api;
 
 use App\Contracts\PaymentProvider;
+use App\Contracts\PaymentProviderResolver;
 use App\Models\Product;
-use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -59,12 +59,12 @@ class CheckoutTest extends TestCase
 
         $mockProvider = $this->getMockPaymentProvider($expectedResponse);
 
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
         $mockFactory->method('make')
             ->with('stripe')
             ->willReturn($mockProvider);
 
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $response = $this->postJson('/api/checkout', $this->getValidCheckoutPayload());
 
@@ -82,11 +82,11 @@ class CheckoutTest extends TestCase
 
         $mockProvider = $this->getMockPaymentProvider($expectedResponse);
 
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
         $mockFactory->method('make')
             ->willReturn($mockProvider);
 
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload();
         unset($payload['email']);
@@ -107,11 +107,11 @@ class CheckoutTest extends TestCase
 
         $mockProvider = $this->getMockPaymentProvider($expectedResponse);
 
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
         $mockFactory->method('make')
             ->willReturn($mockProvider);
 
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload();
         unset($payload['product_slug']);
@@ -124,8 +124,8 @@ class CheckoutTest extends TestCase
 
     public function test_requires_provider(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload();
         unset($payload['provider']);
@@ -138,8 +138,8 @@ class CheckoutTest extends TestCase
 
     public function test_validates_provider_options(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload([
             'provider' => 'invalid',
@@ -156,8 +156,8 @@ class CheckoutTest extends TestCase
 
     public function test_fails_with_nonexistent_product(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload([
             'product_slug' => 'nonexistent-product',
@@ -172,8 +172,8 @@ class CheckoutTest extends TestCase
     {
         Product::where('slug', 'honeymelon')->update(['is_active' => false]);
 
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $response = $this->postJson('/api/checkout', $this->getValidCheckoutPayload());
 
@@ -182,8 +182,8 @@ class CheckoutTest extends TestCase
 
     public function test_requires_success_url(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload();
         unset($payload['success_url']);
@@ -196,8 +196,8 @@ class CheckoutTest extends TestCase
 
     public function test_validates_success_url_format(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload([
             'success_url' => 'not-a-url',
@@ -211,8 +211,8 @@ class CheckoutTest extends TestCase
 
     public function test_requires_cancel_url(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload();
         unset($payload['cancel_url']);
@@ -225,8 +225,8 @@ class CheckoutTest extends TestCase
 
     public function test_validates_cancel_url_format(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload([
             'cancel_url' => 'not-a-url',
@@ -240,8 +240,8 @@ class CheckoutTest extends TestCase
 
     public function test_validates_email_format(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload([
             'email' => 'not-an-email',
@@ -255,11 +255,11 @@ class CheckoutTest extends TestCase
 
     public function test_handles_checkout_service_exception(): void
     {
-        $mockFactory = $this->createMock(PaymentProviderFactory::class);
+        $mockFactory = $this->createMock(PaymentProviderResolver::class);
         $mockFactory->method('make')
             ->willThrowException(new \Exception('Provider not found'));
 
-        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+        $this->app->instance(PaymentProviderResolver::class, $mockFactory);
 
         $response = $this->postJson('/api/checkout', $this->getValidCheckoutPayload());
 

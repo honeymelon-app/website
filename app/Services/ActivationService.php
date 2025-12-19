@@ -4,34 +4,26 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\LicenseActivator;
+use App\Contracts\LicenseManager;
+use App\Enums\ActivationError;
 use App\Enums\LicenseStatus;
-use App\Models\License;
 use App\Support\LicenseCodec;
 use Illuminate\Support\Facades\Log;
 
-class ActivationService
+final class ActivationService implements LicenseActivator
 {
-    /**
-     * Activation error codes.
-     */
-    public const ERROR_LICENSE_NOT_FOUND = 'license_not_found';
-
-    public const ERROR_LICENSE_NOT_ACTIVE = 'license_not_active';
-
-    public const ERROR_LICENSE_ALREADY_ACTIVATED = 'license_already_activated';
-
     public function __construct(
-        protected LicenseService $licenseService
+        protected LicenseManager $licenseService
     ) {}
 
     /**
      * Attempt to activate a license.
      *
-     * @return array{success: bool, license?: array, error?: string, error_code?: string}
+     * @return array{success: bool, license?: array<string, mixed>, error?: string, error_code?: ActivationError}
      */
     public function activate(string $licenseKey, string $appVersion, ?string $deviceId = null): array
     {
-        // Normalize and find the license
         $normalizedKey = LicenseCodec::normalize($licenseKey);
         $license = $this->licenseService->findByKey($normalizedKey);
 
@@ -43,11 +35,10 @@ class ActivationService
             return [
                 'success' => false,
                 'error' => 'License not found.',
-                'error_code' => self::ERROR_LICENSE_NOT_FOUND,
+                'error_code' => ActivationError::LicenseNotFound,
             ];
         }
 
-        // Check if license status allows activation
         if (! $license->status->allowsActivation()) {
             Log::info('Activation attempted for non-active license', [
                 'license_id' => $license->id,
@@ -64,11 +55,10 @@ class ActivationService
             return [
                 'success' => false,
                 'error' => $message,
-                'error_code' => self::ERROR_LICENSE_NOT_ACTIVE,
+                'error_code' => ActivationError::LicenseNotActive,
             ];
         }
 
-        // Check if already activated (one-time activation)
         if ($license->isActivated()) {
             Log::info('Activation attempted for already-activated license', [
                 'license_id' => $license->id,
@@ -78,11 +68,10 @@ class ActivationService
             return [
                 'success' => false,
                 'error' => 'This license has already been activated.',
-                'error_code' => self::ERROR_LICENSE_ALREADY_ACTIVATED,
+                'error_code' => ActivationError::LicenseAlreadyActivated,
             ];
         }
 
-        // Verify the key signature is valid
         if (! $this->licenseService->isValid($licenseKey)) {
             Log::warning('Activation attempted with invalid license signature', [
                 'license_id' => $license->id,
@@ -91,11 +80,10 @@ class ActivationService
             return [
                 'success' => false,
                 'error' => 'License key signature is invalid.',
-                'error_code' => self::ERROR_LICENSE_NOT_FOUND,
+                'error_code' => ActivationError::LicenseNotFound,
             ];
         }
 
-        // Activate the license
         $license->markAsActivated($deviceId);
 
         Log::info('License activated successfully', [
@@ -104,8 +92,6 @@ class ActivationService
             'device_id' => $deviceId,
         ]);
 
-        // Return the license data - the app will store this locally
-        // The original signed key is already verifiable by the app
         return [
             'success' => true,
             'license' => [
@@ -117,7 +103,6 @@ class ActivationService
                 'max_major_version' => $license->max_major_version,
                 'product' => 'honeymelon',
                 'app_version' => $appVersion,
-                // Include the signed payload and signature for offline verification
                 'payload' => $license->meta['payload'] ?? null,
                 'signature' => $license->meta['signature'] ?? null,
             ],

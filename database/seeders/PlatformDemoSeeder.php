@@ -8,7 +8,6 @@ use App\Models\Artifact;
 use App\Models\License;
 use App\Models\Order;
 use App\Models\Release;
-use App\Models\Update;
 use App\Models\WebhookEvent;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
@@ -40,29 +39,6 @@ class PlatformDemoSeeder extends Seeder
             ])
             ->create();
 
-        // Create update manifest for stable channel
-        Update::factory()
-            ->forRelease($stableRelease)
-            ->state([
-                'channel' => 'stable',
-                'version' => $stableRelease->version,
-                'manifest' => [
-                    'version' => $stableRelease->version,
-                    'notes' => $stableRelease->notes,
-                    'pub_date' => $stableRelease->published_at->format('c'),
-                    'platforms' => [
-                        'darwin-aarch64' => [
-                            'signature' => $stableArtifact->signature,
-                            'url' => $stableArtifact->url,
-                            'sha256' => $stableArtifact->sha256,
-                        ],
-                    ],
-                ],
-                'is_latest' => true,
-                'published_at' => $stableRelease->published_at,
-            ])
-            ->create();
-
         // Create one beta release with full artifacts and updates
         $betaRelease = Release::factory()
             ->forVersion('1.6.0', 'beta')
@@ -80,29 +56,6 @@ class PlatformDemoSeeder extends Seeder
             ->state([
                 'filename' => "honeymelon-{$betaRelease->version}.dmg",
                 'url' => "https://github.com/honeymelon-app/honeymelon/releases/download/v{$betaRelease->version}/honeymelon-{$betaRelease->version}.dmg",
-            ])
-            ->create();
-
-        // Create update manifest for beta channel
-        Update::factory()
-            ->forRelease($betaRelease)
-            ->state([
-                'channel' => 'beta',
-                'version' => $betaRelease->version,
-                'manifest' => [
-                    'version' => $betaRelease->version,
-                    'notes' => $betaRelease->notes,
-                    'pub_date' => $betaRelease->published_at->format('c'),
-                    'platforms' => [
-                        'darwin-aarch64' => [
-                            'signature' => $betaArtifact->signature,
-                            'url' => $betaArtifact->url,
-                            'sha256' => $betaArtifact->sha256,
-                        ],
-                    ],
-                ],
-                'is_latest' => true,
-                'published_at' => $betaRelease->published_at,
             ])
             ->create();
 

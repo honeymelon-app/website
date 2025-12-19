@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\CheckoutManager;
+use App\Contracts\PaymentProviderResolver;
 use App\Models\Product;
-use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Support\Facades\Log;
 
-class CheckoutService
+final class CheckoutService implements CheckoutManager
 {
     public function __construct(
-        private readonly PaymentProviderFactory $providerFactory
+        private readonly PaymentProviderResolver $providerFactory
     ) {}
 
     /**

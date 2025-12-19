@@ -20,7 +20,7 @@ class DownloadController extends Controller
     {
         $latestArtifact = Artifact::query()
             ->with('release')
-            ->whereHas('release', function ($query) {
+            ->whereHas('release', function ($query): void {
                 $query->where('channel', ReleaseChannel::STABLE)
                     ->whereNotNull('published_at');
             })

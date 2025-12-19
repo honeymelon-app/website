@@ -5,8 +5,14 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\LicenseStatus;
+use App\Http\Resources\LicenseCollection;
+use App\Http\Resources\LicenseResource;
+use App\Policies\LicensePolicy;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Attributes\UseResource;
+use Illuminate\Database\Eloquent\Attributes\UseResourceCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -15,6 +21,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+#[UsePolicy(LicensePolicy::class)]
+#[UseResource(LicenseResource::class)]
+#[UseResourceCollection(LicenseCollection::class)]
 class License extends Model implements Filterable
 {
     /** @use HasFactory<\Database\Factories\LicenseFactory> */
@@ -120,6 +129,22 @@ class License extends Model implements Filterable
     public function scopeRevoked(Builder $query): Builder
     {
         return $query->where('status', LicenseStatus::REVOKED);
+    }
+
+    /**
+     * Scope a query to only include activated licenses.
+     */
+    public function scopeActivated(Builder $query): Builder
+    {
+        return $query->whereNotNull('activated_at');
+    }
+
+    /**
+     * Scope a query to only include licenses for a specific order.
+     */
+    public function scopeForOrder(Builder $query, string $orderId): Builder
+    {
+        return $query->where('order_id', $orderId);
     }
 
     /**

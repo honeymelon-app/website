@@ -5,16 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class RollbackReleaseRequest extends FormRequest
+class ActivateLicenseRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true; // TODO: Add authorization logic
+        return true; // Public endpoint
     }
 
     /**
@@ -25,8 +24,9 @@ class RollbackReleaseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'version' => ['required', 'string', 'regex:/^\d+\.\d+\.\d+$/'],
-            'channel' => ['required', 'string', Rule::in(['stable', 'beta'])],
+            'license_key' => ['required', 'string', 'max:255'],
+            'app_version' => ['required', 'string', 'max:50'],
+            'device_id' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -38,10 +38,11 @@ class RollbackReleaseRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'version.required' => 'A version is required',
-            'version.regex' => 'Version must be a valid semantic version (e.g., 1.2.3)',
-            'channel.required' => 'A channel is required',
-            'channel.in' => 'Channel must be either stable or beta',
+            'license_key.required' => 'A license key is required',
+            'license_key.max' => 'The license key must not exceed 255 characters',
+            'app_version.required' => 'The app version is required',
+            'app_version.max' => 'The app version must not exceed 50 characters',
+            'device_id.max' => 'The device ID must not exceed 255 characters',
         ];
     }
 }

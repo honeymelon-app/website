@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class ArtifactDownloadController extends Controller
+final class ArtifactDownloadController extends Controller
 {
     public function __construct(
         private readonly DownloadService $downloadService

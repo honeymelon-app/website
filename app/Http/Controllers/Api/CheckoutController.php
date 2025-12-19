@@ -10,7 +10,7 @@ use App\Services\CheckoutService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class CheckoutController extends Controller
+final class CheckoutController extends Controller
 {
     public function __construct(
         private readonly CheckoutService $checkoutService

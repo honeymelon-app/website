@@ -34,7 +34,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDate, formatDateTime, truncateId } from '@/lib/formatters';
 import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import licenses from '@/routes/admin/licenses';
+import licensesRoutes from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
 import type { License, PaginatedResponse } from '@/types/resources';
 import { Head, router, useForm } from '@inertiajs/vue3';
@@ -64,7 +64,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Licenses',
-        href: licenses.index().url,
+        href: licensesRoutes.index().url,
     },
 ];
 
@@ -336,7 +336,7 @@ const processRevoke = (): void => {
 };
 
 const handleIssueLicense = (): void => {
-    issueForm.post(licenses.store().url, {
+    issueForm.post(licensesRoutes.store().url, {
         preserveScroll: true,
         onSuccess: () => {
             isIssueDialogOpen.value = false;
@@ -346,7 +346,7 @@ const handleIssueLicense = (): void => {
 };
 
 const handlePageChange = (page: number): void => {
-    router.visit(licenses.index().url, {
+    router.visit(licensesRoutes.index().url, {
         data: { page },
         preserveState: true,
         preserveScroll: true,

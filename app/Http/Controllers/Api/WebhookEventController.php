@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Contracts\PaymentProviderResolver;
 use App\Http\Controllers\Controller;
 use App\Models\WebhookEvent;
-use App\Services\PaymentProviders\PaymentProviderFactory;
 use App\Services\WebhookProcessingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-class WebhookEventController extends Controller
+final class WebhookEventController extends Controller
 {
     public function __construct(
         private readonly WebhookProcessingService $webhookService,
-        private readonly PaymentProviderFactory $providerFactory
+        private readonly PaymentProviderResolver $providerFactory
     ) {}
 
     /**

@@ -9,7 +9,7 @@ use App\Http\Requests\UploadArtifactRequest;
 use App\Services\ArtifactUploadService;
 use Illuminate\Http\JsonResponse;
 
-class UploadArtifactController extends Controller
+final class UploadArtifactController extends Controller
 {
     public function __construct(private ArtifactUploadService $uploadService) {}
 

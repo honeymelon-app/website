@@ -16,7 +16,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDate, truncateId } from '@/lib/formatters';
 import { getProviderVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import orders from '@/routes/admin/orders';
+import ordersRoutes from '@/routes/admin/orders';
 import type { BreadcrumbItem } from '@/types';
 import type { Order, PaginatedResponse } from '@/types/resources';
 import { Head, router, useForm } from '@inertiajs/vue3';
@@ -42,7 +42,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Orders',
-        href: orders.index().url,
+        href: ordersRoutes.index().url,
     },
 ];
 
@@ -272,7 +272,7 @@ const columns: Column<Order>[] = [
 
 // Actions
 const viewOrder = (order: Order): void => {
-    router.visit(orders.show(order.id).url);
+    router.visit(ordersRoutes.show(order.id).url);
 };
 
 const openRefundDialog = (order: Order): void => {
@@ -286,7 +286,7 @@ const processRefund = (): void => {
         return;
     }
 
-    refundForm.post(orders.refund(orderToRefund.value.id).url, {
+    refundForm.post(ordersRoutes.refund(orderToRefund.value.id).url, {
         preserveScroll: true,
         onSuccess: () => {
             showRefundDialog.value = false;
@@ -297,7 +297,7 @@ const processRefund = (): void => {
 };
 
 const handlePageChange = (page: number): void => {
-    router.visit(orders.index().url, {
+    router.visit(ordersRoutes.index().url, {
         data: { page },
         preserveState: true,
         preserveScroll: true,

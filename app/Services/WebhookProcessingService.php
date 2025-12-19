@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Mail\LicenseKeyMail;
+use App\Contracts\LicenseManager;
+use App\Contracts\WebhookProcessor;
 use App\Models\Order;
 use App\Models\WebhookEvent;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
-class WebhookProcessingService
+final class WebhookProcessingService implements WebhookProcessor
 {
-    public function __construct(private readonly LicenseService $licenseService) {}
+    public function __construct(private readonly LicenseManager $licenseService) {}
 
     /**
      * Process a payment webhook and issue license if applicable.
@@ -48,12 +48,7 @@ class WebhookProcessingService
                 'license_id' => $license->id,
             ]);
 
-            Mail::to($orderData['email'])->queue(new LicenseKeyMail($license));
-
-            Log::info('License key email queued', [
-                'email' => $orderData['email'],
-                'license_id' => $license->id,
-            ]);
+            // Email is now sent via LicenseIssued event listener
         }
     }
 

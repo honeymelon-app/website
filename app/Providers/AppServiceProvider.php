@@ -4,15 +4,21 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
-use App\Models\Artifact;
-use App\Observers\ArtifactObserver;
-use App\Services\GithubService;
-use App\Services\PaymentProviders\PaymentProviderFactory;
-use App\Services\PaymentProviders\StripePaymentProvider;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Application Service Provider.
+ *
+ * Note: Contract-to-implementation bindings are now declared using #[Bind] attributes
+ * directly on the interfaces in App\Contracts\. Singletons use #[Singleton] on classes.
+ * Config injection uses #[Config] parameter attributes.
+ */
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -20,29 +26,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Register GithubService
-        $this->app->singleton(GithubService::class, function () {
-            return new GithubService(
-                owner: config('services.github.owner'),
-                repo: config('services.github.repo'),
-                token: config('services.github.token')
-            );
-        });
-
-        // Register StripePaymentProvider
-        $this->app->singleton(StripePaymentProvider::class, function () {
-            return new StripePaymentProvider(
-                secretKey: config('services.stripe.secret'),
-                webhookSecret: config('services.stripe.webhook_secret')
-            );
-        });
-
-        // Register PaymentProviderFactory
-        $this->app->singleton(PaymentProviderFactory::class, function ($app) {
-            return new PaymentProviderFactory(
-                stripe: $app->make(StripePaymentProvider::class)
-            );
-        });
+        //
     }
 
     /**
@@ -50,10 +34,63 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Register observers
-        Artifact::observe(ArtifactObserver::class);
+        $this->configureModels();
+        $this->configureUrls();
+        $this->configureDevelopmentTools();
+        $this->registerResponseMacros();
+    }
 
-        // Add response macro for CDN caching
+    /**
+     * Configure Eloquent model strictness for safer development.
+     *
+     * - preventLazyLoading: Catches N+1 query issues early
+     * - preventSilentlyDiscardingAttributes: Fails if mass-assigning non-fillable attrs
+     * - preventAccessingMissingAttributes: Fails on typos like $model->naem
+     *
+     * All three are disabled in production to avoid breaking deployed apps.
+     */
+    protected function configureModels(): void
+    {
+        Model::shouldBeStrict(! $this->app->isProduction());
+    }
+
+    /**
+     * Configure URL generation defaults.
+     *
+     * Forces HTTPS scheme in production to ensure generated URLs
+     * (routes, assets, signed URLs) use secure protocol.
+     */
+    protected function configureUrls(): void
+    {
+        if ($this->app->isProduction()) {
+            URL::forceScheme('https');
+        }
+    }
+
+    /**
+     * Configure development-only debugging tools.
+     *
+     * Query logging is opt-in via LOG_DB_QUERIES env var to avoid
+     * noisy logs during normal development.
+     */
+    protected function configureDevelopmentTools(): void
+    {
+        if (! $this->app->isProduction() && config('app.debug') && env('LOG_DB_QUERIES', false)) {
+            DB::listen(function ($query): void {
+                Log::debug('DB Query', [
+                    'sql' => $query->sql,
+                    'bindings' => $query->bindings,
+                    'time' => $query->time.'ms',
+                ]);
+            });
+        }
+    }
+
+    /**
+     * Register custom response macros.
+     */
+    protected function registerResponseMacros(): void
+    {
         Response::macro('cdnJson', function (mixed $data, int $ttl = 300): JsonResponse {
             return response()->json($data)
                 ->header('Cache-Control', "public, max-age={$ttl}, stale-while-revalidate=60");

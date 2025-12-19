@@ -11,7 +11,7 @@ use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
 use Illuminate\Http\Request;
 
-class ArtifactController extends Controller
+final class ArtifactController extends Controller
 {
     /**
      * Display a listing of artifacts.

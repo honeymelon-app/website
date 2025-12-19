@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\PaymentProviderResolver;
+use App\Contracts\RefundProcessor;
+use App\Events\OrderRefunded;
 use App\Models\Order;
-use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Support\Facades\DB;
 use RuntimeException;
 
-class RefundService
+final class RefundService implements RefundProcessor
 {
     public function __construct(
-        private readonly PaymentProviderFactory $providerFactory
+        private readonly PaymentProviderResolver $providerFactory
     ) {}
 
     /**
@@ -32,7 +34,7 @@ class RefundService
 
         $provider = $this->providerFactory->make($order->provider);
 
-        return DB::transaction(function () use ($order, $provider, $reason) {
+        $order = DB::transaction(function () use ($order, $provider, $reason) {
             // Process refund with payment provider
             $result = $provider->refund(
                 paymentId: $order->external_id,
@@ -51,12 +53,12 @@ class RefundService
                 ]),
             ]);
 
-            // Revoke associated license - use REFUNDED status for refunds
-            if ($order->license) {
-                $order->license->markAsRefunded();
-            }
-
             return $order->fresh(['license']);
         });
+
+        // Dispatch event - listener handles license revocation
+        OrderRefunded::dispatch($order, $order->amount);
+
+        return $order;
     }
 }

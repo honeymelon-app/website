@@ -14,7 +14,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDate } from '@/lib/formatters';
 import { getChannelVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import releases from '@/routes/admin/releases';
+import releasesRoutes from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
 import type { PaginatedResponse, Release } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
@@ -34,7 +34,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Releases',
-        href: releases.index().url,
+        href: releasesRoutes.index().url,
     },
 ];
 
@@ -241,7 +241,7 @@ const columns: Column<Release>[] = [
 
 // Actions
 const viewRelease = (release: Release, section?: 'artifacts'): void => {
-    const url = `${releases.show(release.id).url}${section === 'artifacts' ? '#artifacts' : ''}`;
+    const url = `${releasesRoutes.show(release.id).url}${section === 'artifacts' ? '#artifacts' : ''}`;
     router.visit(url);
 };
 
@@ -251,7 +251,7 @@ const publishRelease = (release: Release): void => {
 };
 
 const handlePageChange = (page: number): void => {
-    router.visit(releases.index().url, {
+    router.visit(releasesRoutes.index().url, {
         data: { page },
         preserveState: true,
         preserveScroll: true,

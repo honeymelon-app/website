@@ -28,7 +28,7 @@ class ReleaseResource extends JsonResource
             'major' => $this->major,
             'created_by' => $this->user_id,
             'created_at' => $this->created_at->toIso8601String(),
-            'artifacts_count' => $this->when(isset($this->artifacts_count), $this->artifacts_count),
+            'artifacts_count' => $this->whenHas('artifacts_count'),
             'artifacts' => $this->when($this->relationLoaded('artifacts'), function () {
                 return $this->artifacts->map(function ($artifact) {
                     $downloadUrl = $this->generateDownloadUrl($artifact);

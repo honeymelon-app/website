@@ -4,14 +4,26 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Http\Resources\ArtifactCollection;
+use App\Http\Resources\ArtifactResource;
+use App\Observers\ArtifactObserver;
+use App\Policies\ArtifactPolicy;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Attributes\UseResource;
+use Illuminate\Database\Eloquent\Attributes\UseResourceCollection;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
+#[ObservedBy(ArtifactObserver::class)]
+#[UsePolicy(ArtifactPolicy::class)]
+#[UseResource(ArtifactResource::class)]
+#[UseResourceCollection(ArtifactCollection::class)]
 class Artifact extends Model implements Filterable
 {
     /** @use HasFactory<\Database\Factories\ArtifactFactory> */
@@ -36,19 +48,6 @@ class Artifact extends Model implements Filterable
     ];
 
     /**
-     * Bootstrap the model and its traits.
-     */
-    protected static function booted(): void
-    {
-        static::deleting(function (Artifact $artifact) {
-            // Delete the file from storage when the artifact record is deleted
-            if ($artifact->path && Storage::disk('s3')->exists($artifact->path)) {
-                Storage::disk('s3')->delete($artifact->path);
-            }
-        });
-    }
-
-    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>
@@ -66,5 +65,13 @@ class Artifact extends Model implements Filterable
     public function release(): BelongsTo
     {
         return $this->belongsTo(Release::class);
+    }
+
+    /**
+     * Scope a query to only include artifacts for a specific platform.
+     */
+    public function scopeForPlatform(Builder $query, string $platform): Builder
+    {
+        return $query->where('platform', $platform);
     }
 }

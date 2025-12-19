@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\DownloadResolver;
+use App\Contracts\LicenseManager;
 use App\Models\Artifact;
 use App\Models\Download;
 use App\Models\License;
@@ -13,10 +15,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class DownloadService
+final class DownloadService implements DownloadResolver
 {
     public function __construct(
-        private readonly LicenseService $licenseService
+        private readonly LicenseManager $licenseService
     ) {}
 
     /**

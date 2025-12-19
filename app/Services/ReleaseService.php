@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\GitRepository;
+use App\Contracts\ReleaseManager;
 use App\Models\Artifact;
 use App\Models\Release;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ReleaseService
+final class ReleaseService implements ReleaseManager
 {
-    public function __construct(private GithubService $githubService) {}
+    public function __construct(private GitRepository $gitRepository) {}
 
     /**
      * Record a release from GitHub data.
@@ -67,7 +69,7 @@ class ReleaseService
             $release->delete();
 
             try {
-                $this->githubService->deleteReleaseAndTag($tag);
+                $this->gitRepository->deleteReleaseAndTag($tag);
                 Log::info('GitHub release and tag deleted', ['tag' => $tag]);
             } catch (\Exception $e) {
                 Log::warning('Failed to delete GitHub release/tag', [

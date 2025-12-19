@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Unit\Jobs;
 
+use App\Contracts\GitRepository;
 use App\Enums\ReleaseChannel;
 use App\Jobs\ProcessGithubReleaseJob;
 use App\Models\User;
-use App\Services\GithubService;
 use App\Services\ReleaseService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -48,7 +48,7 @@ class ProcessGithubReleaseJobTest extends TestCase
             payload: $payload,
         );
 
-        $githubService = $this->createMock(GithubService::class);
+        $githubService = $this->createMock(GitRepository::class);
         $githubService->expects($this->never())->method('fetchRelease');
 
         $job->handle(

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Jobs;
 
+use App\Contracts\GitRepository;
 use App\Enums\ReleaseChannel;
-use App\Services\GithubService;
 use App\Services\ReleaseService;
 use App\Support\PlatformDetector;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -13,7 +13,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class ProcessGithubReleaseJob implements ShouldQueue
+final class ProcessGithubReleaseJob implements ShouldQueue
 {
     use Queueable;
 
@@ -34,7 +34,7 @@ class ProcessGithubReleaseJob implements ShouldQueue
      * Execute the job.
      */
     public function handle(
-        GithubService $githubService,
+        GitRepository $githubService,
         ReleaseService $releaseService,
     ): void {
         Log::info('Processing GitHub release', [

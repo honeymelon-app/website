@@ -11,7 +11,7 @@ use App\Http\Resources\LicenseResource;
 use App\Models\License;
 use Illuminate\Http\Request;
 
-class LicenseController extends Controller
+final class LicenseController extends Controller
 {
     /**
      * Display a listing of licenses.

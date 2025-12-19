@@ -21,8 +21,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDate, formatFileSize } from '@/lib/formatters';
 import { getSourceVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import artifacts from '@/routes/admin/artifacts';
-import releases from '@/routes/admin/releases';
+import artifactsRoutes from '@/routes/admin/artifacts';
+import releasesRoutes from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
 import type { ArtifactWithSync, PaginatedResponse } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
@@ -53,7 +53,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
     {
         title: 'Artifacts',
-        href: artifacts.index().url,
+        href: artifactsRoutes.index().url,
     },
 ];
 
@@ -400,11 +400,11 @@ const columns: Column<ArtifactWithSync>[] = [
 
 // Actions
 const viewArtifact = (artifact: ArtifactWithSync): void => {
-    router.visit(artifacts.show(artifact.id).url);
+    router.visit(artifactsRoutes.show(artifact.id).url);
 };
 
 const viewRelease = (releaseId: string): void => {
-    router.visit(releases.show(releaseId).url);
+    router.visit(releasesRoutes.show(releaseId).url);
 };
 
 const downloadArtifact = (artifact: ArtifactWithSync): void => {
@@ -426,7 +426,7 @@ const confirmDelete = (artifact: ArtifactWithSync): void => {
 const handleDelete = (): void => {
     if (!artifactToDelete.value) return;
 
-    router.delete(artifacts.destroy(artifactToDelete.value.id).url, {
+    router.delete(artifactsRoutes.destroy(artifactToDelete.value.id).url, {
         onSuccess: () => {
             showDeleteDialog.value = false;
             artifactToDelete.value = null;
@@ -440,7 +440,7 @@ const cancelDelete = (): void => {
 };
 
 const handlePageChange = (page: number): void => {
-    router.visit(artifacts.index().url, {
+    router.visit(artifactsRoutes.index().url, {
         data: { page },
         preserveState: true,
         preserveScroll: true,

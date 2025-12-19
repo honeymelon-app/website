@@ -8,7 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 
-class ProductController extends Controller
+final class ProductController extends Controller
 {
     /**
      * Get active products with pricing information.

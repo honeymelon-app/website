@@ -9,17 +9,15 @@ use App\Http\Requests\PublishReleaseRequest;
 use App\Http\Resources\ReleaseResource;
 use App\Services\GithubService;
 use App\Services\ReleaseService;
-use App\Services\UpdateService;
 use App\Support\PlatformDetector;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
-class PublishReleaseController extends Controller
+final class PublishReleaseController extends Controller
 {
     public function __construct(
         private readonly GithubService $github,
         private readonly ReleaseService $releaseService,
-        private readonly UpdateService $updateService
     ) {}
 
     /**
@@ -74,12 +72,9 @@ class PublishReleaseController extends Controller
                 ]);
             }
 
-            // Build and publish update manifest
-            $update = $this->updateService->buildAndPublish($release, $channel);
-
             return response()->json([
                 'message' => 'Release published successfully',
-                'data' => new ReleaseResource($release->load('artifacts', 'updates')),
+                'data' => new ReleaseResource($release->load('artifacts')),
             ], 201);
         } catch (\Exception $e) {
             Log::error('Failed to publish release', [

@@ -5,8 +5,16 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ReleaseChannel;
+use App\Http\Resources\ReleaseCollection;
+use App\Http\Resources\ReleaseResource;
+use App\Observers\ReleaseObserver;
+use App\Policies\ReleasePolicy;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\UsePolicy;
+use Illuminate\Database\Eloquent\Attributes\UseResource;
+use Illuminate\Database\Eloquent\Attributes\UseResourceCollection;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -14,6 +22,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy(ReleaseObserver::class)]
+#[UsePolicy(ReleasePolicy::class)]
+#[UseResource(ReleaseResource::class)]
+#[UseResourceCollection(ReleaseCollection::class)]
 class Release extends Model implements Filterable
 {
     /** @use HasFactory<\Database\Factories\ReleaseFactory> */
@@ -50,18 +62,6 @@ class Release extends Model implements Filterable
             'is_downloadable' => 'boolean',
             'major' => 'boolean',
         ];
-    }
-
-    /**
-     * Bootstrap the model and its traits.
-     */
-    protected static function booted(): void
-    {
-        static::deleting(function (Release $release) {
-            // Delete each artifact individually to trigger their deleting events
-            // which will clean up the S3 files
-            $release->artifacts()->each(fn (Artifact $artifact) => $artifact->delete());
-        });
     }
 
     /**
@@ -110,6 +110,14 @@ class Release extends Model implements Filterable
     public function scopeDownloadable(Builder $query): Builder
     {
         return $query->where('is_downloadable', true);
+    }
+
+    /**
+     * Scope to only releases matching a major version number.
+     */
+    public function scopeForMajorVersion(Builder $query, int $majorVersion): Builder
+    {
+        return $query->where('version', 'like', $majorVersion.'.%');
     }
 
     /**
