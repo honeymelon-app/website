@@ -14,7 +14,9 @@ import { Check } from 'lucide-vue-next';
                     >
                         Designed for macOS
                     </h2>
-                    <p class="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+                    <p
+                        class="mx-auto mt-4 max-w-xl text-lg text-muted-foreground"
+                    >
                         A native interface that feels right at home on your Mac.
                     </p>
                 </div>
@@ -34,15 +36,21 @@ import { Check } from 'lucide-vue-next';
                             one clean interface. Batch process with confidence.
                         </p>
                         <ul class="mt-6 space-y-3">
-                            <li class="flex items-center gap-3 text-muted-foreground">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
                                 <Check class="h-5 w-5 shrink-0 text-primary" />
                                 <span>Real-time progress tracking</span>
                             </li>
-                            <li class="flex items-center gap-3 text-muted-foreground">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
                                 <Check class="h-5 w-5 shrink-0 text-primary" />
                                 <span>Concurrent job management</span>
                             </li>
-                            <li class="flex items-center gap-3 text-muted-foreground">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
                                 <Check class="h-5 w-5 shrink-0 text-primary" />
                                 <span>Accurate ETA calculations</span>
                             </li>
@@ -78,18 +86,25 @@ import { Check } from 'lucide-vue-next';
                         </h3>
                         <p class="mt-4 text-lg text-muted-foreground">
                             Full dark mode support that follows your system
-                            preferences. Easy on the eyes during late-night sessions.
+                            preferences. Easy on the eyes during late-night
+                            sessions.
                         </p>
                         <ul class="mt-6 space-y-3">
-                            <li class="flex items-center gap-3 text-muted-foreground">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
                                 <Check class="h-5 w-5 shrink-0 text-primary" />
                                 <span>Automatic system sync</span>
                             </li>
-                            <li class="flex items-center gap-3 text-muted-foreground">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
                                 <Check class="h-5 w-5 shrink-0 text-primary" />
                                 <span>Carefully balanced colors</span>
                             </li>
-                            <li class="flex items-center gap-3 text-muted-foreground">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
                                 <Check class="h-5 w-5 shrink-0 text-primary" />
                                 <span>Reduced eye strain</span>
                             </li>

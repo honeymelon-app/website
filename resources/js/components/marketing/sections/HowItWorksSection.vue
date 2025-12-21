@@ -5,17 +5,20 @@ const steps = [
     {
         number: '01',
         title: 'Drop Your Files',
-        description: 'Drag any video, audio, or image file into the queue. Honeymelon accepts most common formats.',
+        description:
+            'Drag any video, audio, or image file into the queue. Honeymelon accepts most common formats.',
     },
     {
         number: '02',
         title: 'Choose Your Output',
-        description: 'Select your target format and quality. Use a preset or customize every setting.',
+        description:
+            'Select your target format and quality. Use a preset or customize every setting.',
     },
     {
         number: '03',
         title: 'Convert Intelligently',
-        description: 'Honeymelon analyzes your files and picks the fastest path—remux when possible, transcode when needed.',
+        description:
+            'Honeymelon analyzes your files and picks the fastest path—remux when possible, transcode when needed.',
     },
 ];
 </script>
@@ -30,7 +33,9 @@ const steps = [
                     >
                         How It Works
                     </h2>
-                    <p class="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+                    <p
+                        class="mx-auto mt-4 max-w-xl text-lg text-muted-foreground"
+                    >
                         Three steps. That's it.
                     </p>
                 </div>
@@ -44,7 +49,7 @@ const steps = [
                 >
                     <div class="relative">
                         <div
-                            class="mb-4 text-4xl font-semibold tabular-nums text-primary/20"
+                            class="mb-4 text-4xl font-semibold text-primary/20 tabular-nums"
                         >
                             {{ step.number }}
                         </div>

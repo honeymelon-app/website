@@ -5,15 +5,18 @@ import { Check } from 'lucide-vue-next';
 const proofPoints = [
     {
         title: 'Built exclusively for macOS',
-        description: 'Native ARM64 binary with hardware acceleration. No Rosetta, no Electron, no compromises.',
+        description:
+            'Native ARM64 binary with hardware acceleration. No Rosetta, no Electron, no compromises.',
     },
     {
         title: 'Privacy-first architecture',
-        description: 'Your files never leave your machine. One-time activation, then fully offline forever.',
+        description:
+            'Your files never leave your machine. One-time activation, then fully offline forever.',
     },
     {
         title: 'Remux-first intelligence',
-        description: 'Automatically copies streams when possible, transcodes only when necessary.',
+        description:
+            'Automatically copies streams when possible, transcodes only when necessary.',
     },
 ];
 </script>

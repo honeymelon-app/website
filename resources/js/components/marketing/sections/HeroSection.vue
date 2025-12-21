@@ -7,7 +7,7 @@ import { ArrowRight, ChevronRight } from 'lucide-vue-next';
 </script>
 
 <template>
-    <section class="relative pb-24 pt-16 sm:pb-32 sm:pt-20">
+    <section class="relative pt-16 pb-24 sm:pt-20 sm:pb-32">
         <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <AnimatedSection>
                 <div class="text-center">
@@ -63,7 +63,8 @@ import { ArrowRight, ChevronRight } from 'lucide-vue-next';
 
                     <!-- Trust line -->
                     <p class="mt-6 text-sm text-muted-foreground/70">
-                        No subscription. No account required. Files stay on your Mac.
+                        No subscription. No account required. Files stay on your
+                        Mac.
                     </p>
                 </div>
             </AnimatedSection>

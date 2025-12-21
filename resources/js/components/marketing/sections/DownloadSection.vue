@@ -2,8 +2,8 @@
 import AnimatedSection from '@/components/marketing/AnimatedSection.vue';
 import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
-import { Download } from 'lucide-vue-next';
 import type { Artifact } from '@/types/api';
+import { Download } from 'lucide-vue-next';
 
 const props = defineProps<{
     artifact?: Artifact | null;
@@ -33,7 +33,10 @@ function formatDate(dateString: string): string {
 </script>
 
 <template>
-    <section id="download" class="border-t border-border/50 bg-muted/30 py-24 sm:py-32">
+    <section
+        id="download"
+        class="border-t border-border/50 bg-muted/30 py-24 sm:py-32"
+    >
         <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
             <AnimatedSection>
                 <div class="text-center">
@@ -56,7 +59,9 @@ function formatDate(dateString: string): string {
                         <!-- Download Info -->
                         <div>
                             <div class="flex items-center gap-2">
-                                <h3 class="text-xl font-semibold text-foreground">
+                                <h3
+                                    class="text-xl font-semibold text-foreground"
+                                >
                                     Honeymelon
                                 </h3>
                                 <Badge
@@ -73,11 +78,16 @@ function formatDate(dateString: string): string {
 
                             <dl v-if="artifact" class="mt-6 space-y-3 text-sm">
                                 <div class="flex justify-between">
-                                    <dt class="text-muted-foreground">Released</dt>
+                                    <dt class="text-muted-foreground">
+                                        Released
+                                    </dt>
                                     <dd class="font-medium text-foreground">
                                         {{
                                             artifact.release?.published_at
-                                                ? formatDate(artifact.release.published_at)
+                                                ? formatDate(
+                                                      artifact.release
+                                                          .published_at,
+                                                  )
                                                 : 'N/A'
                                         }}
                                     </dd>
@@ -89,7 +99,9 @@ function formatDate(dateString: string): string {
                                     </dd>
                                 </div>
                                 <div class="flex justify-between">
-                                    <dt class="text-muted-foreground">Requires</dt>
+                                    <dt class="text-muted-foreground">
+                                        Requires
+                                    </dt>
                                     <dd class="font-medium text-foreground">
                                         macOS 13+
                                     </dd>
@@ -106,13 +118,17 @@ function formatDate(dateString: string): string {
                                 Download for Apple Silicon
                             </Button>
 
-                            <p class="mt-3 text-center text-xs text-muted-foreground/70">
+                            <p
+                                class="mt-3 text-center text-xs text-muted-foreground/70"
+                            >
                                 Intel-based Macs are not supported
                             </p>
                         </div>
 
                         <!-- Installation Steps -->
-                        <div class="border-t border-border/50 pt-8 sm:border-l sm:border-t-0 sm:pl-8 sm:pt-0">
+                        <div
+                            class="border-t border-border/50 pt-8 sm:border-t-0 sm:border-l sm:pt-0 sm:pl-8"
+                        >
                             <h4 class="font-semibold text-foreground">
                                 Installation
                             </h4>
@@ -134,7 +150,8 @@ function formatDate(dateString: string): string {
                                         2
                                     </span>
                                     <span class="text-muted-foreground">
-                                        Drag Honeymelon to your Applications folder
+                                        Drag Honeymelon to your Applications
+                                        folder
                                     </span>
                                 </li>
                                 <li class="flex gap-3">
@@ -144,7 +161,8 @@ function formatDate(dateString: string): string {
                                         3
                                     </span>
                                     <span class="text-muted-foreground">
-                                        Launch and enter your license key to activate
+                                        Launch and enter your license key to
+                                        activate
                                     </span>
                                 </li>
                             </ol>

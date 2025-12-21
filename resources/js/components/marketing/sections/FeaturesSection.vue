@@ -7,27 +7,54 @@ const featureGroups = [
         icon: Zap,
         title: 'Performance',
         features: [
-            { name: 'Apple Silicon native', description: 'Hardware-accelerated encoding on M-series chips' },
-            { name: 'Batch processing', description: 'Convert multiple files with concurrent jobs' },
-            { name: 'Remux-first engine', description: 'Copy streams when re-encoding isn\'t needed' },
+            {
+                name: 'Apple Silicon native',
+                description: 'Hardware-accelerated encoding on M-series chips',
+            },
+            {
+                name: 'Batch processing',
+                description: 'Convert multiple files with concurrent jobs',
+            },
+            {
+                name: 'Remux-first engine',
+                description: "Copy streams when re-encoding isn't needed",
+            },
         ],
     },
     {
         icon: Settings2,
         title: 'Control',
         features: [
-            { name: 'Custom presets', description: 'Save your preferred settings for quick access' },
-            { name: 'Format flexibility', description: 'MP4, MOV, MKV, WebM, audio, and more' },
-            { name: 'Codec options', description: 'H.264, H.265/HEVC, ProRes, and VP9' },
+            {
+                name: 'Custom presets',
+                description: 'Save your preferred settings for quick access',
+            },
+            {
+                name: 'Format flexibility',
+                description: 'MP4, MOV, MKV, WebM, audio, and more',
+            },
+            {
+                name: 'Codec options',
+                description: 'H.264, H.265/HEVC, ProRes, and VP9',
+            },
         ],
     },
     {
         icon: Sparkles,
         title: 'Simplicity',
         features: [
-            { name: 'Drag & drop', description: 'Add files from Finder or any app' },
-            { name: 'Smart queue', description: 'Track progress across all conversions' },
-            { name: 'Clean interface', description: 'Native macOS design that stays out of your way' },
+            {
+                name: 'Drag & drop',
+                description: 'Add files from Finder or any app',
+            },
+            {
+                name: 'Smart queue',
+                description: 'Track progress across all conversions',
+            },
+            {
+                name: 'Clean interface',
+                description: 'Native macOS design that stays out of your way',
+            },
         ],
     },
 ];
@@ -43,7 +70,9 @@ const featureGroups = [
                     >
                         Everything You Need
                     </h2>
-                    <p class="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+                    <p
+                        class="mx-auto mt-4 max-w-xl text-lg text-muted-foreground"
+                    >
                         Powerful features, thoughtfully organized.
                     </p>
                 </div>

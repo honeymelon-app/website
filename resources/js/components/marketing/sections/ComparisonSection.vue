@@ -54,10 +54,11 @@ const comparisonFeatures = [
                             <tr
                                 v-for="(item, index) in comparisonFeatures"
                                 :key="item.feature"
-                                :class="index !== comparisonFeatures.length - 1
+                                :class="
+                                    index !== comparisonFeatures.length - 1
                                         ? 'border-b border-border/50'
                                         : ''
-                                    "
+                                "
                             >
                                 <td class="px-6 py-4 text-sm text-foreground">
                                     {{ item.feature }}

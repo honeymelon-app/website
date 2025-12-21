@@ -16,8 +16,8 @@ import { ArrowRight } from 'lucide-vue-next';
                     Designed to stay out of your way.
                 </h2>
                 <p class="mt-6 text-lg text-muted-foreground">
-                    Download Honeymelon and experience intelligent, privacy-first
-                    media conversion on your Mac.
+                    Download Honeymelon and experience intelligent,
+                    privacy-first media conversion on your Mac.
                 </p>
                 <div
                     class="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"

@@ -44,18 +44,35 @@ onUnmounted(() => {
                 <div class="flex h-16 items-center justify-between">
                     <Link href="/" class="flex items-center gap-2.5">
                         <AppLogoIcon class="h-8 w-8" />
-                        <span class="text-lg font-semibold text-foreground">Honeymelon</span>
+                        <span class="text-lg font-semibold text-foreground"
+                            >Honeymelon</span
+                        >
                     </Link>
 
                     <!-- Desktop Navigation -->
                     <nav class="hidden items-center gap-1 md:flex">
-                        <Button as-child variant="ghost" size="sm" class="text-muted-foreground hover:text-foreground">
+                        <Button
+                            as-child
+                            variant="ghost"
+                            size="sm"
+                            class="text-muted-foreground hover:text-foreground"
+                        >
                             <a href="/#features">Features</a>
                         </Button>
-                        <Button as-child variant="ghost" size="sm" class="text-muted-foreground hover:text-foreground">
+                        <Button
+                            as-child
+                            variant="ghost"
+                            size="sm"
+                            class="text-muted-foreground hover:text-foreground"
+                        >
                             <a href="/#pricing">Pricing</a>
                         </Button>
-                        <Button as-child variant="ghost" size="sm" class="text-muted-foreground hover:text-foreground">
+                        <Button
+                            as-child
+                            variant="ghost"
+                            size="sm"
+                            class="text-muted-foreground hover:text-foreground"
+                        >
                             <a
                                 href="https://docs.honeymelon.app"
                                 target="_blank"
@@ -91,7 +108,10 @@ onUnmounted(() => {
                                     <SheetTitle class="text-left">
                                         <div class="flex items-center gap-2.5">
                                             <AppLogoIcon class="h-7 w-7" />
-                                            <span class="text-base font-semibold">Honeymelon</span>
+                                            <span
+                                                class="text-base font-semibold"
+                                                >Honeymelon</span
+                                            >
                                         </div>
                                     </SheetTitle>
                                 </SheetHeader>
@@ -147,17 +167,24 @@ onUnmounted(() => {
                     <div class="sm:col-span-2 lg:col-span-1">
                         <div class="flex items-center gap-2.5">
                             <AppLogoIcon class="h-7 w-7" />
-                            <span class="text-base font-semibold text-foreground">Honeymelon</span>
+                            <span
+                                class="text-base font-semibold text-foreground"
+                                >Honeymelon</span
+                            >
                         </div>
-                        <p class="mt-4 text-sm leading-relaxed text-muted-foreground">
-                            Smart media conversion for macOS.
-                            Built for Apple Silicon.
+                        <p
+                            class="mt-4 text-sm leading-relaxed text-muted-foreground"
+                        >
+                            Smart media conversion for macOS. Built for Apple
+                            Silicon.
                         </p>
                     </div>
 
                     <!-- Product -->
                     <div>
-                        <h3 class="text-sm font-medium text-foreground">Product</h3>
+                        <h3 class="text-sm font-medium text-foreground">
+                            Product
+                        </h3>
                         <ul class="mt-4 space-y-3 text-sm">
                             <li>
                                 <a
@@ -199,7 +226,9 @@ onUnmounted(() => {
 
                     <!-- Resources -->
                     <div>
-                        <h3 class="text-sm font-medium text-foreground">Resources</h3>
+                        <h3 class="text-sm font-medium text-foreground">
+                            Resources
+                        </h3>
                         <ul class="mt-4 space-y-3 text-sm">
                             <li>
                                 <a
@@ -228,7 +257,9 @@ onUnmounted(() => {
 
                     <!-- Legal -->
                     <div>
-                        <h3 class="text-sm font-medium text-foreground">Legal</h3>
+                        <h3 class="text-sm font-medium text-foreground">
+                            Legal
+                        </h3>
                         <ul class="mt-4 space-y-3 text-sm">
                             <li>
                                 <Link
@@ -252,7 +283,9 @@ onUnmounted(() => {
 
                 <Separator class="my-10" />
 
-                <div class="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                <div
+                    class="flex flex-col items-center justify-between gap-4 sm:flex-row"
+                >
                     <p class="text-sm text-muted-foreground">
                         © 2025 Honeymelon. All rights reserved.
                     </p>

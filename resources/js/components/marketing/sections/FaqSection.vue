@@ -20,7 +20,7 @@ const faqs = [
     },
     {
         question: 'Can I use my license on multiple Macs?',
-        answer: 'Each license activates on one Mac device. The activation is one-time and cannot be transferred. If you need Honeymelon on multiple Macs, you\'ll need a separate license for each.',
+        answer: "Each license activates on one Mac device. The activation is one-time and cannot be transferred. If you need Honeymelon on multiple Macs, you'll need a separate license for each.",
     },
     {
         question: 'What happens when version 2.0 is released?',
@@ -28,13 +28,16 @@ const faqs = [
     },
     {
         question: 'What if I want a refund?',
-        answer: 'We offer a 30-day money-back guarantee, no questions asked. If Honeymelon doesn\'t work for you, contact us for a full refund.',
+        answer: "We offer a 30-day money-back guarantee, no questions asked. If Honeymelon doesn't work for you, contact us for a full refund.",
     },
 ];
 </script>
 
 <template>
-    <section id="faq" class="border-t border-border/50 bg-muted/30 py-24 sm:py-32">
+    <section
+        id="faq"
+        class="border-t border-border/50 bg-muted/30 py-24 sm:py-32"
+    >
         <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
             <AnimatedSection>
                 <div class="text-center">
@@ -60,7 +63,9 @@ const faqs = [
                             >
                                 {{ faq.question }}
                             </AccordionTrigger>
-                            <AccordionContent class="pb-5 text-muted-foreground">
+                            <AccordionContent
+                                class="pb-5 text-muted-foreground"
+                            >
                                 {{ faq.answer }}
                             </AccordionContent>
                         </AccordionItem>

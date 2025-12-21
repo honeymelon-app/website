@@ -68,7 +68,8 @@ const features = [
                         One Price. Forever.
                     </h2>
                     <p class="mt-4 text-lg text-muted-foreground">
-                        No subscriptions. No hidden fees. Pay once, own it forever.
+                        No subscriptions. No hidden fees. Pay once, own it
+                        forever.
                     </p>
                 </div>
             </AnimatedSection>
@@ -81,13 +82,17 @@ const features = [
                         <h3 class="text-xl font-semibold text-foreground">
                             Honeymelon License
                         </h3>
-                        <div class="mt-6 flex items-baseline justify-center gap-2">
+                        <div
+                            class="mt-6 flex items-baseline justify-center gap-2"
+                        >
                             <span
                                 class="text-6xl font-semibold tracking-tight text-foreground"
                             >
                                 $29
                             </span>
-                            <span class="text-lg text-muted-foreground">USD</span>
+                            <span class="text-lg text-muted-foreground"
+                                >USD</span
+                            >
                         </div>
                         <p class="mt-2 text-sm text-muted-foreground">
                             One-time payment · Lifetime access
@@ -100,8 +105,12 @@ const features = [
                             :key="feature"
                             class="flex items-start gap-3"
                         >
-                            <Check class="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                            <span class="text-muted-foreground">{{ feature }}</span>
+                            <Check
+                                class="mt-0.5 h-5 w-5 shrink-0 text-primary"
+                            />
+                            <span class="text-muted-foreground">{{
+                                feature
+                            }}</span>
                         </li>
                     </ul>
 
@@ -129,8 +138,11 @@ const features = [
                             {{ checkoutError }}
                         </p>
 
-                        <p class="mt-4 text-center text-sm text-muted-foreground/70">
-                            30-day money-back guarantee · Secure payment via Stripe
+                        <p
+                            class="mt-4 text-center text-sm text-muted-foreground/70"
+                        >
+                            30-day money-back guarantee · Secure payment via
+                            Stripe
                         </p>
                     </div>
                 </div>
