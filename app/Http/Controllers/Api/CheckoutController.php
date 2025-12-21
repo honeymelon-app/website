@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateCheckoutRequest;
+use App\Models\Product;
 use App\Services\CheckoutService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
@@ -22,8 +23,7 @@ class CheckoutController extends Controller
      * Expected payload:
      * {
      *   "provider": "stripe",
-     *   "amount": 2900,
-     *   "currency": "usd",
+     *   "product_id": "uuid",
      *   "success_url": "https://yoursite.com/success",
      *   "cancel_url": "https://yoursite.com/cancel",
      *   "email": "user@example.com"
@@ -39,14 +39,16 @@ class CheckoutController extends Controller
     public function __invoke(CreateCheckoutRequest $request): JsonResponse
     {
         try {
+            $product = Product::findOrFail($request->input('product_id'));
+
             $session = $this->checkoutService->createCheckoutSession([
                 'provider' => $request->input('provider'),
-                'amount' => $request->integer('amount'),
-                'currency' => $request->input('currency', 'usd'),
+                'product' => $product,
                 'success_url' => $request->input('success_url'),
                 'cancel_url' => $request->input('cancel_url'),
                 'email' => $request->input('email'),
                 'metadata' => [
+                    'product_id' => $product->id,
                     'user_agent' => $request->userAgent(),
                     'ip' => $request->ip(),
                 ],
@@ -56,6 +58,7 @@ class CheckoutController extends Controller
         } catch (\Exception $e) {
             Log::error('Failed to create checkout session', [
                 'provider' => $request->input('provider'),
+                'product_id' => $request->input('product_id'),
                 'error' => $e->getMessage(),
             ]);
 

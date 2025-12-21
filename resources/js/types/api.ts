@@ -58,6 +58,20 @@ export interface Artifact {
     release?: Release;
 }
 
+// Product types
+export interface Product {
+    id: string;
+    name: string;
+    slug: string;
+    description: string | null;
+    stripe_product_id: string | null;
+    stripe_price_id: string | null;
+    price_cents: number;
+    currency: string;
+    formatted_price: string;
+    is_active: boolean;
+}
+
 // Update types
 export interface Update {
     id: string;

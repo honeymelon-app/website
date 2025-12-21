@@ -10,11 +10,12 @@ import InterfaceSection from '@/components/marketing/sections/InterfaceSection.v
 import PricingSection from '@/components/marketing/sections/PricingSection.vue';
 import ProofSection from '@/components/marketing/sections/ProofSection.vue';
 import MarketingLayout from '@/layouts/MarketingLayout.vue';
-import type { Artifact } from '@/types/api';
+import type { Artifact, Product } from '@/types/api';
 import { Head } from '@inertiajs/vue3';
 
 defineProps<{
     artifact?: Artifact | null;
+    product?: Product | null;
 }>();
 </script>
 
@@ -38,7 +39,7 @@ defineProps<{
         <InterfaceSection />
 
         <!-- 6. Pricing -->
-        <PricingSection />
+        <PricingSection :product="product" />
 
         <!-- 7. Download -->
         <DownloadSection :artifact="artifact" />

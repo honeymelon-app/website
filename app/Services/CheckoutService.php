@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Product;
 use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Support\Facades\Log;
 
@@ -16,23 +17,31 @@ class CheckoutService
     /**
      * Create a checkout session for license purchase.
      *
-     * @param  array{provider: string, amount: int, currency: string, success_url: string, cancel_url: string, email?: string, metadata?: array<string, mixed>}  $data
+     * @param  array{provider: string, product: Product, success_url: string, cancel_url: string, email?: string, metadata?: array<string, mixed>}  $data
      * @return array{checkout_url: string, session_id: string, provider: string}
      */
     public function createCheckoutSession(array $data): array
     {
-        Log::info('Creating checkout session', ['provider' => $data['provider']]);
+        /** @var Product $product */
+        $product = $data['product'];
+
+        Log::info('Creating checkout session', [
+            'provider' => $data['provider'],
+            'product_id' => $product->id,
+        ]);
 
         $provider = $this->providerFactory->make($data['provider']);
 
         $checkoutData = [
-            'amount' => $data['amount'],
-            'currency' => $data['currency'] ?? 'usd',
-            'product_name' => 'Honeymelon License',
+            'amount' => $product->price_cents,
+            'currency' => $product->currency,
+            'product_name' => $product->name.' License',
+            'stripe_price_id' => $product->stripe_price_id,
             'success_url' => $data['success_url'],
             'cancel_url' => $data['cancel_url'],
             'metadata' => array_merge($data['metadata'] ?? [], [
-                'product' => 'honeymelon_license',
+                'product_id' => $product->id,
+                'product_slug' => $product->slug,
                 'seats' => 1,
             ]),
         ];
@@ -46,6 +55,7 @@ class CheckoutService
         Log::info('Checkout session created', [
             'provider' => $session['provider'],
             'session_id' => $session['session_id'],
+            'product_id' => $product->id,
         ]);
 
         return $session;

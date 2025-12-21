@@ -1,14 +1,31 @@
 <script setup lang="ts">
 import AnimatedSection from '@/components/marketing/AnimatedSection.vue';
 import Button from '@/components/ui/button/Button.vue';
+import type { Product } from '@/types/api';
 import { ArrowRight, Check, Loader2 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+
+const props = defineProps<{
+    product?: Product | null;
+}>();
 
 const isCheckingOut = ref(false);
 const checkoutError = ref<string | null>(null);
 
+const displayPrice = computed(() => {
+    if (!props.product) {
+        return '$29';
+    }
+    const dollars = Math.floor(props.product.price_cents / 100);
+    return `$${dollars}`;
+});
+
+const displayCurrency = computed(() => {
+    return props.product?.currency?.toUpperCase() ?? 'USD';
+});
+
 async function startCheckout(): Promise<void> {
-    if (isCheckingOut.value) return;
+    if (isCheckingOut.value || !props.product) return;
 
     isCheckingOut.value = true;
     checkoutError.value = null;
@@ -22,8 +39,7 @@ async function startCheckout(): Promise<void> {
             },
             body: JSON.stringify({
                 provider: 'stripe',
-                amount: 2900,
-                currency: 'usd',
+                product_id: props.product.id,
                 success_url: `${window.location.origin}/download?success=true`,
                 cancel_url: `${window.location.origin}/#pricing?cancelled=true`,
             }),
@@ -80,7 +96,7 @@ const features = [
                 >
                     <div class="text-center">
                         <h3 class="text-xl font-semibold text-foreground">
-                            Honeymelon License
+                            {{ product?.name ?? 'Honeymelon' }} License
                         </h3>
                         <div
                             class="mt-6 flex items-baseline justify-center gap-2"
@@ -88,11 +104,11 @@ const features = [
                             <span
                                 class="text-6xl font-semibold tracking-tight text-foreground"
                             >
-                                $29
+                                {{ displayPrice }}
                             </span>
-                            <span class="text-lg text-muted-foreground"
-                                >USD</span
-                            >
+                            <span class="text-lg text-muted-foreground">{{
+                                displayCurrency
+                            }}</span>
                         </div>
                         <p class="mt-2 text-sm text-muted-foreground">
                             One-time payment · Lifetime access
@@ -116,7 +132,7 @@ const features = [
 
                     <div class="mt-10">
                         <Button
-                            :disabled="isCheckingOut"
+                            :disabled="isCheckingOut || !product"
                             size="lg"
                             class="h-12 w-full text-base"
                             @click="startCheckout"
@@ -126,7 +142,7 @@ const features = [
                                 class="mr-2 h-4 w-4 animate-spin"
                             />
                             <template v-else>
-                                Buy Honeymelon
+                                Buy {{ product?.name ?? 'Honeymelon' }}
                                 <ArrowRight class="ml-2 h-4 w-4" />
                             </template>
                         </Button>

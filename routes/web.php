@@ -12,7 +12,9 @@ use App\Http\Controllers\Web\Auth\NewPasswordController;
 use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Web\DownloadController;
 use App\Http\Resources\ArtifactResource;
+use App\Http\Resources\ProductResource;
 use App\Models\Artifact;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -32,8 +34,13 @@ Route::get('/', function () {
         ->latest('created_at')
         ->first();
 
+    $product = Product::query()
+        ->where('is_active', true)
+        ->first();
+
     return Inertia::render('Welcome', [
         'artifact' => $latestArtifact ? (new ArtifactResource($latestArtifact))->resolve() : null,
+        'product' => $product ? (new ProductResource($product))->resolve() : null,
     ]);
 })->name('home');
 
