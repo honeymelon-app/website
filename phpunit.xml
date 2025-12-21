@@ -31,5 +31,8 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
+        <env name="FILESYSTEM_DISK" value="local"/>
+        <env name="STRIPE_SECRET" value="sk_test_dummy_key_for_testing"/>
+        <env name="STRIPE_WEBHOOK_SECRET" value="whsec_test_dummy_secret_for_testing"/>
     </php>
 </phpunit>

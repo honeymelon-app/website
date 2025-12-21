@@ -91,4 +91,9 @@ class LicenseFactory extends Factory
             'activation_count' => 1,
         ]);
     }
+
+    public function active(): self
+    {
+        return $this->state(fn () => ['status' => LicenseStatus::ACTIVE]);
+    }
 }

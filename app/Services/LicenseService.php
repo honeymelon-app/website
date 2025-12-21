@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\LicenseManager;
 use App\Enums\LicenseStatus;
+use App\Events\LicenseIssued;
 use App\Models\License;
 use App\Support\LicenseBundle;
 use App\Support\LicenseCodec;
@@ -14,7 +16,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Throwable;
 
-class LicenseService
+class LicenseService implements LicenseManager
 {
     /**
      * Issue a new signed license for an order.
@@ -51,6 +53,8 @@ class LicenseService
             'license_id' => $license->id,
             'key_last_6' => substr($bundle['key'], -6),
         ]);
+
+        event(new LicenseIssued($license));
 
         return $license->refresh();
     }
