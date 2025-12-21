@@ -28,6 +28,7 @@ Control plane for Honeymelon: marketing pages, update manifests for the Tauri ap
 - [CI Snippets](#ci-snippets)
   - [Trigger publish from `app-macos`](#trigger-publish-from-app-macos)
   - [Typical post-deploy cache warmers](#typical-post-deploy-cache-warmers)
+- [Scheduler](#scheduler)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 
@@ -226,7 +227,7 @@ curl -u "$HM_USER:$HM_PASS" \
   -d '{"tag":"v1.3.2","channel":"stable"}'
 ```
 
-3. Platform fetches the GitHub Release, records `releases` and `artifacts`, writes the manifest, marks `latest`, and optionally clears CDN cache for `/api/updates/stable/latest.json`.
+1. Platform fetches the GitHub Release, records `releases` and `artifacts`, writes the manifest, marks `latest`, and optionally clears CDN cache for `/api/updates/stable/latest.json`.
 
 ## Admin UI
 
@@ -287,6 +288,23 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
+
+## Scheduler
+
+The platform includes scheduled tasks for keeping data in sync. Add the Laravel scheduler to your server's crontab:
+
+```bash
+* * * * * cd /path-to-project && php artisan schedule:run >> /dev/null 2>&1
+```
+
+**Scheduled commands:**
+
+| Command                | Frequency | Description                                 |
+| ---------------------- | --------- | ------------------------------------------- |
+| `github:sync-releases` | Hourly    | Syncs releases and artifacts from GitHub    |
+| `stripe:sync`          | Daily     | Syncs product and price details from Stripe |
+
+View the schedule with `php artisan schedule:list`.
 
 ## Roadmap
 
