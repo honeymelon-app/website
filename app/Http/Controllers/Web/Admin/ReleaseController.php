@@ -99,14 +99,13 @@ class ReleaseController extends Controller
                 ->route('admin.releases.index')
                 ->with('success', "Release {$version} has been deleted successfully.");
         } catch (\Exception $e) {
-            Log::error('Failed to delete release', [
-                'release_id' => $release->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return redirect()
-                ->route('admin.releases.show', $release)
-                ->with('error', 'Failed to delete release: '.$e->getMessage());
+            return $this->handleWebException(
+                $e,
+                'admin.releases.show',
+                'Failed to delete release',
+                ['release_id' => $release->id],
+                [$release]
+            );
         }
     }
 }

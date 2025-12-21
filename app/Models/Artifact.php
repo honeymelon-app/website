@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Observers\ArtifactObserver;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
 
+#[ObservedBy(ArtifactObserver::class)]
 class Artifact extends Model implements Filterable
 {
     /** @use HasFactory<\Database\Factories\ArtifactFactory> */
@@ -34,19 +36,6 @@ class Artifact extends Model implements Filterable
         'path',
         'release_id',
     ];
-
-    /**
-     * Bootstrap the model and its traits.
-     */
-    protected static function booted(): void
-    {
-        static::deleting(function (Artifact $artifact) {
-            // Delete the file from storage when the artifact record is deleted
-            if ($artifact->path && Storage::disk('s3')->exists($artifact->path)) {
-                Storage::disk('s3')->delete($artifact->path);
-            }
-        });
-    }
 
     /**
      * Get the attributes that should be cast.

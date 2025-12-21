@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\HandlesControllerExceptions;
 use App\Http\Controllers\Controller;
 use App\Services\DownloadService;
 use Illuminate\Http\RedirectResponse;
@@ -13,6 +14,8 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 class ArtifactDownloadController extends Controller
 {
+    use HandlesControllerExceptions;
+
     public function __construct(
         private readonly DownloadService $downloadService
     ) {}

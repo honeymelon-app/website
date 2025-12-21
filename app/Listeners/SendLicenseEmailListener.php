@@ -7,8 +7,10 @@ namespace App\Listeners;
 use App\Events\LicenseIssued;
 use App\Mail\LicenseKeyMail;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\WithoutRelations;
 use Illuminate\Support\Facades\Mail;
 
+#[WithoutRelations]
 final class SendLicenseEmailListener implements ShouldQueue
 {
     /**

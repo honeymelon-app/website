@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Support\ValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreLicenseRequest extends FormRequest
@@ -24,7 +25,7 @@ class StoreLicenseRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ValidationRules::email(),
             'max_major_version' => ['required', 'integer', 'min:0', 'max:999'],
         ];
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Support\ValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class OrderRefundRequest extends FormRequest
@@ -24,7 +25,7 @@ class OrderRefundRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'reason' => ['nullable', 'string', 'max:500'],
+            'reason' => ValidationRules::optionalString(500),
         ];
     }
 }

@@ -5,16 +5,21 @@ declare(strict_types=1);
 namespace App\Services\PaymentProviders;
 
 use App\Contracts\PaymentProvider;
+use Illuminate\Container\Attributes\Config;
+use Illuminate\Container\Attributes\Singleton;
 use Stripe\Checkout\Session;
 use Stripe\Exception\SignatureVerificationException;
 use Stripe\Refund;
 use Stripe\Stripe;
 use Stripe\Webhook;
 
+#[Singleton]
 class StripePaymentProvider implements PaymentProvider
 {
     public function __construct(
+        #[Config('services.stripe.secret')]
         private readonly string $secretKey,
+        #[Config('services.stripe.webhook_secret')]
         private readonly string $webhookSecret
     ) {
         Stripe::setApiKey($this->secretKey);

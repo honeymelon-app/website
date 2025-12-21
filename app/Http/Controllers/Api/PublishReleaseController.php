@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\HandlesControllerExceptions;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PublishReleaseRequest;
 use App\Http\Resources\ReleaseResource;
+use App\Http\Responses\ApiResponse;
 use App\Services\GithubService;
 use App\Services\ReleaseService;
 use App\Services\UpdateService;
 use App\Support\PlatformDetector;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class PublishReleaseController extends Controller
 {
+    use HandlesControllerExceptions;
+
     public function __construct(
         private readonly GithubService $github,
         private readonly ReleaseService $releaseService,
@@ -77,20 +80,16 @@ class PublishReleaseController extends Controller
             // Build and publish update manifest
             $update = $this->updateService->buildAndPublish($release, $channel);
 
-            return response()->json([
-                'message' => 'Release published successfully',
-                'data' => new ReleaseResource($release->load('artifacts', 'updates')),
-            ], 201);
+            return ApiResponse::created(
+                new ReleaseResource($release->load('artifacts', 'updates')),
+                'Release published successfully'
+            );
         } catch (\Exception $e) {
-            Log::error('Failed to publish release', [
-                'tag' => $tag,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'message' => 'Failed to publish release',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException(
+                $e,
+                'Failed to publish release',
+                ['tag' => $tag]
+            );
         }
     }
 }

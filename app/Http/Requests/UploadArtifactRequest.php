@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Support\ValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UploadArtifactRequest extends FormRequest
@@ -24,11 +25,11 @@ class UploadArtifactRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'platform' => ['required', 'string', 'max:64'],
+            'platform' => ValidationRules::platform(),
             'artifact' => ['required', 'file'],
-            'filename' => ['nullable', 'string', 'max:255'],
-            'signature' => ['nullable', 'string'],
-            'sha256' => ['nullable', 'string'],
+            'filename' => ValidationRules::optionalString(),
+            'signature' => ValidationRules::optionalString(),
+            'sha256' => ValidationRules::optionalString(),
             'notarized' => ['sometimes', 'boolean'],
         ];
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\DateRanges;
 use App\Contracts\LicenseManager;
 use App\Enums\LicenseStatus;
 use App\Events\LicenseIssued;
@@ -69,7 +70,7 @@ class LicenseService implements LicenseManager
 
         $cacheKey = "license:valid:{$hashed}";
 
-        return Cache::remember($cacheKey, 300, function () use ($key, $hashed) {
+        return Cache::remember($cacheKey, DateRanges::LICENSE_CACHE_SECONDS, function () use ($key, $hashed) {
             $license = License::where('key', $hashed)->first();
 
             if (! $license) {
@@ -126,6 +127,24 @@ class LicenseService implements LicenseManager
         $hashed = $this->hashKey($normalized);
 
         return License::where('key', $hashed)->first();
+    }
+
+    /**
+     * Find and validate a license by its key, returning both the license and validation status.
+     *
+     * @return array{license: ?License, is_valid: bool}
+     */
+    public function findAndValidate(string $key): array
+    {
+        $license = $this->findByKey($key);
+
+        if (! $license) {
+            return ['license' => null, 'is_valid' => false];
+        }
+
+        $isValid = $this->isValid($key);
+
+        return ['license' => $license, 'is_valid' => $isValid];
     }
 
     protected function hashKey(string $key): string

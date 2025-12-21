@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use App\Mail\LicenseKeyMail;
 use App\Models\Order;
 use App\Models\WebhookEvent;
@@ -35,7 +36,7 @@ class WebhookEventController extends Controller
         if (! $provider->verifyWebhookSignature($request->getContent(), $request->header('Stripe-Signature', ''))) {
             Log::warning('Invalid Stripe webhook signature');
 
-            return response()->json(['message' => 'Invalid signature'], 401);
+            return ApiResponse::unauthorized('Invalid signature');
         }
 
         $payload = $request->all();
@@ -56,7 +57,7 @@ class WebhookEventController extends Controller
                 Log::info('Non-payment webhook event, skipping', ['event_id' => $event->id]);
                 $event->update(['processed_at' => now()]);
 
-                return response()->json(['message' => 'Event acknowledged']);
+                return ApiResponse::success(message: 'Event acknowledged');
             }
 
             // Process the payment
@@ -64,14 +65,13 @@ class WebhookEventController extends Controller
 
             $event->update(['processed_at' => now()]);
 
-            return response()->json(['message' => 'Webhook processed']);
+            return ApiResponse::success(message: 'Webhook processed');
         } catch (\Exception $e) {
-            Log::error('Failed to process Stripe webhook', [
-                'event_id' => $event->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json(['message' => 'Webhook processing failed'], 500);
+            return $this->handleApiException(
+                $e,
+                'Failed to process Stripe webhook',
+                ['event_id' => $event->id]
+            );
         }
     }
 

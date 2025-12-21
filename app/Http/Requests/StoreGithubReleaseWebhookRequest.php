@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Support\ValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,22 +26,22 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'notes' => ['required', 'string'],
+            'notes' => ValidationRules::requiredString(),
             'published_at' => ['required', 'date'],
-            'tag' => ['required', 'string', 'max:255'],
-            'version' => ['required', 'string', 'max:255'],
+            'tag' => ValidationRules::requiredString(),
+            'version' => ValidationRules::requiredString(),
             'channel' => ['required', 'string', Rule::in(['stable', 'beta', 'alpha', 'rc'])],
-            'commit_hash' => ['required', 'string', 'max:255'],
+            'commit_hash' => ValidationRules::requiredString(),
             'major' => ['sometimes', 'boolean'],
             'artifacts' => ['sometimes', 'array'],
-            'artifacts.*.platform' => ['required_with:artifacts', 'string', 'max:64'],
+            'artifacts.*.platform' => ['required_with:artifacts', ...ValidationRules::platform()],
             'artifacts.*.source' => ['sometimes', 'string', Rule::in(['github', 'r2', 's3'])],
-            'artifacts.*.filename' => ['sometimes', 'string', 'max:255'],
+            'artifacts.*.filename' => ValidationRules::optionalString(),
             'artifacts.*.url' => ['required_with:artifacts', 'string', 'max:2048'],
             'artifacts.*.path' => ['sometimes', 'string', 'max:2048'],
             'artifacts.*.size' => ['sometimes', 'integer', 'min:0'],
-            'artifacts.*.sha256' => ['sometimes', 'string'],
-            'artifacts.*.signature' => ['nullable', 'string'],
+            'artifacts.*.sha256' => ValidationRules::optionalString(),
+            'artifacts.*.signature' => ValidationRules::optionalString(),
             'artifacts.*.notarized' => ['sometimes', 'boolean'],
         ];
     }

@@ -6,7 +6,11 @@ namespace App\Listeners;
 
 use App\Events\OrderRefunded;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Attributes\DeleteWhenMissingModels;
+use Illuminate\Queue\Attributes\WithoutRelations;
 
+#[WithoutRelations]
+#[DeleteWhenMissingModels]
 final class RevokeLicenseOnRefundListener implements ShouldQueue
 {
     /**

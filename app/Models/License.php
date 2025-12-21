@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Enums\LicenseStatus;
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -101,6 +102,7 @@ class License extends Model implements Filterable
     /**
      * Scope a query to only include active licenses.
      */
+    #[Scope]
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('status', LicenseStatus::ACTIVE);
@@ -109,6 +111,7 @@ class License extends Model implements Filterable
     /**
      * Scope a query to only include refunded licenses.
      */
+    #[Scope]
     public function scopeRefunded(Builder $query): Builder
     {
         return $query->where('status', LicenseStatus::REFUNDED);
@@ -117,9 +120,28 @@ class License extends Model implements Filterable
     /**
      * Scope a query to only include revoked licenses.
      */
+    #[Scope]
     public function scopeRevoked(Builder $query): Builder
     {
         return $query->where('status', LicenseStatus::REVOKED);
+    }
+
+    /**
+     * Scope to only include licenses within the last N days.
+     */
+    #[Scope]
+    public function scopeWithinDays(Builder $query, int $days): Builder
+    {
+        return $query->where('created_at', '>=', now()->subDays($days));
+    }
+
+    /**
+     * Scope to only include licenses within a date range.
+     */
+    #[Scope]
+    public function scopeBetweenDates(Builder $query, $startDate, $endDate): Builder
+    {
+        return $query->whereBetween('created_at', [$startDate, $endDate]);
     }
 
     /**

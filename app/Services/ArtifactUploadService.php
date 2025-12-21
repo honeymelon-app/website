@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\DateRanges;
 use App\Contracts\ArtifactUploader;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
@@ -94,7 +95,7 @@ final class ArtifactUploadService implements ArtifactUploader
     private function temporaryUrl(string $path): ?string
     {
         try {
-            return Storage::disk('private')->temporaryUrl($path, now()->addMinutes(30));
+            return Storage::disk('private')->temporaryUrl($path, now()->addMinutes(DateRanges::TEMPORARY_URL_MINUTES));
         } catch (\Throwable $e) {
             Log::debug('Failed to create temporary artifact URL', [
                 'path' => $path,

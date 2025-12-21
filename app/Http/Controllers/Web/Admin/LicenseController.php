@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web\Admin;
 
+use App\Constants\DateRanges;
 use App\Enums\ReleaseChannel;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLicenseRequest;
@@ -42,7 +43,7 @@ class LicenseController extends Controller
         $licenses = License::query()
             ->with('order')
             ->latest('created_at')
-            ->paginate(20);
+            ->paginate(DateRanges::ADMIN_PAGINATION_SIZE);
 
         return Inertia::render('admin/licenses/Index', [
             'licenses' => [

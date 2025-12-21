@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\GitRepository;
+use Illuminate\Container\Attributes\Config;
+use Illuminate\Container\Attributes\Singleton;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
-class GithubService
+#[Singleton]
+class GithubService implements GitRepository
 {
     public function __construct(
+        #[Config('services.github.owner')]
         private readonly string $owner,
+        #[Config('services.github.repo')]
         private readonly string $repo,
+        #[Config('services.github.token')]
         private readonly ?string $token = null
     ) {}
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Constants\DateRanges;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UploadArtifactRequest;
 use Illuminate\Http\JsonResponse;
@@ -103,7 +104,7 @@ class UploadArtifactController extends Controller
     protected function temporaryUrl(string $path): ?string
     {
         try {
-            return Storage::disk('private')->temporaryUrl($path, now()->addMinutes(30));
+            return Storage::disk('private')->temporaryUrl($path, now()->addMinutes(DateRanges::TEMPORARY_URL_MINUTES));
         } catch (\Throwable $e) {
             Log::debug('Failed to create temporary artifact URL', [
                 'path' => $path,

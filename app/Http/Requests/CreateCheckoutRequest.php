@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Support\ValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateCheckoutRequest extends FormRequest
@@ -25,9 +26,9 @@ class CreateCheckoutRequest extends FormRequest
     {
         return [
             'provider' => ['required', 'in:stripe'],
-            'product_id' => ['required', 'uuid', 'exists:products,id'],
-            'success_url' => ['required', 'url'],
-            'cancel_url' => ['required', 'url'],
+            'product_id' => [...ValidationRules::uuid(), 'exists:products,id'],
+            'success_url' => ValidationRules::url(),
+            'cancel_url' => ValidationRules::url(),
             'email' => ['sometimes', 'email'],
         ];
     }
@@ -40,16 +41,8 @@ class CreateCheckoutRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'provider.required' => 'A payment provider is required',
             'provider.in' => 'The provider must be stripe',
-            'product_id.required' => 'A product is required',
-            'product_id.uuid' => 'The product ID must be a valid UUID',
             'product_id.exists' => 'The selected product does not exist',
-            'success_url.required' => 'A success URL is required',
-            'success_url.url' => 'The success URL must be a valid URL',
-            'cancel_url.required' => 'A cancel URL is required',
-            'cancel_url.url' => 'The cancel URL must be a valid URL',
-            'email.email' => 'The email must be a valid email address',
         ];
     }
 }

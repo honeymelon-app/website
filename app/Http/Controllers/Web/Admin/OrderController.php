@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web\Admin;
 
+use App\Constants\DateRanges;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\OrderCollection;
 use App\Http\Resources\OrderResource;
@@ -24,7 +25,7 @@ class OrderController extends Controller
         $orders = Order::query()
             ->with('license')
             ->latest('created_at')
-            ->paginate(20);
+            ->paginate(DateRanges::ADMIN_PAGINATION_SIZE);
 
         return Inertia::render('admin/orders/Index', [
             'orders' => new OrderCollection($orders),

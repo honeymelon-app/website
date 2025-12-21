@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Enums\LicenseStatus;
+use App\Constants\DateRanges;
 use App\Models\Artifact;
 use App\Models\License;
 use App\Models\Order;
@@ -32,7 +32,7 @@ final class DashboardService
         return [
             'total_orders' => Order::count(),
             'total_revenue_cents' => (int) Order::sum('amount_cents'),
-            'active_licenses' => License::where('status', LicenseStatus::ACTIVE)->count(),
+            'active_licenses' => License::active()->count(),
             'total_releases' => Release::whereNotNull('published_at')->count(),
             'orders_change' => $this->calculateOrdersChange(),
             'revenue_change' => $this->calculateRevenueChange(),
@@ -115,29 +115,33 @@ final class DashboardService
 
     private function calculateOrdersChange(): float
     {
-        $current = Order::where('created_at', '>=', now()->subDays(30))->count();
-        $previous = Order::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])->count();
+        $current = Order::withinDays(DateRanges::DASHBOARD_COMPARISON_DAYS)->count();
+        $previous = Order::betweenDates(
+            now()->subDays(DateRanges::DASHBOARD_COMPARISON_DAYS * 2),
+            now()->subDays(DateRanges::DASHBOARD_COMPARISON_DAYS)
+        )->count();
 
         return $this->calculatePercentageChange($current, $previous);
     }
 
     private function calculateRevenueChange(): float
     {
-        $current = Order::where('created_at', '>=', now()->subDays(30))->sum('amount_cents') / 100;
-        $previous = Order::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])->sum('amount_cents') / 100;
+        $current = Order::withinDays(DateRanges::DASHBOARD_COMPARISON_DAYS)->sum('amount_cents') / 100;
+        $previous = Order::betweenDates(
+            now()->subDays(DateRanges::DASHBOARD_COMPARISON_DAYS * 2),
+            now()->subDays(DateRanges::DASHBOARD_COMPARISON_DAYS)
+        )->sum('amount_cents') / 100;
 
         return $this->calculatePercentageChange($current, $previous);
     }
 
     private function calculateLicensesChange(): float
     {
-        $current = License::where('created_at', '>=', now()->subDays(30))
-            ->where('status', LicenseStatus::ACTIVE)
-            ->count();
-
-        $previous = License::whereBetween('created_at', [now()->subDays(60), now()->subDays(30)])
-            ->where('status', LicenseStatus::ACTIVE)
-            ->count();
+        $current = License::withinDays(DateRanges::DASHBOARD_COMPARISON_DAYS)->active()->count();
+        $previous = License::betweenDates(
+            now()->subDays(DateRanges::DASHBOARD_COMPARISON_DAYS * 2),
+            now()->subDays(DateRanges::DASHBOARD_COMPARISON_DAYS)
+        )->active()->count();
 
         return $this->calculatePercentageChange($current, $previous);
     }
@@ -158,7 +162,7 @@ final class DashboardService
             DB::raw('COUNT(*) as count'),
             DB::raw('SUM(amount_cents) / 100 as revenue')
         )
-            ->where('created_at', '>=', now()->subDays(30))
+            ->withinDays(DateRanges::DASHBOARD_COMPARISON_DAYS)
             ->groupBy('date')
             ->orderBy('date')
             ->get()

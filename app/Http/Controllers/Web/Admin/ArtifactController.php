@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web\Admin;
 
+use App\Constants\DateRanges;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
@@ -22,7 +23,7 @@ class ArtifactController extends Controller
         $artifacts = Artifact::query()
             ->with('release')
             ->latest('created_at')
-            ->paginate(20);
+            ->paginate(DateRanges::ADMIN_PAGINATION_SIZE);
 
         // Check R2 sync status for each artifact
         $disk = Storage::disk('s3');

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace App\Services\PaymentProviders;
 
 use App\Contracts\PaymentProvider;
+use Illuminate\Container\Attributes\Singleton;
 use InvalidArgumentException;
 
+#[Singleton]
 class PaymentProviderFactory
 {
     public function __construct(

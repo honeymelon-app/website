@@ -6,6 +6,8 @@ namespace App\Models;
 
 use Filterable\Contracts\Filterable;
 use Filterable\Traits\Filterable as HasFilters;
+use Illuminate\Database\Eloquent\Attributes\Scope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -110,5 +112,23 @@ class Order extends Model implements Filterable
         return ! $this->isRefunded()
             && $this->provider === 'stripe'
             && $this->amount_cents > 0;
+    }
+
+    /**
+     * Scope orders created within the last N days.
+     */
+    #[Scope]
+    public function scopeWithinDays(Builder $query, int $days): Builder
+    {
+        return $query->where('created_at', '>=', now()->subDays($days));
+    }
+
+    /**
+     * Scope orders created between two dates.
+     */
+    #[Scope]
+    public function scopeBetweenDates(Builder $query, $start, $end): Builder
+    {
+        return $query->whereBetween('created_at', [$start, $end]);
     }
 }

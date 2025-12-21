@@ -4,48 +4,35 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\HandlesControllerExceptions;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateCheckoutRequest;
+use App\Http\Responses\ApiResponse;
 use App\Models\Product;
 use App\Services\CheckoutService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class CheckoutController extends Controller
 {
+    use HandlesControllerExceptions;
+
     public function __construct(
         private readonly CheckoutService $checkoutService
     ) {}
 
     /**
      * Create a checkout session for license purchase.
-     *
-     * Expected payload:
-     * {
-     *   "provider": "stripe",
-     *   "product_id": "uuid",
-     *   "success_url": "https://yoursite.com/success",
-     *   "cancel_url": "https://yoursite.com/cancel",
-     *   "email": "user@example.com"
-     * }
-     *
-     * Returns:
-     * {
-     *   "checkout_url": "https://checkout.stripe.com/...",
-     *   "session_id": "cs_...",
-     *   "provider": "stripe"
-     * }
      */
     public function __invoke(CreateCheckoutRequest $request): JsonResponse
     {
         try {
-            $product = Product::findOrFail($request->input('product_id'));
+            $product = Product::findOrFail($request->validated('product_id'));
 
             $session = $this->checkoutService->createCheckoutSession([
-                'provider' => $request->input('provider'),
+                'provider' => $request->validated('provider'),
                 'product' => $product,
-                'success_url' => $request->input('success_url'),
-                'cancel_url' => $request->input('cancel_url'),
+                'success_url' => $request->validated('success_url'),
+                'cancel_url' => $request->validated('cancel_url'),
                 'email' => $request->input('email'),
                 'metadata' => [
                     'product_id' => $product->id,
@@ -54,18 +41,16 @@ class CheckoutController extends Controller
                 ],
             ]);
 
-            return response()->json($session, 201);
+            return ApiResponse::created($session, null, dataKey: null);
         } catch (\Exception $e) {
-            Log::error('Failed to create checkout session', [
-                'provider' => $request->input('provider'),
-                'product_id' => $request->input('product_id'),
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'message' => 'Failed to create checkout session',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException(
+                $e,
+                'Failed to create checkout session',
+                [
+                    'provider' => $request->validated('provider'),
+                    'product_id' => $request->validated('product_id'),
+                ]
+            );
         }
     }
 }

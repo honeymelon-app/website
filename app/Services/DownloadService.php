@@ -113,7 +113,7 @@ class DownloadService
 
             return Storage::disk($disk)->temporaryUrl(
                 $artifact->path,
-                now()->addMinutes(30),
+                now()->addMinutes(DateRanges::TEMPORARY_URL_MINUTES),
                 [
                     'ResponseContentDisposition' => 'attachment; filename="'.$artifact->filename.'"',
                 ]

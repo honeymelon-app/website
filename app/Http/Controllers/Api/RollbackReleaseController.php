@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Concerns\HandlesControllerExceptions;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RollbackReleaseRequest;
+use App\Http\Responses\ApiResponse;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Log;
 
 class RollbackReleaseController extends Controller
 {
+    use HandlesControllerExceptions;
+
     /**
      * Rollback to a previous release.
      */
@@ -36,24 +39,17 @@ class RollbackReleaseController extends Controller
 
             Log::info('Release rolled back', ['update_id' => $update->id]);
 
-            return response()->json([
-                'message' => 'Release rolled back successfully',
-                'update' => [
-                    'id' => $update->id,
-                    'version' => $update->version,
-                    'channel' => $update->channel,
-                ],
-            ]);
+            return ApiResponse::success([
+                'id' => $update->id,
+                'version' => $update->version,
+                'channel' => $update->channel,
+            ], 'Release rolled back successfully');
         } catch (\Exception $e) {
-            Log::error('Failed to rollback release', [
-                'version' => $version,
-                'error' => $e->getMessage(),
-            ]);
-
-            return response()->json([
-                'message' => 'Failed to rollback release',
-                'error' => $e->getMessage(),
-            ], 500);
+            return $this->handleApiException(
+                $e,
+                'Failed to rollback release',
+                ['version' => $version]
+            );
         }
     }
 }

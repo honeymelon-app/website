@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Enums\LicenseStatus;
 use App\Models\License;
-use App\Support\LicenseCodec;
 use Illuminate\Support\Facades\Log;
 
 class ActivationService
@@ -31,9 +30,8 @@ class ActivationService
      */
     public function activate(string $licenseKey, string $appVersion, ?string $deviceId = null): array
     {
-        // Normalize and find the license
-        $normalizedKey = LicenseCodec::normalize($licenseKey);
-        $license = $this->licenseService->findByKey($normalizedKey);
+        // Find and validate the license in one call
+        ['license' => $license, 'is_valid' => $isValid] = $this->licenseService->findAndValidate($licenseKey);
 
         if (! $license) {
             Log::info('Activation attempted with unknown license key', [
@@ -83,7 +81,7 @@ class ActivationService
         }
 
         // Verify the key signature is valid
-        if (! $this->licenseService->isValid($licenseKey)) {
+        if (! $isValid) {
             Log::warning('Activation attempted with invalid license signature', [
                 'license_id' => $license->id,
             ]);
