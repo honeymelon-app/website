@@ -8,7 +8,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import type { PaginationMeta } from '@/types/resources';
+import type { PaginationMeta } from '@/types/api';
 import { computed } from 'vue';
 import DataTablePagination from './DataTablePagination.vue';
 

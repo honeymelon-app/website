@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import type { PaginationMeta } from '@/types/resources';
+import type { PaginationMeta } from '@/types/api';
 import {
     ChevronLeft,
     ChevronRight,

@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\ArtifactDownloadController;
 use App\Http\Controllers\Api\CheckoutController;
 use App\Http\Controllers\Api\GithubWebhookController;
 use App\Http\Controllers\Api\LicenseActivationController;
-use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UploadArtifactController;
 use App\Http\Controllers\Api\WebhookEventController;
 use Illuminate\Support\Facades\Route;
@@ -18,8 +17,6 @@ use Illuminate\Support\Facades\Route;
 | No auth required.
 */
 Route::get('/download', ArtifactDownloadController::class)->name('artifacts.download');
-Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
 Route::post('/checkout', CheckoutController::class)->name('checkout');
 Route::post('/licenses/activate', LicenseActivationController::class)->name('licenses.activate');
 

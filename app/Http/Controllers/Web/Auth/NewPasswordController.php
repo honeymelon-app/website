@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\NewPasswordRequest;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,20 +33,19 @@ class NewPasswordController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(NewPasswordRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $validated = $request->validated();
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
 
         $status = Password::reset(
-            [
-                'email' => $validated['email'],
-                'password' => $validated['password'],
-                'password_confirmation' => $request->input('password_confirmation'),
-                'token' => $validated['token'],
-            ],
-            function ($user) use ($validated) {
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user) use ($request) {
                 $user->forceFill([
-                    'password' => Hash::make($validated['password']),
+                    'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
                 ])->save();
 

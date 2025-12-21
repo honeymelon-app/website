@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests\Feature\Api;
 
 use App\Contracts\PaymentProvider;
-use App\Models\Product;
 use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,21 +12,6 @@ use Tests\TestCase;
 class CheckoutTest extends TestCase
 {
     use RefreshDatabase;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        Product::factory()->create([
-            'slug' => 'honeymelon',
-            'name' => 'Honeymelon',
-            'price_cents' => 2900,
-            'currency' => 'usd',
-            'stripe_price_id' => 'price_test_123',
-            'stripe_product_id' => 'prod_test_123',
-            'is_active' => true,
-        ]);
-    }
 
     protected function getMockPaymentProvider(array $checkoutResponse): PaymentProvider
     {
@@ -42,7 +26,8 @@ class CheckoutTest extends TestCase
     {
         return array_merge([
             'provider' => 'stripe',
-            'product_slug' => 'honeymelon',
+            'amount' => 2900,
+            'currency' => 'usd',
             'success_url' => 'https://example.com/success',
             'cancel_url' => 'https://example.com/cancel',
             'email' => 'test@example.com',
@@ -97,7 +82,7 @@ class CheckoutTest extends TestCase
             ->assertJson($expectedResponse);
     }
 
-    public function test_creates_checkout_session_without_product_slug_uses_default(): void
+    public function test_creates_checkout_session_without_optional_currency(): void
     {
         $expectedResponse = [
             'checkout_url' => 'https://checkout.stripe.com/test-session',
@@ -114,7 +99,7 @@ class CheckoutTest extends TestCase
         $this->app->instance(PaymentProviderFactory::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload();
-        unset($payload['product_slug']);
+        unset($payload['currency']);
 
         $response = $this->postJson('/api/checkout', $payload);
 
@@ -154,30 +139,66 @@ class CheckoutTest extends TestCase
             ]);
     }
 
-    public function test_fails_with_nonexistent_product(): void
+    public function test_requires_amount(): void
+    {
+        $mockFactory = $this->createMock(PaymentProviderFactory::class);
+        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+
+        $payload = $this->getValidCheckoutPayload();
+        unset($payload['amount']);
+
+        $response = $this->postJson('/api/checkout', $payload);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['amount']);
+    }
+
+    public function test_validates_amount_is_integer(): void
     {
         $mockFactory = $this->createMock(PaymentProviderFactory::class);
         $this->app->instance(PaymentProviderFactory::class, $mockFactory);
 
         $payload = $this->getValidCheckoutPayload([
-            'product_slug' => 'nonexistent-product',
+            'amount' => 'not-an-integer',
         ]);
 
         $response = $this->postJson('/api/checkout', $payload);
 
-        $response->assertStatus(500);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['amount']);
     }
 
-    public function test_fails_with_inactive_product(): void
+    public function test_validates_minimum_amount(): void
     {
-        Product::where('slug', 'honeymelon')->update(['is_active' => false]);
-
         $mockFactory = $this->createMock(PaymentProviderFactory::class);
         $this->app->instance(PaymentProviderFactory::class, $mockFactory);
 
-        $response = $this->postJson('/api/checkout', $this->getValidCheckoutPayload());
+        $payload = $this->getValidCheckoutPayload([
+            'amount' => 99,
+        ]);
 
-        $response->assertStatus(500);
+        $response = $this->postJson('/api/checkout', $payload);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['amount'])
+            ->assertJsonFragment([
+                'amount' => ['The amount must be at least $1.00 (100 cents)'],
+            ]);
+    }
+
+    public function test_validates_currency_format(): void
+    {
+        $mockFactory = $this->createMock(PaymentProviderFactory::class);
+        $this->app->instance(PaymentProviderFactory::class, $mockFactory);
+
+        $payload = $this->getValidCheckoutPayload([
+            'currency' => 'toolong',
+        ]);
+
+        $response = $this->postJson('/api/checkout', $payload);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['currency']);
     }
 
     public function test_requires_success_url(): void

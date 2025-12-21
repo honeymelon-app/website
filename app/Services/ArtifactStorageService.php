@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\ArtifactStorage;
 use App\Models\Artifact;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 
-class ArtifactStorageService
+final class ArtifactStorageService implements ArtifactStorage
 {
     private FilesystemAdapter $disk;
 
@@ -23,6 +24,22 @@ class ArtifactStorageService
     public function getDisk(): FilesystemAdapter
     {
         return $this->disk;
+    }
+
+    /**
+     * Check if a file exists in storage.
+     */
+    public function exists(string $path): bool
+    {
+        return $this->disk->exists($path);
+    }
+
+    /**
+     * Delete an artifact from storage.
+     */
+    public function delete(string $path): bool
+    {
+        return $this->disk->delete($path);
     }
 
     /**

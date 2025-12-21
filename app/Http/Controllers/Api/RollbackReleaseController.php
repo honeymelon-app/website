@@ -6,14 +6,11 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RollbackReleaseRequest;
-use App\Services\UpdateService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 
 class RollbackReleaseController extends Controller
 {
-    public function __construct(private UpdateService $updateService) {}
-
     /**
      * Rollback to a previous release.
      */
@@ -22,17 +19,34 @@ class RollbackReleaseController extends Controller
         $version = $request->input('version');
         $channel = $request->input('channel');
 
+        Log::info('Rolling back release', ['version' => $version, 'channel' => $channel]);
+
         try {
-            $update = $this->updateService->rollback($version, $channel);
+            $update = \App\Models\Update::where('channel', $channel)
+                ->where('version', $version)
+                ->firstOrFail();
+
+            // Unset current latest
+            \App\Models\Update::where('channel', $channel)
+                ->where('is_latest', true)
+                ->update(['is_latest' => false]);
+
+            // Set this version as latest
+            $update->update(['is_latest' => true]);
+
+            Log::info('Release rolled back', ['update_id' => $update->id]);
 
             return response()->json([
                 'message' => 'Release rolled back successfully',
-                'update' => $update,
+                'update' => [
+                    'id' => $update->id,
+                    'version' => $update->version,
+                    'channel' => $update->channel,
+                ],
             ]);
         } catch (\Exception $e) {
             Log::error('Failed to rollback release', [
                 'version' => $version,
-                'channel' => $channel,
                 'error' => $e->getMessage(),
             ]);
 

@@ -6,15 +6,14 @@ namespace App\Http\Controllers\Web\Admin;
 
 use App\Enums\ReleaseChannel;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AdminRevokeLicenseRequest;
 use App\Http\Requests\StoreLicenseRequest;
-use App\Http\Resources\LicenseCollection;
 use App\Http\Resources\LicenseResource;
 use App\Models\License;
 use App\Models\Order;
 use App\Models\Release;
 use App\Services\LicenseService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -46,7 +45,23 @@ class LicenseController extends Controller
             ->paginate(20);
 
         return Inertia::render('admin/licenses/Index', [
-            'licenses' => new LicenseCollection($licenses),
+            'licenses' => [
+                'data' => LicenseResource::collection($licenses->items())->resolve(),
+                'meta' => [
+                    'current_page' => $licenses->currentPage(),
+                    'from' => $licenses->firstItem(),
+                    'last_page' => $licenses->lastPage(),
+                    'per_page' => $licenses->perPage(),
+                    'to' => $licenses->lastItem(),
+                    'total' => $licenses->total(),
+                ],
+                'links' => [
+                    'first' => $licenses->url(1),
+                    'last' => $licenses->url($licenses->lastPage()),
+                    'prev' => $licenses->previousPageUrl(),
+                    'next' => $licenses->nextPageUrl(),
+                ],
+            ],
             'available_versions' => $availableMajorVersions,
         ]);
     }
@@ -95,8 +110,12 @@ class LicenseController extends Controller
     /**
      * Revoke a license manually.
      */
-    public function revoke(AdminRevokeLicenseRequest $request, License $license, LicenseService $licenseService): RedirectResponse
+    public function revoke(Request $request, License $license, LicenseService $licenseService): RedirectResponse
     {
+        $request->validate([
+            'reason' => ['nullable', 'string', 'max:500'],
+        ]);
+
         if (! $license->isActive()) {
             return redirect()
                 ->route('admin.licenses.show', $license)

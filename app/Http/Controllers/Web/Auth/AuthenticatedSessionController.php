@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,17 +31,14 @@ class AuthenticatedSessionController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $credentials = $request->validated();
+        $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+        ]);
 
-        if (! Auth::attempt(
-            [
-                'email' => $credentials['email'],
-                'password' => $credentials['password'],
-            ],
-            (bool) ($credentials['remember'] ?? false)
-        )) {
+        if (! Auth::attempt($request->only('email', 'password'), $request->boolean('remember'))) {
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);

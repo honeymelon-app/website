@@ -6,13 +6,10 @@ namespace App\Services;
 
 use App\Models\Artifact;
 use App\Models\Release;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class ReleaseService
 {
-    public function __construct(private GithubService $githubService) {}
-
     /**
      * Record a release from GitHub data.
      *
@@ -46,37 +43,5 @@ class ReleaseService
         Log::info('Artifact attached', ['artifact_id' => $artifact->id]);
 
         return $artifact;
-    }
-
-    /**
-     * Delete a release and its associated artifacts, including from GitHub.
-     */
-    public function deleteRelease(Release $release): void
-    {
-        $tag = $release->tag;
-        $version = $release->version;
-
-        Log::info('Deleting release', [
-            'release_id' => $release->id,
-            'version' => $version,
-            'tag' => $tag,
-        ]);
-
-        DB::transaction(function () use ($release, $tag): void {
-            $release->artifacts()->delete();
-            $release->delete();
-
-            try {
-                $this->githubService->deleteReleaseAndTag($tag);
-                Log::info('GitHub release and tag deleted', ['tag' => $tag]);
-            } catch (\Exception $e) {
-                Log::warning('Failed to delete GitHub release/tag', [
-                    'tag' => $tag,
-                    'error' => $e->getMessage(),
-                ]);
-            }
-        });
-
-        Log::info('Release deleted successfully', ['version' => $version]);
     }
 }

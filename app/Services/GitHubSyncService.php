@@ -4,16 +4,17 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\GitRepository;
 use App\Enums\ReleaseChannel;
 use App\Models\Artifact;
 use App\Models\Release;
 use App\Support\PlatformDetector;
 use Illuminate\Support\Facades\Log;
 
-class GitHubSyncService
+final class GitHubSyncService
 {
     public function __construct(
-        private readonly GithubService $githubService,
+        private readonly GitRepository $githubService,
         private readonly ReleaseService $releaseService
     ) {}
 

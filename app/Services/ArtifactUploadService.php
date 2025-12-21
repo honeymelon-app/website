@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Contracts\ArtifactUploader;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-class ArtifactUploadService
+final class ArtifactUploadService implements ArtifactUploader
 {
     /**
      * Upload an artifact to storage.

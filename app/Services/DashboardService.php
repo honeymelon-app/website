@@ -12,7 +12,7 @@ use App\Models\Release;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class DashboardService
+final class DashboardService
 {
     /**
      * Get all dashboard metrics.

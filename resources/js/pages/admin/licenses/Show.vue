@@ -13,23 +13,24 @@ import { dashboard } from '@/routes';
 import licenses from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
 import type { License } from '@/types/resources';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import {
+    AlertTriangle,
     Check,
+    CheckCircle,
     Copy,
     ShieldOff,
     Smartphone,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
-import { useFlashMessages } from '@/composables/useFlashMessages';
-
-useFlashMessages();
+import { computed, ref } from 'vue';
 
 interface Props {
     license: License;
 }
 
 const props = defineProps<Props>();
+
+const page = usePage();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -48,11 +49,26 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const { copied: isCopied, copy: copyToClipboard } = useCopyToClipboard();
 
+// Flash messages
+const successMessage = computed(
+    () => page.props.flash?.success as string | undefined,
+);
+const errorMessage = computed(
+    () => page.props.flash?.error as string | undefined,
+);
+
 // Revoke dialog state
 const showRevokeDialog = ref(false);
 const revokeForm = useForm({
     reason: '',
 });
+
+const formatDate = (dateString: string | null): string => {
+    if (!dateString) {
+        return 'Not issued';
+    }
+    return formatDateTime(dateString);
+};
 
 const processRevoke = (): void => {
     revokeForm.post(`/admin/licenses/${props.license.id}/revoke`, {
@@ -73,6 +89,34 @@ const processRevoke = (): void => {
             class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
+                <!-- Flash Messages -->
+                <div
+                    v-if="successMessage"
+                    class="flex items-center gap-3 rounded-lg border border-green-200 bg-green-50 p-4 dark:border-green-800 dark:bg-green-950"
+                >
+                    <CheckCircle
+                        class="h-5 w-5 text-green-600 dark:text-green-400"
+                    />
+                    <p
+                        class="text-sm font-medium text-green-800 dark:text-green-200"
+                    >
+                        {{ successMessage }}
+                    </p>
+                </div>
+                <div
+                    v-if="errorMessage"
+                    class="flex items-center gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950"
+                >
+                    <AlertTriangle
+                        class="h-5 w-5 text-red-600 dark:text-red-400"
+                    />
+                    <p
+                        class="text-sm font-medium text-red-800 dark:text-red-200"
+                    >
+                        {{ errorMessage }}
+                    </p>
+                </div>
+
                 <!-- Revoked/Refunded Banner -->
                 <div
                     v-if="license.status === 'revoked'"
@@ -256,10 +300,11 @@ const processRevoke = (): void => {
                                 <Label>Activation Status</Label>
                                 <div class="flex items-center gap-2">
                                     <Badge
-                                        :variant="license.is_activated
-                                            ? 'default'
-                                            : 'secondary'
-                                            "
+                                        :variant="
+                                            license.is_activated
+                                                ? 'default'
+                                                : 'secondary'
+                                        "
                                     >
                                         {{
                                             license.is_activated
@@ -286,7 +331,7 @@ const processRevoke = (): void => {
                             <div v-if="license.activated_at" class="space-y-2">
                                 <Label>Activated At</Label>
                                 <p class="text-sm">
-                                    {{ formatDateTime(license.activated_at) }}
+                                    {{ formatDate(license.activated_at) }}
                                 </p>
                             </div>
 
@@ -319,19 +364,14 @@ const processRevoke = (): void => {
                             <div class="space-y-2">
                                 <Label>Issued At</Label>
                                 <p class="text-sm">
-                                    {{
-                                        formatDateTime(
-                                            license.issued_at,
-                                            'Not issued',
-                                        )
-                                    }}
+                                    {{ formatDate(license.issued_at) }}
                                 </p>
                             </div>
 
                             <div class="space-y-2">
                                 <Label>Created At</Label>
                                 <p class="text-sm">
-                                    {{ formatDateTime(license.created_at) }}
+                                    {{ formatDate(license.created_at) }}
                                 </p>
                             </div>
                         </CardContent>

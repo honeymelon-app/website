@@ -22,7 +22,8 @@ class CheckoutController extends Controller
      * Expected payload:
      * {
      *   "provider": "stripe",
-     *   "product_slug": "honeymelon",  // optional, defaults to honeymelon
+     *   "amount": 2900,
+     *   "currency": "usd",
      *   "success_url": "https://yoursite.com/success",
      *   "cancel_url": "https://yoursite.com/cancel",
      *   "email": "user@example.com"
@@ -40,7 +41,8 @@ class CheckoutController extends Controller
         try {
             $session = $this->checkoutService->createCheckoutSession([
                 'provider' => $request->input('provider'),
-                'product_slug' => $request->input('product_slug', 'honeymelon'),
+                'amount' => $request->integer('amount'),
+                'currency' => $request->input('currency', 'usd'),
                 'success_url' => $request->input('success_url'),
                 'cancel_url' => $request->input('cancel_url'),
                 'email' => $request->input('email'),

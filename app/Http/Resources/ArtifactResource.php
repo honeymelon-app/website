@@ -28,8 +28,6 @@ class ArtifactResource extends JsonResource
             'notarized' => $this->notarized,
             'url' => $this->url,
             'path' => $this->path,
-            'storage_status' => $this->when(isset($this->storage_status), $this->storage_status),
-            'download_url' => $this->when(isset($this->download_url), $this->download_url),
             'created_at' => $this->created_at->toIso8601String(),
             'release' => $this->when($this->relationLoaded('release'), function () {
                 return (new ReleaseResource($this->release))->resolve();

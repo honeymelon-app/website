@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import Card from '@/components/ui/card/Card.vue';
+import CardContent from '@/components/ui/card/CardContent.vue';
+import CardDescription from '@/components/ui/card/CardDescription.vue';
+import CardHeader from '@/components/ui/card/CardHeader.vue';
+import CardTitle from '@/components/ui/card/CardTitle.vue';
 import { useScrollAnimation } from '@/composables/useScrollAnimation';
 import type { Component } from 'vue';
 
@@ -23,27 +28,37 @@ const { elementRef, isVisible } = useScrollAnimation({
     <div
         ref="elementRef"
         class="transition-all duration-500 ease-out"
-        :class="isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
-            "
+        :class="
+            isVisible ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'
+        "
         :style="{ transitionDelay: `${delay}ms` }"
     >
-        <div class="group relative">
+        <Card
+            class="group relative h-full overflow-hidden border-border/50 transition-all duration-300 hover:-translate-y-1 hover:border-primary/30"
+        >
+            <!-- Subtle gradient overlay on hover -->
             <div
-                v-if="icon"
-                class="mb-4 flex size-10 items-center justify-center rounded-lg bg-muted"
-            >
-                <component
-                    :is="icon"
-                    class="size-5 text-foreground"
-                    :stroke-width="1.5"
-                />
-            </div>
-            <h3 class="text-base font-semibold text-foreground">
-                {{ title }}
-            </h3>
-            <p class="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {{ description }}
-            </p>
-        </div>
+                class="absolute inset-0 -z-10 bg-gradient-to-br from-primary/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            />
+
+            <CardHeader class="pb-4">
+                <div
+                    v-if="icon"
+                    class="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/15"
+                >
+                    <component
+                        :is="icon"
+                        class="h-7 w-7 text-primary"
+                        :stroke-width="1.5"
+                    />
+                </div>
+                <CardTitle class="text-xl">{{ title }}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <CardDescription class="text-base leading-relaxed">
+                    {{ description }}
+                </CardDescription>
+            </CardContent>
+        </Card>
     </div>
 </template>

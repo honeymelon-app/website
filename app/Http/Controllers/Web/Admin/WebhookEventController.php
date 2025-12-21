@@ -22,7 +22,7 @@ class WebhookEventController extends Controller
             ->latest('created_at')
             ->paginate(20);
 
-        return Inertia::render('admin/webhook-events/Index', [
+        return Inertia::render('Admin/WebhookEvents/Index', [
             'events' => new WebhookEventCollection($events),
         ]);
     }
@@ -32,8 +32,8 @@ class WebhookEventController extends Controller
      */
     public function show(WebhookEvent $webhookEvent): Response
     {
-        return Inertia::render('admin/webhook-events/Show', [
-            'event' => (new WebhookEventResource($webhookEvent))->resolve(),
+        return Inertia::render('Admin/WebhookEvents/Show', [
+            'event' => new WebhookEventResource($webhookEvent),
         ]);
     }
 }

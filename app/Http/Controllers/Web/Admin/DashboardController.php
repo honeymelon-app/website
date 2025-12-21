@@ -1,25 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\Http\Controllers\Web\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\DashboardService;
-use Inertia\Inertia;
-use Inertia\Response;
+use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
-    public function __construct(private DashboardService $dashboardService) {}
-
-    public function index(): Response
+    /**
+     * Handle the incoming request.
+     */
+    public function __invoke(Request $request)
     {
-        return Inertia::render('admin/Index', [
-            'metrics' => $this->dashboardService->getMetrics(),
-            'recent_orders' => $this->dashboardService->getRecentOrders(),
-            'recent_licenses' => $this->dashboardService->getRecentLicenses(),
-            'charts' => $this->dashboardService->getChartData(),
-        ]);
+        //
     }
 }

@@ -23,26 +23,15 @@ class StripePaymentProvider implements PaymentProvider
     /**
      * Create a checkout session for a one-time purchase.
      *
-     * @param  array{amount: int, currency: string, product_name: string, stripe_price_id?: string, success_url: string, cancel_url: string, metadata: array<string, mixed>}  $data
+     * @param  array{amount: int, currency: string, product_name: string, success_url: string, cancel_url: string, metadata: array<string, mixed>}  $data
      * @return array{checkout_url: string, session_id: string, provider: string}
      */
     public function createCheckoutSession(array $data): array
     {
         try {
-            $sessionData = [
+            $session = Session::create([
                 'mode' => 'payment',
-                'success_url' => $data['success_url'],
-                'cancel_url' => $data['cancel_url'],
-                'metadata' => $data['metadata'],
-            ];
-
-            if (! empty($data['stripe_price_id'])) {
-                $sessionData['line_items'] = [[
-                    'price' => $data['stripe_price_id'],
-                    'quantity' => 1,
-                ]];
-            } else {
-                $sessionData['line_items'] = [[
+                'line_items' => [[
                     'price_data' => [
                         'currency' => $data['currency'],
                         'product_data' => [
@@ -51,10 +40,11 @@ class StripePaymentProvider implements PaymentProvider
                         'unit_amount' => $data['amount'],
                     ],
                     'quantity' => 1,
-                ]];
-            }
-
-            $session = Session::create($sessionData);
+                ]],
+                'success_url' => $data['success_url'],
+                'cancel_url' => $data['cancel_url'],
+                'metadata' => $data['metadata'],
+            ]);
 
             return [
                 'checkout_url' => $session->url,

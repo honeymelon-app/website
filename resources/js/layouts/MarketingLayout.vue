@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import AppLogoIcon from '@/components/AppLogoIcon.vue';
+import Badge from '@/components/ui/badge/Badge.vue';
 import Button from '@/components/ui/button/Button.vue';
+import Separator from '@/components/ui/separator/Separator.vue';
 import {
     Sheet,
     SheetContent,
@@ -8,7 +10,7 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { Menu } from 'lucide-vue-next';
+import { ExternalLink, Menu } from 'lucide-vue-next';
 import { onMounted, onUnmounted, ref } from 'vue';
 
 const isScrolled = ref(false);
@@ -25,102 +27,99 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener('scroll', handleScroll);
 });
-
-const navLinks = [
-    { href: '/#features', label: 'Features' },
-    { href: '/pricing', label: 'Pricing' },
-    { href: 'https://docs.honeymelon.app', label: 'Docs', external: true },
-];
 </script>
 
 <template>
-    <div class="min-h-screen bg-background">
+    <div class="min-h-screen bg-gradient-to-b from-background to-muted/20">
         <!-- Header -->
         <header
-            class="sticky top-0 z-50 transition-all duration-200"
+            class="sticky top-0 z-50 transition-all duration-300"
             :class="[
                 isScrolled
-                    ? 'border-b border-border bg-background/95 backdrop-blur-sm'
-                    : 'bg-transparent',
+                    ? 'border-b border-border/60 bg-background/95 shadow-sm backdrop-blur-md'
+                    : 'border-b border-transparent bg-transparent',
             ]"
         >
-            <div class="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-                <div class="flex h-14 items-center justify-between">
-                    <a href="/" class="flex items-center gap-2.5">
-                        <AppLogoIcon class="size-8" />
-                        <span class="text-lg font-semibold tracking-tight"
-                            >Honeymelon</span
-                        >
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="flex h-16 items-center justify-between">
+                    <a href="/" class="flex items-center gap-3">
+                        <AppLogoIcon
+                            class="h-10 w-10 transition-transform hover:scale-110"
+                        />
+                        <span class="text-xl font-bold">Honeymelon</span>
                     </a>
 
                     <!-- Desktop Navigation -->
-                    <nav class="hidden items-center gap-8 md:flex">
-                        <template v-for="link in navLinks" :key="link.href">
+                    <nav class="hidden items-center gap-3 md:flex">
+                        <Button as-child variant="ghost">
+                            <a href="/pricing">Pricing</a>
+                        </Button>
+                        <Button as-child variant="ghost">
                             <a
-                                :href="link.href"
-                                :target="link.external ? '_blank' : undefined"
-                                :rel="link.external
-                                        ? 'noopener noreferrer'
-                                        : undefined
-                                    "
-                                class="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                                href="https://docs.honeymelon.app"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="inline-flex items-center gap-1.5"
                             >
-                                {{ link.label }}
+                                Docs
+                                <ExternalLink class="h-3 w-3" />
                             </a>
-                        </template>
-                    </nav>
-
-                    <div class="hidden md:block">
-                        <Button as-child size="sm">
+                        </Button>
+                        <Button as-child>
                             <a href="/download">Download</a>
                         </Button>
-                    </div>
+                    </nav>
 
                     <!-- Mobile Navigation -->
                     <div class="md:hidden">
                         <Sheet>
                             <SheetTrigger :as-child="true">
-                                <Button variant="ghost" size="icon">
-                                    <Menu class="size-5" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    class="h-10 w-10"
+                                >
+                                    <Menu class="h-5 w-5" />
                                     <span class="sr-only">Toggle menu</span>
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="right" class="w-72">
+                            <SheetContent side="right" class="w-[300px]">
                                 <SheetHeader>
                                     <SheetTitle class="text-left">
-                                        <div class="flex items-center gap-2.5">
-                                            <AppLogoIcon class="size-7" />
-                                            <span class="font-semibold"
+                                        <div class="flex items-center gap-3">
+                                            <AppLogoIcon class="h-8 w-8" />
+                                            <span class="text-lg font-bold"
                                                 >Honeymelon</span
                                             >
                                         </div>
                                     </SheetTitle>
                                 </SheetHeader>
-                                <nav class="mt-8 flex flex-col gap-1">
-                                    <template
-                                        v-for="link in navLinks"
-                                        :key="link.href"
+                                <nav class="mt-8 flex flex-col gap-4">
+                                    <Button
+                                        as-child
+                                        variant="ghost"
+                                        class="justify-start"
+                                    >
+                                        <a href="/pricing">Pricing</a>
+                                    </Button>
+                                    <Button
+                                        as-child
+                                        variant="ghost"
+                                        class="justify-start"
                                     >
                                         <a
-                                            :href="link.href"
-                                            :target="link.external
-                                                    ? '_blank'
-                                                    : undefined
-                                                "
-                                            :rel="link.external
-                                                    ? 'noopener noreferrer'
-                                                    : undefined
-                                                "
-                                            class="rounded-md px-3 py-2 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                                            href="https://docs.honeymelon.app"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            class="inline-flex items-center gap-1.5"
                                         >
-                                            {{ link.label }}
+                                            Docs
+                                            <ExternalLink class="h-3 w-3" />
                                         </a>
-                                    </template>
-                                    <div class="mt-4 px-3">
-                                        <Button as-child class="w-full">
-                                            <a href="/download">Download</a>
-                                        </Button>
-                                    </div>
+                                    </Button>
+                                    <Button as-child class="justify-start">
+                                        <a href="/download">Download</a>
+                                    </Button>
                                 </nav>
                             </SheetContent>
                         </Sheet>
@@ -130,113 +129,130 @@ const navLinks = [
         </header>
 
         <!-- Main Content -->
-        <main>
-            <slot />
-        </main>
+        <slot />
 
         <!-- Footer -->
-        <footer class="border-t border-border bg-muted/30">
-            <div class="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
-                <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-                    <!-- Brand -->
-                    <div class="sm:col-span-2 lg:col-span-1">
-                        <a href="/" class="flex items-center gap-2.5">
-                            <AppLogoIcon class="size-7" />
-                            <span class="font-semibold">Honeymelon</span>
-                        </a>
+        <footer class="border-t border-border/40 bg-muted/50 py-16">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
+                    <div>
+                        <div class="mb-6 flex items-center gap-3">
+                            <AppLogoIcon class="h-8 w-8" />
+                            <span class="text-lg font-bold">Honeymelon</span>
+                        </div>
                         <p
-                            class="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground"
+                            class="text-sm leading-relaxed text-muted-foreground"
                         >
-                            Smart media converter for macOS. Hardware
-                            accelerated, privacy-first.
+                            Smart media converter for macOS Apple Silicon.
+                            Convert video, audio, and images with remux-first
+                            intelligence.
                         </p>
                     </div>
-
-                    <!-- Product -->
                     <div>
-                        <h3 class="text-sm font-semibold">Product</h3>
-                        <ul class="mt-4 space-y-3 text-sm">
+                        <h3 class="mb-4 text-sm font-semibold">Product</h3>
+                        <ul class="space-y-3 text-sm text-muted-foreground">
                             <li>
                                 <a
-                                    href="/#features"
-                                    class="text-muted-foreground transition-colors hover:text-foreground"
-                                    >Features</a
+                                    href="/download"
+                                    class="transition-colors hover:text-foreground"
+                                    >Download</a
                                 >
                             </li>
                             <li>
                                 <a
                                     href="/pricing"
-                                    class="text-muted-foreground transition-colors hover:text-foreground"
+                                    class="transition-colors hover:text-foreground"
                                     >Pricing</a
                                 >
                             </li>
                             <li>
                                 <a
-                                    href="/download"
-                                    class="text-muted-foreground transition-colors hover:text-foreground"
-                                    >Download</a
+                                    href="https://docs.honeymelon.app"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
                                 >
+                                    Documentation
+                                    <ExternalLink class="h-3 w-3" />
+                                </a>
                             </li>
                         </ul>
                     </div>
-
-                    <!-- Resources -->
                     <div>
-                        <h3 class="text-sm font-semibold">Resources</h3>
-                        <ul class="mt-4 space-y-3 text-sm">
+                        <h3 class="mb-4 text-sm font-semibold">Resources</h3>
+                        <ul class="space-y-3 text-sm text-muted-foreground">
+                            <li>
+                                <a
+                                    href="https://github.com/honeymelon-app/honeymelon"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
+                                >
+                                    GitHub
+                                    <ExternalLink class="h-3 w-3" />
+                                </a>
+                            </li>
                             <li>
                                 <a
                                     href="https://docs.honeymelon.app"
                                     target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="text-muted-foreground transition-colors hover:text-foreground"
-                                    >Documentation</a
+                                    rel="noopener"
+                                    class="inline-flex items-center gap-1 transition-colors hover:text-foreground"
                                 >
-                            </li>
-                            <li>
-                                <a
-                                    href="https://github.com/honeymelon-app"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    class="text-muted-foreground transition-colors hover:text-foreground"
-                                    >GitHub</a
-                                >
+                                    Support
+                                    <ExternalLink class="h-3 w-3" />
+                                </a>
                             </li>
                         </ul>
                     </div>
-
-                    <!-- Legal -->
                     <div>
-                        <h3 class="text-sm font-semibold">Legal</h3>
-                        <ul class="mt-4 space-y-3 text-sm">
+                        <h3 class="mb-4 text-sm font-semibold">Legal</h3>
+                        <ul class="space-y-3 text-sm text-muted-foreground">
                             <li>
                                 <a
                                     href="/privacy"
-                                    class="text-muted-foreground transition-colors hover:text-foreground"
-                                    >Privacy</a
+                                    class="transition-colors hover:text-foreground"
+                                    >Privacy Policy</a
                                 >
                             </li>
                             <li>
                                 <a
                                     href="/terms"
-                                    class="text-muted-foreground transition-colors hover:text-foreground"
-                                    >Terms</a
+                                    class="transition-colors hover:text-foreground"
+                                    >Terms of Use</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    href="/terms"
+                                    class="transition-colors hover:text-foreground"
+                                    >License Agreement</a
                                 >
                             </li>
                         </ul>
                     </div>
                 </div>
-
+                <Separator class="my-10" />
                 <div
-                    class="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row"
+                    class="flex flex-col items-center justify-between gap-4 sm:flex-row"
                 >
-                    <p class="text-sm text-muted-foreground">
-                        © {{ new Date().getFullYear() }} Honeymelon. All rights
-                        reserved.
+                    <p
+                        class="text-center text-sm text-muted-foreground sm:text-left"
+                    >
+                        © 2025 Honeymelon. Privacy-first media conversion for
+                        Mac.
                     </p>
-                    <p class="text-sm text-muted-foreground">
-                        Requires macOS 13+ and Apple Silicon
-                    </p>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <Badge variant="outline" class="px-3 py-1"
+                            >macOS 13+</Badge
+                        >
+                        <Badge variant="outline" class="px-3 py-1"
+                            >Apple Silicon</Badge
+                        >
+                        <Badge variant="outline" class="px-3 py-1"
+                            >Privacy-First</Badge
+                        >
+                    </div>
                 </div>
             </div>
         </footer>
