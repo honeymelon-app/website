@@ -34,5 +34,7 @@
         <env name="FILESYSTEM_DISK" value="local"/>
         <env name="STRIPE_SECRET" value="sk_test_dummy_key_for_testing"/>
         <env name="STRIPE_WEBHOOK_SECRET" value="whsec_test_dummy_secret_for_testing"/>
+        <env name="LICENSE_SIGNING_PRIVATE_KEY" value="xRJNcTiGW+zT5GL89LZqngQbL3R2c8MRpYIEVs/MCmy3cWhjythP4yQlwFklKbRLNBHqTkpeWCeh4KWlTaDJiA=="/>
+        <env name="LICENSE_SIGNING_PUBLIC_KEY" value="t3FoY8rYT+MkJcBZJSm0SzQR6k5KXlgnoeClpU2gyYg="/>
     </php>
 </phpunit>
