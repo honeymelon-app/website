@@ -67,22 +67,6 @@ onUnmounted(() => {
                         >
                             <a href="/#pricing">Pricing</a>
                         </Button>
-                        <Button
-                            as-child
-                            variant="ghost"
-                            size="sm"
-                            class="text-muted-foreground hover:text-foreground"
-                        >
-                            <a
-                                href="https://docs.honeymelon.app"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="inline-flex items-center gap-1.5"
-                            >
-                                Docs
-                                <ExternalLink class="h-3 w-3" />
-                            </a>
-                        </Button>
                         <div class="ml-2">
                             <Button as-child size="sm">
                                 <a href="/#download">Download</a>
