@@ -132,6 +132,7 @@ jobs:
           DB_DATABASE: honeymelon_test
           DB_USERNAME: honeymelon
           DB_PASSWORD: secret
+          LICENSE_SIGNING_PRIVATE_KEY: ${{ secrets.LICENSE_SIGNING_PRIVATE_KEY }}
 
   build:
     name: Build
