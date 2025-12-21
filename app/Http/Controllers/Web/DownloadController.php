@@ -14,7 +14,8 @@ use Inertia\Response;
 class DownloadController extends Controller
 {
     /**
-     * Display the download page with the latest darwin-aarch64 artifact.
+     * Redirect to the home page with the download section in focus.
+     * Passes the latest darwin-aarch64 artifact for the download section.
      */
     public function __invoke(): Response
     {
@@ -28,8 +29,8 @@ class DownloadController extends Controller
             ->latest('created_at')
             ->first();
 
-        return Inertia::render('Download', [
+        return Inertia::render('Welcome', [
             'artifact' => $latestArtifact ? (new ArtifactResource($latestArtifact))->resolve() : null,
-        ]);
+        ])->withViewData(['scrollTo' => 'download']);
     }
 }

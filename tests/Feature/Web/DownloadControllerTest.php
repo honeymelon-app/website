@@ -19,7 +19,7 @@ class DownloadControllerTest extends TestCase
         $response = $this->get('/download');
 
         $response->assertStatus(200);
-        $response->assertInertia(fn ($page) => $page->component('Download'));
+        $response->assertInertia(fn ($page) => $page->component('Welcome'));
     }
 
     public function test_download_page_displays_latest_stable_artifact(): void
@@ -40,11 +40,12 @@ class DownloadControllerTest extends TestCase
         $response = $this->get('/download');
 
         $response->assertStatus(200);
-        $response->assertInertia(fn ($page) => $page
-            ->component('Download')
-            ->has('artifact.platform')
-            ->where('artifact.platform', 'darwin-aarch64')
-            ->where('artifact.url', 'https://example.com/download.dmg')
+        $response->assertInertia(
+            fn ($page) => $page
+                ->component('Welcome')
+                ->has('artifact.platform')
+                ->where('artifact.platform', 'darwin-aarch64')
+                ->where('artifact.url', 'https://example.com/download.dmg')
         );
     }
 
@@ -53,9 +54,10 @@ class DownloadControllerTest extends TestCase
         $response = $this->get('/download');
 
         $response->assertStatus(200);
-        $response->assertInertia(fn ($page) => $page
-            ->component('Download')
-            ->where('artifact', null)
+        $response->assertInertia(
+            fn ($page) => $page
+                ->component('Welcome')
+                ->where('artifact', null)
         );
     }
 
@@ -86,12 +88,13 @@ class DownloadControllerTest extends TestCase
         $response = $this->get('/download');
 
         $response->assertStatus(200);
-        $response->assertInertia(fn ($page) => $page
-            ->component('Download')
-            ->has('artifact')
-            ->has('artifact.release')
-            ->where('artifact.release.version', '1.0.0')
-            ->where('artifact.platform', 'darwin-aarch64')
+        $response->assertInertia(
+            fn ($page) => $page
+                ->component('Welcome')
+                ->has('artifact')
+                ->has('artifact.release')
+                ->where('artifact.release.version', '1.0.0')
+                ->where('artifact.platform', 'darwin-aarch64')
         );
     }
 }

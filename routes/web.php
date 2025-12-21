@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ReleaseChannel;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Web\Admin\ArtifactController;
 use App\Http\Controllers\Web\Admin\LicenseController;
@@ -10,6 +11,8 @@ use App\Http\Controllers\Web\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
 use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Web\DownloadController;
+use App\Http\Resources\ArtifactResource;
+use App\Models\Artifact;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -19,7 +22,19 @@ use Inertia\Inertia;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    return Inertia::render('Welcome');
+    $latestArtifact = Artifact::query()
+        ->with('release')
+        ->whereHas('release', function ($query) {
+            $query->where('channel', ReleaseChannel::STABLE)
+                ->whereNotNull('published_at');
+        })
+        ->where('platform', 'darwin-aarch64')
+        ->latest('created_at')
+        ->first();
+
+    return Inertia::render('Welcome', [
+        'artifact' => $latestArtifact ? (new ArtifactResource($latestArtifact))->resolve() : null,
+    ]);
 })->name('home');
 
 Route::get('/download', DownloadController::class)->name('download');
