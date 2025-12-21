@@ -11,7 +11,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^8.3",
+        "php": "^8.5",
         "graham-campbell/github": "^13.0",
         "inertiajs/inertia-laravel": "^2.0",
         "jerome/filterable": "^2.1",
