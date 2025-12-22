@@ -6,7 +6,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
-use App\Mail\LicenseKeyMail;
 use App\Models\Order;
 use App\Models\WebhookEvent;
 use App\Services\LicenseService;
@@ -14,7 +13,6 @@ use App\Services\PaymentProviders\PaymentProviderFactory;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 
 class WebhookEventController extends Controller
 {
@@ -107,14 +105,6 @@ class WebhookEventController extends Controller
             Log::info('License issued from webhook', [
                 'provider' => $event->provider,
                 'order_id' => $order->id,
-                'license_id' => $license->id,
-            ]);
-
-            // Send email with license key
-            Mail::to($orderData['email'])->queue(new LicenseKeyMail($license));
-
-            Log::info('License key email queued', [
-                'email' => $orderData['email'],
                 'license_id' => $license->id,
             ]);
         }
