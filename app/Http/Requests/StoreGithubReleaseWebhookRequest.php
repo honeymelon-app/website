@@ -26,11 +26,11 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'notes' => ValidationRules::requiredString(),
+            'notes' => ValidationRules::optionalString(65535),
             'published_at' => ['required', 'date'],
             'tag' => ValidationRules::requiredString(),
             'version' => ValidationRules::requiredString(),
-            'channel' => ['required', 'string', Rule::in(['stable', 'beta', 'alpha', 'rc'])],
+            'channel' => ValidationRules::releaseChannel(),
             'commit_hash' => ValidationRules::requiredString(),
             'major' => ['nullable', 'integer', 'min:0'],
             'artifacts' => ['nullable', 'array'],
@@ -38,10 +38,10 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
             'artifacts.*.source' => ['nullable', 'string', Rule::in(['github', 'r2', 's3'])],
             'artifacts.*.filename' => ValidationRules::optionalString(),
             'artifacts.*.url' => ['required_with:artifacts', 'string', 'max:2048'],
-            'artifacts.*.path' => ['nullable', 'string', 'max:2048'],
+            'artifacts.*.path' => ValidationRules::optionalString(2048),
             'artifacts.*.size' => ['nullable', 'integer', 'min:0'],
-            'artifacts.*.sha256' => ['nullable', 'string', 'max:255'],
-            'artifacts.*.signature' => ['nullable', 'string', 'max:512'],
+            'artifacts.*.sha256' => ValidationRules::optionalString(),
+            'artifacts.*.signature' => ValidationRules::optionalString(512),
             'artifacts.*.notarized' => ['nullable', 'boolean'],
         ];
     }

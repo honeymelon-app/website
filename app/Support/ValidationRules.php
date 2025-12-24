@@ -50,7 +50,7 @@ final class ValidationRules
      */
     public static function optionalString(int $maxLength = 255): array
     {
-        return ['sometimes', 'string', "max:{$maxLength}"];
+        return ['nullable', 'string', "max:{$maxLength}"];
     }
 
     /**
