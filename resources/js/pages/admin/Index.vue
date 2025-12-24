@@ -52,9 +52,9 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
-    licenses_by_status: Array<{ status: string; count: number; }>;
-    artifacts_by_platform: Array<{ platform: string; count: number; }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
+    licenses_by_status: Array<{ status: string; count: number }>;
+    artifacts_by_platform: Array<{ platform: string; count: number }>;
 }
 
 interface Props {
@@ -165,10 +165,11 @@ const revenueChartData = computed(() => {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="metrics.revenue_change >= 0
-                                    ? 'text-emerald-600 dark:text-emerald-400'
-                                    : 'text-red-600 dark:text-red-400'
-                                    "
+                                :class="
+                                    metrics.revenue_change >= 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                "
                             >
                                 <TrendingUp
                                     v-if="metrics.revenue_change >= 0"
@@ -183,7 +184,9 @@ const revenueChartData = computed(() => {
                                 Total Revenue
                             </p>
                             <p class="mt-1 text-3xl font-semibold">
-                                {{ formatCurrency(metrics.total_revenue_cents) }}
+                                {{
+                                    formatCurrency(metrics.total_revenue_cents)
+                                }}
                             </p>
                         </div>
                     </CardContent>
@@ -202,10 +205,11 @@ const revenueChartData = computed(() => {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="metrics.orders_change >= 0
-                                    ? 'text-emerald-600 dark:text-emerald-400'
-                                    : 'text-red-600 dark:text-red-400'
-                                    "
+                                :class="
+                                    metrics.orders_change >= 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                "
                             >
                                 <TrendingUp
                                     v-if="metrics.orders_change >= 0"
@@ -239,10 +243,11 @@ const revenueChartData = computed(() => {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="metrics.licenses_change >= 0
-                                    ? 'text-emerald-600 dark:text-emerald-400'
-                                    : 'text-red-600 dark:text-red-400'
-                                    "
+                                :class="
+                                    metrics.licenses_change >= 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                "
                             >
                                 <TrendingUp
                                     v-if="metrics.licenses_change >= 0"
@@ -308,9 +313,9 @@ const revenueChartData = computed(() => {
                             index="date"
                             :categories="['Revenue']"
                             :colors="['var(--color-honey-500)']"
-                            :y-formatter="(value: number) =>
-                                formatCurrency(value * 100)
-                                "
+                            :y-formatter="
+                                (value: number) => formatCurrency(value * 100)
+                            "
                             :show-legend="false"
                             class="h-[280px]"
                         />
@@ -363,7 +368,7 @@ const revenueChartData = computed(() => {
                                 </Avatar>
                                 <div class="min-w-0 flex-1">
                                     <p
-                                        class="truncate text-sm font-medium leading-none"
+                                        class="truncate text-sm leading-none font-medium"
                                     >
                                         {{ order.email }}
                                     </p>
@@ -380,10 +385,11 @@ const revenueChartData = computed(() => {
                                     </p>
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="getStatusVariant(
-                                            order.license_status,
-                                        )
-                                            "
+                                        :variant="
+                                            getStatusVariant(
+                                                order.license_status,
+                                            )
+                                        "
                                         class="mt-1"
                                     >
                                         {{ order.license_status }}

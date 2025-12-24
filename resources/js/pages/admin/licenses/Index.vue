@@ -348,8 +348,9 @@ const handleIssueLicense = (): void => {
                                             >Max Major Version</Label
                                         >
                                         <Select
-                                            v-model="issueForm.max_major_version
-                                                "
+                                            v-model="
+                                                issueForm.max_major_version
+                                            "
                                         >
                                             <SelectTrigger
                                                 id="max_major_version"
@@ -549,8 +550,9 @@ const handleIssueLicense = (): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="getStatusVariant(selectedLicense.status)
-                                    "
+                                :variant="
+                                    getStatusVariant(selectedLicense.status)
+                                "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -632,7 +634,7 @@ const handleIssueLicense = (): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                            isDetailsDialogOpen = false;
+                                isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />

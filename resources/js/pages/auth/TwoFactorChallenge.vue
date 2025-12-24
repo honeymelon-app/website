@@ -69,7 +69,11 @@ const submit = (): void => {
                     class="text-sm text-muted-foreground underline hover:text-foreground"
                     @click="toggleRecovery"
                 >
-                    {{ recovery ? 'Use authentication code' : 'Use recovery code' }}
+                    {{
+                        recovery
+                            ? 'Use authentication code'
+                            : 'Use recovery code'
+                    }}
                 </button>
             </div>
 

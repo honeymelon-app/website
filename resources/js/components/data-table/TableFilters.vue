@@ -16,7 +16,7 @@ export interface FilterConfig {
     key: string;
     label: string;
     type: 'text' | 'select';
-    options?: { label: string; value: string; }[];
+    options?: { label: string; value: string }[];
     placeholder?: string;
 }
 
@@ -136,7 +136,7 @@ const getSelectedLabel = (filter: FilterConfig): string | undefined => {
                                         ? undefined
                                         : option.value,
                                 )
-                                "
+                            "
                         >
                             {{ option.label }}
                             <Check

@@ -111,18 +111,27 @@ const disableTwoFactorAuthentication = (): void => {
 
                 <!-- Enabled State -->
                 <div v-if="twoFactorEnabled && !confirming" class="space-y-4">
-                    <div class="rounded-lg border bg-green-50 p-4 dark:bg-green-950">
-                        <p class="text-sm font-medium text-green-800 dark:text-green-200">
+                    <div
+                        class="rounded-lg border bg-green-50 p-4 dark:bg-green-950"
+                    >
+                        <p
+                            class="text-sm font-medium text-green-800 dark:text-green-200"
+                        >
                             Two-factor authentication is enabled.
                         </p>
-                        <p class="mt-1 text-sm text-green-600 dark:text-green-400">
-                            Your account is now more secure with two-factor authentication.
+                        <p
+                            class="mt-1 text-sm text-green-600 dark:text-green-400"
+                        >
+                            Your account is now more secure with two-factor
+                            authentication.
                         </p>
                     </div>
 
                     <!-- Recovery Codes -->
                     <div
-                        v-if="showingRecoveryCodes && props.recoveryCodes?.length"
+                        v-if="
+                            showingRecoveryCodes && props.recoveryCodes?.length
+                        "
                         class="space-y-3"
                     >
                         <p class="text-sm text-muted-foreground">
@@ -150,7 +159,10 @@ const disableTwoFactorAuthentication = (): void => {
                         >
                             Show Recovery Codes
                         </Button>
-                        <Button variant="outline" @click="regenerateRecoveryCodes">
+                        <Button
+                            variant="outline"
+                            @click="regenerateRecoveryCodes"
+                        >
                             Regenerate Recovery Codes
                         </Button>
                         <Button
@@ -199,7 +211,9 @@ const disableTwoFactorAuthentication = (): void => {
                                 autocomplete="one-time-code"
                                 placeholder="Enter 6-digit code"
                             />
-                            <InputError :message="confirmationForm.errors.code" />
+                            <InputError
+                                :message="confirmationForm.errors.code"
+                            />
                         </div>
                         <div class="flex gap-3">
                             <Button

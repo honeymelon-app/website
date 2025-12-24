@@ -7,7 +7,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { FlexRender, type ColumnDef, type Table as TanStackTable } from '@tanstack/vue-table';
+import {
+    FlexRender,
+    type ColumnDef,
+    type Table as TanStackTable,
+} from '@tanstack/vue-table';
 
 defineProps<{
     table: TanStackTable<TData>;
@@ -61,7 +65,10 @@ defineProps<{
                     </TableRow>
                 </template>
                 <TableRow v-else>
-                    <TableCell :colspan="columns.length" class="h-24 text-center">
+                    <TableCell
+                        :colspan="columns.length"
+                        class="h-24 text-center"
+                    >
                         <div class="text-muted-foreground">
                             <slot name="empty">
                                 {{ emptyMessage || 'No results found.' }}
