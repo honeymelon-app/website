@@ -42,7 +42,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => false,
                 'draft' => false,
-                'target_commitish' => 'abc123',
                 'assets' => [
                     [
                         'name' => 'Honeymelon_1.0.0_aarch64.dmg',
@@ -57,6 +56,10 @@ class GitHubSyncServiceTest extends TestCase
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
+            $mock->shouldReceive('fetchCommitShaForTag')
+                ->with('v1.0.0')
+                ->once()
+                ->andReturn('abc123def456');
         });
 
         $syncService = $this->app->make(GitHubSyncService::class);
@@ -71,6 +74,7 @@ class GitHubSyncServiceTest extends TestCase
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
             'notes' => 'Initial release',
+            'commit_hash' => 'abc123def456',
         ]);
 
         $this->assertDatabaseHas('artifacts', [
@@ -86,7 +90,7 @@ class GitHubSyncServiceTest extends TestCase
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
             'notes' => 'Initial release',
-            'commit_hash' => 'abc123',
+            'commit_hash' => 'abc123def456',
         ]);
 
         $githubReleases = [
@@ -98,7 +102,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => false,
                 'draft' => false,
-                'target_commitish' => 'abc123',
                 'assets' => [],
             ],
         ];
@@ -107,6 +110,10 @@ class GitHubSyncServiceTest extends TestCase
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
+            $mock->shouldReceive('fetchCommitShaForTag')
+                ->with('v1.0.0')
+                ->once()
+                ->andReturn('abc123def456');
         });
 
         $syncService = $this->app->make(GitHubSyncService::class);
@@ -123,7 +130,7 @@ class GitHubSyncServiceTest extends TestCase
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
             'notes' => 'Old notes',
-            'commit_hash' => 'abc123',
+            'commit_hash' => 'abc123def456',
         ]);
 
         $githubReleases = [
@@ -135,7 +142,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => false,
                 'draft' => false,
-                'target_commitish' => 'abc123',
                 'assets' => [],
             ],
         ];
@@ -144,6 +150,10 @@ class GitHubSyncServiceTest extends TestCase
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
+            $mock->shouldReceive('fetchCommitShaForTag')
+                ->with('v1.0.0')
+                ->once()
+                ->andReturn('abc123def456');
         });
 
         $syncService = $this->app->make(GitHubSyncService::class);
@@ -167,7 +177,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => false,
                 'draft' => true,
-                'target_commitish' => 'abc123',
                 'assets' => [],
             ],
         ];
@@ -198,7 +207,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => true,
                 'draft' => false,
-                'target_commitish' => 'abc123',
                 'assets' => [],
             ],
         ];
@@ -207,6 +215,10 @@ class GitHubSyncServiceTest extends TestCase
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
+            $mock->shouldReceive('fetchCommitShaForTag')
+                ->with('v1.0.0')
+                ->once()
+                ->andReturn('abc123def456');
         });
 
         $syncService = $this->app->make(GitHubSyncService::class);
@@ -227,7 +239,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => true,
                 'draft' => false,
-                'target_commitish' => 'abc123',
                 'assets' => [],
             ],
         ];
@@ -236,6 +247,10 @@ class GitHubSyncServiceTest extends TestCase
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
+            $mock->shouldReceive('fetchCommitShaForTag')
+                ->with('v1.0.0-alpha.1')
+                ->once()
+                ->andReturn('abc123def456');
         });
 
         $syncService = $this->app->make(GitHubSyncService::class);
@@ -251,7 +266,7 @@ class GitHubSyncServiceTest extends TestCase
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
             'notes' => 'Initial release',
-            'commit_hash' => 'abc123',
+            'commit_hash' => 'abc123def456',
         ]);
 
         $githubReleases = [
@@ -263,7 +278,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => false,
                 'draft' => false,
-                'target_commitish' => 'abc123',
                 'assets' => [
                     [
                         'name' => 'Honeymelon_1.0.0_aarch64.dmg',
@@ -278,6 +292,10 @@ class GitHubSyncServiceTest extends TestCase
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
+            $mock->shouldReceive('fetchCommitShaForTag')
+                ->with('v1.0.0')
+                ->once()
+                ->andReturn('abc123def456');
         });
 
         $syncService = $this->app->make(GitHubSyncService::class);
@@ -299,7 +317,7 @@ class GitHubSyncServiceTest extends TestCase
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
             'notes' => 'Initial release',
-            'commit_hash' => 'abc123',
+            'commit_hash' => 'abc123def456',
         ]);
 
         $artifact = Artifact::factory()->create([
@@ -320,7 +338,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => false,
                 'draft' => false,
-                'target_commitish' => 'abc123',
                 'assets' => [
                     [
                         'name' => 'Honeymelon_1.0.0_aarch64.dmg',
@@ -335,6 +352,10 @@ class GitHubSyncServiceTest extends TestCase
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
+            $mock->shouldReceive('fetchCommitShaForTag')
+                ->with('v1.0.0')
+                ->once()
+                ->andReturn('abc123def456');
         });
 
         $syncService = $this->app->make(GitHubSyncService::class);
@@ -355,7 +376,7 @@ class GitHubSyncServiceTest extends TestCase
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
             'notes' => 'Initial release',
-            'commit_hash' => 'abc123',
+            'commit_hash' => 'abc123def456',
         ]);
 
         Artifact::factory()->create([
@@ -375,7 +396,6 @@ class GitHubSyncServiceTest extends TestCase
                 'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => false,
                 'draft' => false,
-                'target_commitish' => 'abc123',
                 'assets' => [
                     [
                         'name' => 'Honeymelon_1.0.0_aarch64.dmg',
@@ -390,6 +410,10 @@ class GitHubSyncServiceTest extends TestCase
             $mock->shouldReceive('fetchAllReleases')
                 ->once()
                 ->andReturn($githubReleases);
+            $mock->shouldReceive('fetchCommitShaForTag')
+                ->with('v1.0.0')
+                ->once()
+                ->andReturn('abc123def456');
         });
 
         $syncService = $this->app->make(GitHubSyncService::class);

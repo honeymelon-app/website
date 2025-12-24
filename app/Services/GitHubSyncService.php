@@ -60,7 +60,7 @@ final class GitHubSyncService
     /**
      * Sync a single release from GitHub.
      *
-     * @param  array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}  $githubRelease
+     * @param  array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}  $githubRelease
      * @return string Result status: 'created', 'updated', or 'skipped'
      */
     public function syncRelease(array $githubRelease): string
@@ -83,17 +83,18 @@ final class GitHubSyncService
     /**
      * Create a new release from GitHub data.
      *
-     * @param  array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}  $githubRelease
+     * @param  array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}  $githubRelease
      */
     protected function createRelease(array $githubRelease): string
     {
         $version = $this->extractVersion($githubRelease['tag']);
         $channel = $this->determineChannel($githubRelease);
+        $commitHash = $this->fetchCommitHash($githubRelease['tag']);
 
         $release = $this->releaseService->recordRelease([
             'version' => $version,
             'tag' => $githubRelease['tag'],
-            'commit_hash' => $githubRelease['target_commitish'] ?? '',
+            'commit_hash' => $commitHash,
             'channel' => $channel,
             'notes' => $githubRelease['notes'],
             'published_at' => $githubRelease['published_at'],
@@ -115,7 +116,7 @@ final class GitHubSyncService
     /**
      * Update an existing release with GitHub data.
      *
-     * @param  array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}  $githubRelease
+     * @param  array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}  $githubRelease
      */
     protected function updateRelease(Release $release, array $githubRelease): string
     {
@@ -126,8 +127,9 @@ final class GitHubSyncService
             $hasChanges = true;
         }
 
-        if ($release->commit_hash !== $githubRelease['target_commitish']) {
-            $release->commit_hash = $githubRelease['target_commitish'] ?? '';
+        $commitHash = $this->fetchCommitHash($githubRelease['tag']);
+        if ($release->commit_hash !== $commitHash) {
+            $release->commit_hash = $commitHash;
             $hasChanges = true;
         }
 
@@ -282,6 +284,20 @@ final class GitHubSyncService
         }
 
         return ReleaseChannel::STABLE;
+    }
+
+    /**
+     * Fetch the actual commit hash for a tag from GitHub.
+     *
+     * The release API's target_commitish field contains the branch name,
+     * not the commit SHA. This method fetches the actual commit SHA
+     * that the tag points to.
+     */
+    protected function fetchCommitHash(string $tag): string
+    {
+        $commitSha = $this->githubService->fetchCommitShaForTag($tag);
+
+        return $commitSha ?? '';
     }
 
     /**

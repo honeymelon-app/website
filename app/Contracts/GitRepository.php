@@ -13,7 +13,7 @@ interface GitRepository
     /**
      * Fetch all releases.
      *
-     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}>
+     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}>
      */
     public function fetchAllReleases(): array;
 
@@ -38,4 +38,12 @@ interface GitRepository
      * Delete both release and tag.
      */
     public function deleteReleaseAndTag(string $tag): bool;
+
+    /**
+     * Fetch the commit SHA for a specific tag.
+     *
+     * This resolves the actual commit SHA that a tag points to,
+     * which may differ from the target_commitish (branch name) in release data.
+     */
+    public function fetchCommitShaForTag(string $tag): ?string;
 }

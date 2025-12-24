@@ -26,7 +26,7 @@ class GithubService implements GitRepository
     /**
      * Fetch all releases from GitHub.
      *
-     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}>
+     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}>
      */
     public function fetchAllReleases(): array
     {
@@ -101,6 +101,58 @@ class GithubService implements GitRepository
     }
 
     /**
+     * Fetch the commit SHA for a specific tag.
+     *
+     * This resolves the actual commit SHA that a tag points to by fetching
+     * the git ref. Tags can point either directly to a commit (lightweight tag)
+     * or to a tag object (annotated tag) which in turn points to a commit.
+     */
+    public function fetchCommitShaForTag(string $tag): ?string
+    {
+        $response = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/git/ref/tags/{$tag}");
+
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $data = $response->json();
+        $sha = $data['object']['sha'] ?? null;
+        $type = $data['object']['type'] ?? null;
+
+        if ($sha === null) {
+            return null;
+        }
+
+        if ($type === 'commit') {
+            return $sha;
+        }
+
+        if ($type === 'tag') {
+            return $this->fetchTagObjectCommitSha($sha);
+        }
+
+        return null;
+    }
+
+    /**
+     * Fetch the commit SHA from an annotated tag object.
+     *
+     * Annotated tags point to a tag object which contains the actual commit SHA.
+     */
+    protected function fetchTagObjectCommitSha(string $tagSha): ?string
+    {
+        $response = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/git/tags/{$tagSha}");
+
+        if (! $response->successful()) {
+            return null;
+        }
+
+        $data = $response->json();
+
+        return $data['object']['sha'] ?? null;
+    }
+
+    /**
      * Make a GET request and return JSON data.
      *
      * @return array<string, mixed>
@@ -143,7 +195,7 @@ class GithubService implements GitRepository
      * Map a GitHub release to our internal format.
      *
      * @param  array<string, mixed>  $release
-     * @return array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}
+     * @return array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}
      */
     protected function mapRelease(array $release): array
     {
@@ -155,7 +207,6 @@ class GithubService implements GitRepository
             'published_at' => $release['published_at'] ?? $release['created_at'],
             'prerelease' => $release['prerelease'] ?? false,
             'draft' => $release['draft'] ?? false,
-            'target_commitish' => $release['target_commitish'] ?? null,
             'assets' => $this->mapAssets($release['assets'] ?? []),
         ];
     }
