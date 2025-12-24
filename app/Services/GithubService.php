@@ -9,8 +9,6 @@ use Fetch\Http\Response;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Container\Attributes\Singleton;
 
-use function Fetch\Http\fetch;
-
 #[Singleton]
 class GithubService implements GitRepository
 {
