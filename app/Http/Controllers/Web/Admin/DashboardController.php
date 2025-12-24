@@ -22,6 +22,7 @@ class DashboardController extends Controller
         $recentLicenses = $this->dashboardService->getRecentLicenses();
         $chartData = $this->dashboardService->getChartData();
         $visitorAnalytics = $this->dashboardService->getVisitorAnalytics();
+        $downloadAnalytics = $this->dashboardService->getDownloadAnalytics();
 
         return Inertia::render('admin/Index', [
             'metrics' => $metrics,
@@ -33,6 +34,7 @@ class DashboardController extends Controller
                 'artifacts_by_platform' => $chartData['artifacts_by_platform'],
             ],
             'visitor_analytics' => $visitorAnalytics,
+            'download_analytics' => $downloadAnalytics,
         ]);
     }
 }

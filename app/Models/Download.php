@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,6 +39,22 @@ class Download extends Model
         return [
             'downloaded_at' => 'datetime',
         ];
+    }
+
+    /**
+     * Scope for downloads within a number of days.
+     */
+    public function scopeWithinDays(Builder $query, int $days): Builder
+    {
+        return $query->where('created_at', '>=', now()->subDays($days));
+    }
+
+    /**
+     * Scope for downloads today.
+     */
+    public function scopeToday(Builder $query): Builder
+    {
+        return $query->whereDate('created_at', today());
     }
 
     /**

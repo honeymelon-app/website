@@ -16,6 +16,7 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowRight,
     DollarSign,
+    Download,
     Eye,
     KeyRound,
     Monitor,
@@ -58,9 +59,9 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
-    licenses_by_status: Array<{ status: string; count: number }>;
-    artifacts_by_platform: Array<{ platform: string; count: number }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
+    licenses_by_status: Array<{ status: string; count: number; }>;
+    artifacts_by_platform: Array<{ platform: string; count: number; }>;
 }
 
 interface VisitorAnalytics {
@@ -73,10 +74,23 @@ interface VisitorAnalytics {
         visits: number;
         unique_visitors: number;
     }>;
-    visits_by_page: Array<{ page: string; visits: number }>;
-    visits_by_device: Array<{ device: string; count: number }>;
-    visits_by_browser: Array<{ browser: string; count: number }>;
-    top_referrers: Array<{ referrer: string; url: string; count: number }>;
+    visits_by_page: Array<{ page: string; visits: number; }>;
+    visits_by_device: Array<{ device: string; count: number; }>;
+    visits_by_browser: Array<{ browser: string; count: number; }>;
+    top_referrers: Array<{ referrer: string; url: string; count: number; }>;
+}
+
+interface DownloadAnalytics {
+    total_downloads: number;
+    downloads_today: number;
+    downloads_change: number;
+    downloads_by_artifact: Array<{ artifact_name: string; count: number; }>;
+    recent_downloads: Array<{
+        id: string;
+        artifact_name: string;
+        user_email: string | null;
+        downloaded_at: string;
+    }>;
 }
 
 interface Props {
@@ -85,6 +99,7 @@ interface Props {
     recent_licenses: RecentLicense[];
     charts: ChartData;
     visitor_analytics: VisitorAnalytics;
+    download_analytics: DownloadAnalytics;
 }
 
 const props = defineProps<Props>();
@@ -218,7 +233,7 @@ function getDeviceIcon(device: string) {
             </div>
 
             <!-- Metrics Grid -->
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
                 <!-- Total Revenue -->
                 <Card class="relative overflow-hidden">
                     <CardContent class="p-6">
@@ -232,11 +247,10 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.revenue_change >= 0
+                                :class="metrics.revenue_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                "
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.revenue_change >= 0"
@@ -272,11 +286,10 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.orders_change >= 0
+                                :class="metrics.orders_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                "
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.orders_change >= 0"
@@ -310,11 +323,10 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.licenses_change >= 0
+                                :class="metrics.licenses_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                "
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.licenses_change >= 0"
@@ -357,6 +369,51 @@ function getDeviceIcon(device: string) {
                         </div>
                     </CardContent>
                 </Card>
+
+                <!-- Total Downloads -->
+                <Card class="relative overflow-hidden">
+                    <CardContent class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div
+                                class="flex size-10 items-center justify-center rounded-full bg-cyan-500/10"
+                            >
+                                <Download
+                                    class="size-5 text-cyan-600 dark:text-cyan-400"
+                                />
+                            </div>
+                            <div
+                                class="flex items-center gap-1 text-sm"
+                                :class="download_analytics.downloads_change >= 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                    "
+                            >
+                                <TrendingUp
+                                    v-if="
+                                        download_analytics.downloads_change >= 0
+                                    "
+                                    class="size-4"
+                                />
+                                <TrendingDown v-else class="size-4" />
+                                {{
+                                    formatChange(
+                                        download_analytics.downloads_change,
+                                    )
+                                }}
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-muted-foreground">
+                                Total Downloads
+                            </p>
+                            <p class="mt-1 text-3xl font-semibold">
+                                {{
+                                    download_analytics.total_downloads.toLocaleString()
+                                }}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
 
             <!-- Main Content -->
@@ -380,9 +437,8 @@ function getDeviceIcon(device: string) {
                             index="date"
                             :categories="['Revenue']"
                             :colors="['var(--color-honey-500)']"
-                            :y-formatter="
-                                (value: number) => formatCurrency(value * 100)
-                            "
+                            :y-formatter="(value: number) => formatCurrency(value * 100)
+                                "
                             :show-legend="false"
                             class="h-[280px]"
                         />
@@ -452,11 +508,10 @@ function getDeviceIcon(device: string) {
                                     </p>
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="
-                                            getStatusVariant(
-                                                order.license_status,
-                                            )
-                                        "
+                                        :variant="getStatusVariant(
+                                            order.license_status,
+                                        )
+                                            "
                                         class="mt-1"
                                     >
                                         {{ order.license_status }}
@@ -487,11 +542,10 @@ function getDeviceIcon(device: string) {
                                 </div>
                                 <div
                                     class="flex items-center gap-1 text-sm"
-                                    :class="
-                                        visitor_analytics.visits_change >= 0
+                                    :class="visitor_analytics.visits_change >= 0
                                             ? 'text-emerald-600 dark:text-emerald-400'
                                             : 'text-red-600 dark:text-red-400'
-                                    "
+                                        "
                                 >
                                     <TrendingUp
                                         v-if="
@@ -591,9 +645,9 @@ function getDeviceIcon(device: string) {
                                         visitor_analytics.visits_by_page
                                             .length > 0
                                             ? formatPageName(
-                                                  visitor_analytics
-                                                      .visits_by_page[0].page,
-                                              )
+                                                visitor_analytics
+                                                    .visits_by_page[0].page,
+                                            )
                                             : '-'
                                     }}
                                 </p>
@@ -626,9 +680,8 @@ function getDeviceIcon(device: string) {
                                     'var(--color-sky-500)',
                                     'var(--color-violet-500)',
                                 ]"
-                                :y-formatter="
-                                    (value: number) => value.toLocaleString()
-                                "
+                                :y-formatter="(value: number) => value.toLocaleString()
+                                    "
                                 class="h-[280px]"
                             />
                             <div

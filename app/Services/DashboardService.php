@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Constants\DateRanges;
 use App\Models\Artifact;
+use App\Models\Download;
 use App\Models\License;
 use App\Models\Order;
 use App\Models\PageVisit;
@@ -318,5 +319,73 @@ final class DashboardService
                     'count' => $item->count,
                 ];
             });
+    }
+
+    /**
+     * Get download analytics for the dashboard.
+     *
+     * @return array{
+     *     total_downloads: int,
+     *     downloads_today: int,
+     *     downloads_change: float,
+     *     downloads_by_artifact: Collection<int, array{artifact_name: string, count: int}>,
+     *     recent_downloads: Collection<int, array{id: string, artifact_name: string, downloaded_at: string}>
+     * }
+     */
+    public function getDownloadAnalytics(): array
+    {
+        return [
+            'total_downloads' => Download::count(),
+            'downloads_today' => Download::today()->count(),
+            'downloads_change' => $this->calculateDownloadsChange(),
+            'downloads_by_artifact' => $this->getDownloadsByArtifact(),
+            'recent_downloads' => $this->getRecentDownloads(),
+        ];
+    }
+
+    private function calculateDownloadsChange(): float
+    {
+        $currentPeriod = Download::withinDays(DateRanges::DASHBOARD_COMPARISON_DAYS)->count();
+        $previousPeriod = Download::query()
+            ->where('created_at', '>=', now()->subDays(DateRanges::DASHBOARD_COMPARISON_DAYS * 2))
+            ->where('created_at', '<', now()->subDays(DateRanges::DASHBOARD_COMPARISON_DAYS))
+            ->count();
+
+        return $this->calculatePercentageChange($currentPeriod, $previousPeriod);
+    }
+
+    /**
+     * @return Collection<int, array{artifact_name: string, count: int}>
+     */
+    private function getDownloadsByArtifact(): Collection
+    {
+        return Download::select('artifact_id', DB::raw('COUNT(*) as count'))
+            ->withinDays(DateRanges::DASHBOARD_COMPARISON_DAYS)
+            ->groupBy('artifact_id')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->with('artifact')
+            ->get()
+            ->map(fn ($item): array => [
+                'artifact_name' => $item->artifact?->filename ?? 'Unknown',
+                'count' => $item->count,
+            ]);
+    }
+
+    /**
+     * @return Collection<int, array{id: string, artifact_name: string, user_email: string|null, downloaded_at: string}>
+     */
+    private function getRecentDownloads(int $limit = 5): Collection
+    {
+        return Download::with(['artifact', 'user'])
+            ->latest()
+            ->take($limit)
+            ->get()
+            ->map(fn (Download $download): array => [
+                'id' => $download->id,
+                'artifact_name' => $download->artifact?->filename ?? 'Unknown',
+                'user_email' => $download->user?->email,
+                'downloaded_at' => $download->created_at->toIso8601String(),
+            ]);
     }
 }

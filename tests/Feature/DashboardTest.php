@@ -53,6 +53,12 @@ class DashboardTest extends TestCase
                 ->has('charts.orders_over_time')
                 ->has('charts.licenses_by_status')
                 ->has('charts.artifacts_by_platform')
+                ->has('download_analytics')
+                ->has('download_analytics.total_downloads')
+                ->has('download_analytics.downloads_today')
+                ->has('download_analytics.downloads_change')
+                ->has('download_analytics.downloads_by_artifact')
+                ->has('download_analytics.recent_downloads')
         );
     }
 }
