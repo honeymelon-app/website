@@ -2,6 +2,7 @@
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DonutChart } from '@/components/ui/chart-donut';
 import { LineChart } from '@/components/ui/chart-line';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatCurrency } from '@/lib/formatters';
@@ -15,11 +16,16 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowRight,
     DollarSign,
+    Eye,
     KeyRound,
+    Monitor,
     Package,
     Receipt,
+    Smartphone,
+    Tablet,
     TrendingDown,
     TrendingUp,
+    Users,
 } from 'lucide-vue-next';
 import { computed } from 'vue';
 
@@ -52,9 +58,25 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
-    licenses_by_status: Array<{ status: string; count: number }>;
-    artifacts_by_platform: Array<{ platform: string; count: number }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
+    licenses_by_status: Array<{ status: string; count: number; }>;
+    artifacts_by_platform: Array<{ platform: string; count: number; }>;
+}
+
+interface VisitorAnalytics {
+    total_visits: number;
+    unique_visitors: number;
+    visits_today: number;
+    visits_change: number;
+    visits_over_time: Array<{
+        date: string;
+        visits: number;
+        unique_visitors: number;
+    }>;
+    visits_by_page: Array<{ page: string; visits: number; }>;
+    visits_by_device: Array<{ device: string; count: number; }>;
+    visits_by_browser: Array<{ browser: string; count: number; }>;
+    top_referrers: Array<{ referrer: string; url: string; count: number; }>;
 }
 
 interface Props {
@@ -62,6 +84,7 @@ interface Props {
     recent_orders: RecentOrder[];
     recent_licenses: RecentLicense[];
     charts: ChartData;
+    visitor_analytics: VisitorAnalytics;
 }
 
 const props = defineProps<Props>();
@@ -127,12 +150,56 @@ function getRelativeTime(dateString: string): string {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
+function formatPageName(routeName: string): string {
+    const names: Record<string, string> = {
+        home: 'Home',
+        download: 'Download',
+        pricing: 'Pricing',
+        privacy: 'Privacy Policy',
+        terms: 'Terms of Service',
+    };
+    return names[routeName] || routeName;
+}
+
 const revenueChartData = computed(() => {
     return props.charts.orders_over_time.map((item) => ({
         date: item.date,
         Revenue: item.revenue / 100,
     }));
 });
+
+const visitsChartData = computed(() => {
+    return props.visitor_analytics.visits_over_time.map((item) => ({
+        date: item.date,
+        Visits: item.visits,
+        'Unique Visitors': item.unique_visitors,
+    }));
+});
+
+const deviceChartData = computed(() => {
+    return props.visitor_analytics.visits_by_device.map((item) => ({
+        device: item.device.charAt(0).toUpperCase() + item.device.slice(1),
+        count: item.count,
+    }));
+});
+
+const browserChartData = computed(() => {
+    return props.visitor_analytics.visits_by_browser.map((item) => ({
+        browser: item.browser,
+        count: item.count,
+    }));
+});
+
+function getDeviceIcon(device: string) {
+    switch (device.toLowerCase()) {
+        case 'mobile':
+            return Smartphone;
+        case 'tablet':
+            return Tablet;
+        default:
+            return Monitor;
+    }
+}
 </script>
 
 <template>
@@ -165,11 +232,10 @@ const revenueChartData = computed(() => {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.revenue_change >= 0
+                                :class="metrics.revenue_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                "
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.revenue_change >= 0"
@@ -205,11 +271,10 @@ const revenueChartData = computed(() => {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.orders_change >= 0
+                                :class="metrics.orders_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                "
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.orders_change >= 0"
@@ -243,11 +308,10 @@ const revenueChartData = computed(() => {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.licenses_change >= 0
+                                :class="metrics.licenses_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                "
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.licenses_change >= 0"
@@ -313,9 +377,8 @@ const revenueChartData = computed(() => {
                             index="date"
                             :categories="['Revenue']"
                             :colors="['var(--color-honey-500)']"
-                            :y-formatter="
-                                (value: number) => formatCurrency(value * 100)
-                            "
+                            :y-formatter="(value: number) => formatCurrency(value * 100)
+                                "
                             :show-legend="false"
                             class="h-[280px]"
                         />
@@ -385,16 +448,365 @@ const revenueChartData = computed(() => {
                                     </p>
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="
-                                            getStatusVariant(
-                                                order.license_status,
-                                            )
-                                        "
+                                        :variant="getStatusVariant(
+                                            order.license_status,
+                                        )
+                                            "
                                         class="mt-1"
                                     >
                                         {{ order.license_status }}
                                     </Badge>
                                 </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <!-- Visitor Analytics Section -->
+            <div class="space-y-4">
+                <h2 class="text-lg font-semibold">Visitor Analytics</h2>
+
+                <!-- Visitor Metrics -->
+                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <!-- Total Visits -->
+                    <Card>
+                        <CardContent class="p-6">
+                            <div class="flex items-center justify-between">
+                                <div
+                                    class="flex size-10 items-center justify-center rounded-full bg-sky-500/10"
+                                >
+                                    <Eye
+                                        class="size-5 text-sky-600 dark:text-sky-400"
+                                    />
+                                </div>
+                                <div
+                                    class="flex items-center gap-1 text-sm"
+                                    :class="visitor_analytics.visits_change >= 0
+                                            ? 'text-emerald-600 dark:text-emerald-400'
+                                            : 'text-red-600 dark:text-red-400'
+                                        "
+                                >
+                                    <TrendingUp
+                                        v-if="
+                                            visitor_analytics.visits_change >= 0
+                                        "
+                                        class="size-4"
+                                    />
+                                    <TrendingDown v-else class="size-4" />
+                                    {{
+                                        formatChange(
+                                            visitor_analytics.visits_change,
+                                        )
+                                    }}
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm text-muted-foreground">
+                                    Page Views (30d)
+                                </p>
+                                <p class="mt-1 text-3xl font-semibold">
+                                    {{
+                                        visitor_analytics.total_visits.toLocaleString()
+                                    }}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Unique Visitors -->
+                    <Card>
+                        <CardContent class="p-6">
+                            <div class="flex items-center justify-between">
+                                <div
+                                    class="flex size-10 items-center justify-center rounded-full bg-violet-500/10"
+                                >
+                                    <Users
+                                        class="size-5 text-violet-600 dark:text-violet-400"
+                                    />
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm text-muted-foreground">
+                                    Unique Visitors (30d)
+                                </p>
+                                <p class="mt-1 text-3xl font-semibold">
+                                    {{
+                                        visitor_analytics.unique_visitors.toLocaleString()
+                                    }}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Visits Today -->
+                    <Card>
+                        <CardContent class="p-6">
+                            <div class="flex items-center justify-between">
+                                <div
+                                    class="flex size-10 items-center justify-center rounded-full bg-rose-500/10"
+                                >
+                                    <Eye
+                                        class="size-5 text-rose-600 dark:text-rose-400"
+                                    />
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm text-muted-foreground">
+                                    Page Views Today
+                                </p>
+                                <p class="mt-1 text-3xl font-semibold">
+                                    {{
+                                        visitor_analytics.visits_today.toLocaleString()
+                                    }}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Top Page -->
+                    <Card>
+                        <CardContent class="p-6">
+                            <div class="flex items-center justify-between">
+                                <div
+                                    class="flex size-10 items-center justify-center rounded-full bg-teal-500/10"
+                                >
+                                    <Monitor
+                                        class="size-5 text-teal-600 dark:text-teal-400"
+                                    />
+                                </div>
+                            </div>
+                            <div class="mt-4">
+                                <p class="text-sm text-muted-foreground">
+                                    Top Page
+                                </p>
+                                <p class="mt-1 text-3xl font-semibold">
+                                    {{
+                                        visitor_analytics.visits_by_page
+                                            .length > 0
+                                            ? formatPageName(
+                                                visitor_analytics
+                                                    .visits_by_page[0].page,
+                                            )
+                                            : '-'
+                                    }}
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <!-- Visitor Charts -->
+                <div class="grid gap-6 lg:grid-cols-5">
+                    <!-- Visits Over Time -->
+                    <Card class="lg:col-span-3">
+                        <CardHeader class="pb-2">
+                            <div class="flex items-center justify-between">
+                                <CardTitle class="text-base font-medium">
+                                    Page Views
+                                </CardTitle>
+                                <span class="text-sm text-muted-foreground">
+                                    Last 30 days
+                                </span>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <LineChart
+                                v-if="visitsChartData.length > 0"
+                                :data="visitsChartData"
+                                index="date"
+                                :categories="['Visits', 'Unique Visitors']"
+                                :colors="[
+                                    'var(--color-sky-500)',
+                                    'var(--color-violet-500)',
+                                ]"
+                                :y-formatter="(value: number) => value.toLocaleString()
+                                    "
+                                class="h-[280px]"
+                            />
+                            <div
+                                v-else
+                                class="flex h-[280px] items-center justify-center text-sm text-muted-foreground"
+                            >
+                                No visitor data yet
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Pages & Devices -->
+                    <Card class="lg:col-span-2">
+                        <CardHeader class="pb-2">
+                            <CardTitle class="text-base font-medium">
+                                Popular Pages
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent class="p-0">
+                            <div
+                                v-if="
+                                    visitor_analytics.visits_by_page.length ===
+                                    0
+                                "
+                                class="flex h-[280px] items-center justify-center text-sm text-muted-foreground"
+                            >
+                                No page data yet
+                            </div>
+                            <div v-else class="divide-y">
+                                <div
+                                    v-for="page in visitor_analytics.visits_by_page.slice(
+                                        0,
+                                        5,
+                                    )"
+                                    :key="page.page"
+                                    class="flex items-center justify-between px-6 py-3"
+                                >
+                                    <span class="text-sm">{{
+                                        formatPageName(page.page)
+                                    }}</span>
+                                    <span
+                                        class="text-sm font-medium text-muted-foreground"
+                                    >
+                                        {{ page.visits.toLocaleString() }}
+                                    </span>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <!-- Device & Browser Breakdown -->
+                <div class="grid gap-6 lg:grid-cols-2">
+                    <!-- Devices -->
+                    <Card>
+                        <CardHeader class="pb-2">
+                            <CardTitle class="text-base font-medium">
+                                Devices
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div
+                                v-if="deviceChartData.length > 0"
+                                class="flex items-center gap-6"
+                            >
+                                <DonutChart
+                                    :data="deviceChartData"
+                                    index="device"
+                                    category="count"
+                                    :colors="[
+                                        'var(--color-sky-500)',
+                                        'var(--color-violet-500)',
+                                        'var(--color-amber-500)',
+                                    ]"
+                                    class="h-[180px] w-[180px]"
+                                    :show-legend="false"
+                                />
+                                <div class="flex-1 space-y-3">
+                                    <div
+                                        v-for="item in deviceChartData"
+                                        :key="item.device"
+                                        class="flex items-center gap-3"
+                                    >
+                                        <component
+                                            :is="getDeviceIcon(item.device)"
+                                            class="size-4 text-muted-foreground"
+                                        />
+                                        <span class="flex-1 text-sm">{{
+                                            item.device
+                                        }}</span>
+                                        <span
+                                            class="text-sm font-medium text-muted-foreground"
+                                        >
+                                            {{ item.count.toLocaleString() }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                v-else
+                                class="flex h-[180px] items-center justify-center text-sm text-muted-foreground"
+                            >
+                                No device data yet
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <!-- Browsers -->
+                    <Card>
+                        <CardHeader class="pb-2">
+                            <CardTitle class="text-base font-medium">
+                                Browsers
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <div
+                                v-if="browserChartData.length > 0"
+                                class="flex items-center gap-6"
+                            >
+                                <DonutChart
+                                    :data="browserChartData"
+                                    index="browser"
+                                    category="count"
+                                    :colors="[
+                                        'var(--color-emerald-500)',
+                                        'var(--color-blue-500)',
+                                        'var(--color-orange-500)',
+                                        'var(--color-pink-500)',
+                                        'var(--color-indigo-500)',
+                                    ]"
+                                    class="h-[180px] w-[180px]"
+                                    :show-legend="false"
+                                />
+                                <div class="flex-1 space-y-3">
+                                    <div
+                                        v-for="item in browserChartData"
+                                        :key="item.browser"
+                                        class="flex items-center gap-3"
+                                    >
+                                        <span class="flex-1 text-sm">{{
+                                            item.browser
+                                        }}</span>
+                                        <span
+                                            class="text-sm font-medium text-muted-foreground"
+                                        >
+                                            {{ item.count.toLocaleString() }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div
+                                v-else
+                                class="flex h-[180px] items-center justify-center text-sm text-muted-foreground"
+                            >
+                                No browser data yet
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <!-- Top Referrers -->
+                <Card v-if="visitor_analytics.top_referrers.length > 0">
+                    <CardHeader class="pb-2">
+                        <CardTitle class="text-base font-medium">
+                            Top Referrers
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent class="p-0">
+                        <div class="divide-y">
+                            <div
+                                v-for="referrer in visitor_analytics.top_referrers.slice(
+                                    0,
+                                    5,
+                                )"
+                                :key="referrer.url"
+                                class="flex items-center justify-between px-6 py-3"
+                            >
+                                <span class="truncate text-sm">{{
+                                    referrer.referrer
+                                }}</span>
+                                <span
+                                    class="text-sm font-medium text-muted-foreground"
+                                >
+                                    {{ referrer.count.toLocaleString() }}
+                                </span>
                             </div>
                         </div>
                     </CardContent>
