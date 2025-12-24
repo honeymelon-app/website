@@ -127,10 +127,12 @@ class OrderFilter extends Filter
             'email',
             'amount_cents',
             'currency',
+            'refund_id',
+            'refunded_at',
             'created_at',
         ]);
 
-        $this->with(['license:id,order_id,key,status']);
+        $this->with(['license:id,order_id,key,key_plain,status,max_major_version,activated_at,activation_count,device_id,meta,created_at']);
 
         return $this;
     }
