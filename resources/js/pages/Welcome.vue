@@ -17,8 +17,7 @@ import {
 } from '@/composables';
 import MarketingLayout from '@/layouts/MarketingLayout.vue';
 import type { Artifact, Product } from '@/types/api';
-import { usePage } from '@inertiajs/vue3';
-import { Head } from '@inertiajs/vue3';
+import { Head, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -81,7 +80,7 @@ const jsonLdSchemas = computed(() => {
             url: appUrl.value,
             image: `${appUrl.value}/images/og-image.png`,
             offers: priceData.value,
-        })
+        }),
     );
 
     // Organization schema
@@ -90,7 +89,7 @@ const jsonLdSchemas = computed(() => {
             name: 'Honeymelon',
             url: appUrl.value,
             logo: `${appUrl.value}/images/logo.png`,
-        })
+        }),
     );
 
     // FAQ schema
@@ -128,11 +127,14 @@ const { headTags, jsonLdScript } = useSeoMeta({
         <!-- Twitter Card -->
         <meta name="twitter:card" :content="headTags.twitterCard" />
         <meta name="twitter:title" :content="headTags.twitterTitle" />
-        <meta name="twitter:description" :content="headTags.twitterDescription" />
+        <meta
+            name="twitter:description"
+            :content="headTags.twitterDescription"
+        />
         <meta name="twitter:image" :content="headTags.twitterImage" />
 
         <!-- JSON-LD Structured Data -->
-        <component :is="'script'" type="application/ld+json" v-html="jsonLdScript" />
+        <script type="application/ld+json" v-html="jsonLdScript" />
     </Head>
 
     <MarketingLayout>

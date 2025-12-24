@@ -41,7 +41,7 @@ withDefaults(
                 answer: "Each license activates on one Mac device. The activation is one-time and cannot be transferred. If you need Honeymelon on multiple Macs, you'll need a separate license for each.",
             },
         ],
-    }
+    },
 );
 </script>
 

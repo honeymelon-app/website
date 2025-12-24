@@ -7,9 +7,9 @@ export type {
 } from './useDataTable';
 
 export {
-    useSeoMeta,
-    generateSoftwareApplicationSchema,
-    generateOrganizationSchema,
     generateFaqSchema,
+    generateOrganizationSchema,
+    generateSoftwareApplicationSchema,
+    useSeoMeta,
 } from './useSeoMeta';
 export type { SeoMeta, UseSeoMetaOptions } from './useSeoMeta';

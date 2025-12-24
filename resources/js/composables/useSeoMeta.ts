@@ -27,7 +27,9 @@ export interface UseSeoMetaOptions {
     ogImage?: MaybeRefOrGetter<string | undefined>;
     ogType?: MaybeRefOrGetter<string | undefined>;
     twitterCard?: MaybeRefOrGetter<string | undefined>;
-    jsonLd?: MaybeRefOrGetter<Record<string, unknown> | Record<string, unknown>[] | undefined>;
+    jsonLd?: MaybeRefOrGetter<
+        Record<string, unknown> | Record<string, unknown>[] | undefined
+    >;
 }
 
 interface SeoConfig {
@@ -103,14 +105,19 @@ export function useSeoMeta(options: UseSeoMetaOptions = {}) {
         const base = baseUrl.value;
 
         const title = toValue(options.title);
-        const description = toValue(options.description) || config.default_description || '';
+        const description =
+            toValue(options.description) || config.default_description || '';
         const canonical = toValue(options.canonical);
-        const robots = toValue(options.robots) || config.robots || 'index, follow';
+        const robots =
+            toValue(options.robots) || config.robots || 'index, follow';
         const ogImage = toValue(options.ogImage) || config.default_og_image;
         const ogType = toValue(options.ogType) || 'website';
-        const twitterCard = toValue(options.twitterCard) || 'summary_large_image';
+        const twitterCard =
+            toValue(options.twitterCard) || 'summary_large_image';
 
-        const absoluteCanonical = canonical ? toAbsoluteUrl(canonical, base) : base;
+        const absoluteCanonical = canonical
+            ? toAbsoluteUrl(canonical, base)
+            : base;
         const absoluteOgImage = toAbsoluteUrl(ogImage, base);
 
         return {
@@ -211,7 +218,7 @@ export function generateOrganizationSchema(options: {
  * Generate FAQPage JSON-LD schema
  */
 export function generateFaqSchema(
-    faqs: Array<{ question: string; answer: string }>
+    faqs: Array<{ question: string; answer: string }>,
 ): Record<string, unknown> {
     return {
         '@context': 'https://schema.org',

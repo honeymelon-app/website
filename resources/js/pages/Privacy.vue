@@ -30,7 +30,10 @@ const { headTags } = useSeoMeta({
         <meta property="og:site_name" :content="headTags.ogSiteName" />
         <meta name="twitter:card" :content="headTags.twitterCard" />
         <meta name="twitter:title" :content="headTags.twitterTitle" />
-        <meta name="twitter:description" :content="headTags.twitterDescription" />
+        <meta
+            name="twitter:description"
+            :content="headTags.twitterDescription"
+        />
         <meta name="twitter:image" :content="headTags.twitterImage" />
     </Head>
 
