@@ -20,11 +20,21 @@ class CheckClientCredentials
         $key = $request->header('X-Client-Key');
         $secret = $request->header('X-Client-Secret');
 
-        abort_if(! $key || ! $secret, 403, 'Invalid client credentials.');
+        if (! $key || ! $secret) {
+            return response()->json(['message' => 'Invalid client credentials.'], 403);
+        }
 
         $client = Client::where('key', $key)->first();
 
-        abort_if(! $client || ! Hash::check($secret, $client->secret), 403, 'Invalid client credentials.');
+        if (! $client || ! Hash::check($secret, $client->secret)) {
+            return response()->json(['message' => 'Invalid client credentials.'], 403);
+        }
+
+        if ($client->revoked_at) {
+            return response()->json(['message' => 'Client has been revoked.'], 403);
+        }
+
+        $client->touch('last_used_at');
 
         return $next($request);
     }

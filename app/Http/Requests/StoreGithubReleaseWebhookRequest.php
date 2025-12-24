@@ -32,17 +32,17 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
             'version' => ValidationRules::requiredString(),
             'channel' => ['required', 'string', Rule::in(['stable', 'beta', 'alpha', 'rc'])],
             'commit_hash' => ValidationRules::requiredString(),
-            'major' => ['sometimes', 'boolean'],
-            'artifacts' => ['sometimes', 'array'],
+            'major' => ['nullable', 'integer', 'min:0'],
+            'artifacts' => ['nullable', 'array'],
             'artifacts.*.platform' => ['required_with:artifacts', ...ValidationRules::platform()],
-            'artifacts.*.source' => ['sometimes', 'string', Rule::in(['github', 'r2', 's3'])],
+            'artifacts.*.source' => ['nullable', 'string', Rule::in(['github', 'r2', 's3'])],
             'artifacts.*.filename' => ValidationRules::optionalString(),
             'artifacts.*.url' => ['required_with:artifacts', 'string', 'max:2048'],
-            'artifacts.*.path' => ['sometimes', 'string', 'max:2048'],
-            'artifacts.*.size' => ['sometimes', 'integer', 'min:0'],
+            'artifacts.*.path' => ['nullable', 'string', 'max:2048'],
+            'artifacts.*.size' => ['nullable', 'integer', 'min:0'],
             'artifacts.*.sha256' => ValidationRules::optionalString(),
             'artifacts.*.signature' => ValidationRules::optionalString(),
-            'artifacts.*.notarized' => ['sometimes', 'boolean'],
+            'artifacts.*.notarized' => ['nullable', 'boolean'],
         ];
     }
 }

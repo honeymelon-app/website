@@ -25,7 +25,7 @@ class GithubWebhookController extends Controller
             channel: ReleaseChannel::from($data['channel']),
             version: $data['version'],
             commitHash: $data['commit_hash'],
-            isMajor: $data['major'],
+            isMajor: (bool) ($data['major'] ?? false),
             userId: auth()->id(),
             payload: [
                 'notes' => $data['notes'],
