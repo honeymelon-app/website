@@ -27,15 +27,16 @@ class PageVisitTrackingTest extends TestCase
         ]);
     }
 
-    public function test_pricing_page_visit_is_tracked(): void
+    public function test_pricing_redirects_to_homepage_anchor(): void
     {
         $response = $this->get('/pricing');
 
-        $response->assertStatus(200);
+        $response->assertStatus(301);
+        $response->assertRedirect('/#pricing');
 
-        $this->assertDatabaseHas('page_visits', [
+        // Redirects don't track page visits
+        $this->assertDatabaseMissing('page_visits', [
             'path' => 'pricing',
-            'route_name' => 'pricing',
         ]);
     }
 
