@@ -16,9 +16,17 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 | No auth required.
 */
-Route::get('/download', ArtifactDownloadController::class)->name('artifacts.download');
-Route::post('/checkout', CheckoutController::class)->name('checkout');
-Route::post('/licenses/activate', LicenseActivationController::class)->name('licenses.activate');
+Route::get('/download', ArtifactDownloadController::class)
+    ->middleware('throttle:downloads')
+    ->name('artifacts.download');
+
+Route::post('/checkout', CheckoutController::class)
+    ->middleware('throttle:api')
+    ->name('checkout');
+
+Route::post('/licenses/activate', LicenseActivationController::class)
+    ->middleware('throttle:api')
+    ->name('licenses.activate');
 
 /*
 |--------------------------------------------------------------------------

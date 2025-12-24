@@ -2,23 +2,38 @@
 
 Control plane for Honeymelon: marketing pages, update manifests for the Tauri app, license-gated downloads, payment webhooks, and release administration. Single app, low cost, Cloudflare in front, GitHub Releases for artifacts. Optional R2/S3 when bandwidth grows.
 
+## Tech Stack
+
+- **Backend**: Laravel 12 (PHP 8.5)
+- **Frontend**: Inertia.js v2 + Vue 3 + TypeScript
+- **Styling**: Tailwind CSS v4
+- **Auth**: Laravel Fortify + Sanctum
+- **Type Safety**: Laravel Wayfinder for TypeScript route generation
+- **Testing**: PHPUnit
+- **Code Quality**: Laravel Pint
+
 ## Table of Contents
 
+- [Tech Stack](#tech-stack)
 - [Table of Contents](#table-of-contents)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Data Model](#data-model)
 - [API](#api)
-  - [Updates](#updates)
-  - [Downloads](#downloads)
+  - [Public Endpoints](#public-endpoints)
   - [Webhooks](#webhooks)
-  - [Admin](#admin)
+  - [Protected Endpoints (Client Auth)](#protected-endpoints-client-auth)
+  - [Admin UI Routes](#admin-ui-routes)
 - [Client (Tauri) Configuration](#client-tauri-configuration)
 - [Requirements](#requirements)
 - [Setup](#setup)
   - [Issuing Licenses](#issuing-licenses)
   - [.env Template](#env-template)
 - [Release Workflow](#release-workflow)
+  - [Option 1: GitHub Webhook (Automatic)](#option-1-github-webhook-automatic)
+  - [Option 2: Manual Sync](#option-2-manual-sync)
+  - [Option 3: CI Webhook Trigger](#option-3-ci-webhook-trigger)
+  - [Release Process Details](#release-process-details)
 - [Admin UI](#admin-ui)
 - [Cloudflare](#cloudflare)
 - [Security](#security)
@@ -29,17 +44,38 @@ Control plane for Honeymelon: marketing pages, update manifests for the Tauri ap
   - [Trigger publish from `app-macos`](#trigger-publish-from-app-macos)
   - [Typical post-deploy cache warmers](#typical-post-deploy-cache-warmers)
 - [Scheduler](#scheduler)
+  - [Available Artisan Commands](#available-artisan-commands)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 
 ## Features
 
-- Updates API for the Tauri auto-updater.
-- License-gated downloads with 302 redirects to GitHub assets (or signed R2/S3 URLs). Licenses are offline and perpetual for a major version (no phone-home).
-- Release administration (channels, notes, rollback).
-- Payments and licensing via Lemon Squeezy or Stripe webhooks.
-- Marketing and legal pages (Blade/Inertia) or proxied statics.
-- Cache-friendly endpoints for CDN.
+- **Auto-updater API** for Tauri with channel support (stable/beta/alpha/rc)
+- **License-gated downloads** with 302 redirects to GitHub assets or signed R2/S3 URLs
+  - Offline validation (licenses embed allowed major version)
+  - Device activation tracking
+  - No phone-home required after download
+- **Release Management**
+  - Multi-product support
+  - Multiple channels (stable, beta, alpha, rc)
+  - Auto-sync from GitHub Releases (fetches real commit SHAs)
+  - Manual and webhook-triggered publishing
+  - Release notes with Markdown support
+- **Payment Integration**
+  - Stripe webhook handling for orders and licenses
+  - Automatic license issuance on successful payment
+- **Admin Dashboard**
+  - Release, artifact, license, and order management
+  - Analytics (downloads, page visits, revenue)
+  - Built with Inertia.js and Vue 3
+- **SEO & Marketing**
+  - Server-side rendering support
+  - Dynamic robots.txt and sitemap.xml
+  - Page visit analytics
+- **Developer Experience**
+  - Type-safe routing with Wayfinder
+  - Comprehensive test coverage
+  - GitHub Actions CI/CD ready
 
 ## Architecture
 
@@ -48,80 +84,86 @@ Control plane for Honeymelon: marketing pages, update manifests for the Tauri ap
 Cloudflare (TLS/WAF/Cache)
 │
 ▼
-Laravel "platform" (PHP 8.3)
-├─ Marketing (Blade/Inertia)
-├─ API: updates, downloads, licenses
-├─ Admin: releases, artifacts, licenses
-├─ Webhooks: LS/Stripe → orders/licenses
-└─ Storage: DB + cache + artifact pointers
+Laravel "platform" (PHP 8.5 + Laravel 12)
+├─ Frontend (Inertia.js v2 + Vue 3)
+│  ├─ Marketing pages with SSR
+│  └─ Admin dashboard
+├─ API
+│  ├─ Downloads (license-gated)
+│  ├─ License activation
+│  └─ Artifact upload (CI)
+├─ Webhooks
+│  ├─ Stripe (payments → licenses)
+│  └─ GitHub (release → sync)
+└─ Background Jobs
+   ├─ GitHub release sync (hourly)
+   └─ Stripe product sync (daily)
 │
 ├─ GitHub Releases (primary artifacts)
-└─ R2/S3 (optional, later)
+└─ R2/S3 (optional, configured)
 
 ```
 
 ## Data Model
 
-- **releases**: `version`, `channel` (`stable|beta`), `notes_md`, `pub_date`, `critical`
-- **artifacts**: `release_id`, `platform` (e.g., `darwin-aarch64`), `source` (`github|r2|s3`), `url/path`, `sha256`, `size`
-- **manifests**: `channel`, `version`, `json`, `is_latest`
-- **licenses**: `key`, `status` (`active|revoked`), `seats`, `meta`
-- **orders**: `provider` (`ls|stripe`), `external_id`, `email`, `license_id`
-- **webhook_events**: `provider`, `type`, `payload`, `processed_at`
-- **activations** (optional): `license_id`, `device_id_hash`, `app_ver`, `os_ver`, `last_seen_at`
+- **products**: `name`, `slug`, `stripe_product_id`, `stripe_price_id`, `price_cents`, `is_active`
+- **releases**: `product_id`, `version`, `tag`, `commit_hash`, `channel` (`stable|beta|alpha|rc`), `notes`, `published_at`, `is_downloadable`, `major`
+- **artifacts**: `release_id`, `platform` (e.g., `darwin-aarch64`), `source` (`github|r2|s3`), `url`, `path`, `filename`, `sha256`, `signature`, `size`, `notarized`
+- **licenses**: `product_id`, `order_id`, `key`, `key_plain`, `status` (`active|revoked`), `max_major_version`, `can_access_prereleases`, `device_id`, `activated_at`, `activation_count`
+- **orders**: `product_id`, `provider` (`stripe|manual`), `stripe_checkout_id`, `amount_cents`, `currency`, `customer_email`, `status`
+- **webhook_events**: `provider` (`stripe|github`), `type`, `payload`, `processed_at`
+- **downloads**: `license_id`, `artifact_id`, `ip_address`, `user_agent`, `downloaded_at`
+- **page_visits**: `url`, `referrer`, `user_agent`, `ip_address`, `visited_at`
 
 ## API
 
-### Updates
+### Public Endpoints
 
-```
+```bash
+# License-gated download
+GET /api/download?license=XXXX-XXXX&artifact=uuid
+→ 302 redirect to GitHub asset or signed R2/S3 URL
 
-GET /api/updates/{channel}/latest.json
-GET /api/updates/{channel}/{version}.json
+# License activation (device tracking)
+POST /api/licenses/activate
+Body: { "license_key": "XXXX-XXXX", "device_id": "..." }
 
-````
-
-Response (Tauri Updater):
-
-```json
-{
-  "version": "1.3.2",
-  "notes": "…",
-  "pub_date": "2025-11-01T02:10:00Z",
-  "platforms": {
-    "darwin-aarch64": {
-      "signature": "<ed25519>",
-      "url": "https://github.com/honeymelon-app/app-macos/releases/download/v1.3.2/honeymelon-1.3.2.dmg",
-      "sha256": "<sha256>"
-    }
-  }
-}
-````
-
-### Downloads
-
-```
-GET /download?license=XXXX-XXXX-XXXX-XXXX&version=1.3.2&platform=darwin-aarch64
-→ 302 redirect to GitHub asset (or signed R2/S3 URL)
+# Stripe checkout session
+POST /api/checkout
+Body: { "product_id": "uuid", "success_url": "...", "cancel_url": "..." }
 ```
 
 ### Webhooks
 
-```
-POST /api/webhooks/lemonsqueezy
+```bash
+# Stripe webhook (payment events)
 POST /api/webhooks/stripe
+→ Creates orders and issues licenses automatically
+
+# GitHub release webhook (requires client auth)
+POST /api/webhooks/github/release
+Body: GitHub release webhook payload
+→ Syncs release and artifacts to database
 ```
 
-Creates `orders` and issues `licenses`, then emails the key.
+### Protected Endpoints (Client Auth)
 
-### Admin
-
+```bash
+# Upload artifact from CI
+POST /api/artifacts/upload
+Headers: Authorization: Bearer {token}
+Body: multipart/form-data with artifact file
 ```
-POST /api/admin/releases/publish   # { "tag": "v1.3.2", "channel": "stable" }
-POST /api/admin/releases/rollback  # { "version": "1.3.2", "channel": "stable" }
-```
 
-Protected via signed routes or basic auth.
+### Admin UI Routes
+
+All admin routes require authentication via Laravel Fortify:
+
+- `/admin` - Dashboard with analytics
+- `/admin/releases` - Release management
+- `/admin/licenses` - License management
+- `/admin/orders` - Order management
+- `/admin/artifacts` - Artifact management
 
 ## Client (Tauri) Configuration
 
@@ -131,21 +173,27 @@ Protected via signed routes or basic auth.
   "updater": {
     "active": true,
     "dialog": true,
-    "endpoints": ["https://www.honeymelon.app/api/updates/stable/latest.json"],
-    "pubkey": "<ED25519_PUBLIC_KEY>"
+    "endpoints": [
+      "https://www.honeymelon.app/api/updates/stable/latest.json",
+      "https://www.honeymelon.app/api/updates/beta/latest.json"
+    ],
+    "pubkey": "<ED25519_PUBLIC_KEY_FOR_SIGNATURE_VERIFICATION>"
   }
 }
 ```
 
+Supported channels: `stable`, `beta`, `alpha`, `rc`
+
 ## Requirements
 
-- PHP 8.3, Composer
-- Node 20+ (if using Inertia/Vite)
-- Redis (cache/queue) or database cache for bootstrap
-- Database: Postgres or MySQL (SQLite acceptable for dev)
-- GitHub token with `repo:read` for release ingestion
-- Optional R2/S3 credentials for signed downloads
-- Mail provider (SES/SMTP) for license emails
+- PHP 8.5+, Composer 2.x
+- Node 20+ (for Vite, TypeScript, and Wayfinder)
+- Redis (cache/queue/sessions)
+- Database: PostgreSQL or MySQL (SQLite for development)
+- GitHub personal access token with `repo` scope
+- Stripe account and webhook secret
+- Optional: Cloudflare R2 or AWS S3 for artifact storage
+- Optional: Mail provider (SES/SMTP) for license emails
 
 ## Setup
 
@@ -153,89 +201,188 @@ Protected via signed routes or basic auth.
 git clone https://github.com/honeymelon-app/platform.git
 cd platform
 cp .env.example .env
+
+# Install dependencies
 composer install
+npm ci
+
+# Generate application key and build assets
 php artisan key:generate
-php artisan migrate
-npm ci && npm run build   # only if using front-end assets
-php artisan serve         # or run via PHP-FPM/Nginx
+npm run build
+
+# Set up database
+php artisan migrate --seed
+
+# Generate client credentials for API access
+php artisan client:generate
+
+# Start development server
+composer run dev  # Runs both Laravel and Vite
 ```
 
 ### Issuing Licenses
 
-```
+First, generate Ed25519 signing keys:
+
+```bash
 php artisan license:generate-keys
-  # prints a base64 public/private pair for LICENSE_SIGNING_* env vars
-
-php artisan license:issue 8ee1d9d7-... --major=1
-
-php artisan license:issue --email=you@example.com --major=2 --json
-
-Each license embeds the allowed major version (e.g. 1 covers every 1.x release). There are no
-activations or entitlement flags—the desktop app validates the signature locally and never contacts
-this service.
-  # creates an ad-hoc order (provider=manual) and emits the signed key as JSON
+# Copy the output to LICENSE_SIGNING_PUBLIC_KEY and LICENSE_SIGNING_PRIVATE_KEY in .env
 ```
 
-Set `LICENSE_SIGNING_PUBLIC_KEY` and `LICENSE_SIGNING_PRIVATE_KEY` (base64 Ed25519 values) in your
-environment before issuing licenses. You can generate a pair locally with
-`php artisan license:generate-keys` and copy the output into `.env`.
+Then issue licenses:
+
+```bash
+# Issue a license for a specific order
+php artisan license:issue {order-uuid} --major=1
+
+# Create a manual order and license in one step
+php artisan license:issue --email=customer@example.com --major=1 --json
+```
+
+License features:
+
+- **Offline validation**: Licenses are cryptographically signed and validated client-side
+- **Major version locking**: Each license specifies the maximum major version (e.g., 1 = all 1.x releases)
+- **Device activation tracking**: Optional tracking of device IDs for seat management
+- **Prerelease access**: Can be toggled per license for beta/alpha access
+- **No phone-home**: After initial download, no server communication required
 
 ### .env Template
 
 ```dotenv
+APP_NAME=Honeymelon
 APP_URL=https://www.honeymelon.app
 APP_ENV=production
+APP_DEBUG=false
 
+# Database
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
 DB_DATABASE=honeymelon
 DB_USERNAME=...
 DB_PASSWORD=...
 
-CACHE_DRIVER=redis
+# Cache, Queue, Sessions
+CACHE_STORE=redis
 QUEUE_CONNECTION=redis
 SESSION_DRIVER=redis
 REDIS_URL=redis://localhost:6379
 
+# GitHub Integration
 GITHUB_TOKEN=ghp_...
 GITHUB_OWNER=honeymelon-app
 GITHUB_REPO=app-macos
 
-LEMONSQUEEZY_SIGNING_SECRET=...
-LEMONSQUEEZY_PRODUCT_ID=...
+# Stripe
+STRIPE_KEY=pk_...
+STRIPE_SECRET=sk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 
+# License Signing (generate with: php artisan license:generate-keys)
+LICENSE_SIGNING_PUBLIC_KEY=...
+LICENSE_SIGNING_PRIVATE_KEY=...
+
+# Optional: Cloudflare R2 / AWS S3
 FILESYSTEM_DISK=local
 R2_ENDPOINT=https://<account>.r2.cloudflarestorage.com
 R2_BUCKET=honeymelon-artifacts
 R2_KEY=...
 R2_SECRET=...
+R2_PUBLIC_URL=https://cdn.honeymelon.app
 
-MAIL_MAILER=ses
+# Optional: Mail
+MAIL_MAILER=smtp
 MAIL_FROM_ADDRESS=support@honeymelon.app
 MAIL_FROM_NAME=Honeymelon
+
+# Inertia SSR (optional, for better SEO)
+INERTIA_SSR_ENABLED=true
+INERTIA_SSR_URL=http://127.0.0.1:13714
 ```
 
 ## Release Workflow
 
-1. In `app-macos`: tag `v1.3.2`, build, sign, notarize, staple, attach `.dmg` to GitHub Release, upload `SHA256SUMS.txt`.
-2. From CI in `app-macos`, call the platform endpoint:
+### Option 1: GitHub Webhook (Automatic)
+
+1. Create a GitHub webhook pointing to `/api/webhooks/github/release`
+2. Generate client credentials: `php artisan client:generate`
+3. Configure webhook to send `Bearer {token}` in Authorization header
+4. When you publish a release on GitHub, it's automatically synced to the platform
+
+### Option 2: Manual Sync
+
+Run the sync command to fetch all releases from GitHub:
 
 ```bash
-curl -u "$HM_USER:$HM_PASS" \
-  -X POST https://www.honeymelon.app/api/admin/releases/publish \
-  -H 'Content-Type: application/json' \
-  -d '{"tag":"v1.3.2","channel":"stable"}'
+php artisan github:sync-releases
 ```
 
-1. Platform fetches the GitHub Release, records `releases` and `artifacts`, writes the manifest, marks `latest`, and optionally clears CDN cache for `/api/updates/stable/latest.json`.
+This runs automatically every hour via the scheduler.
+
+### Option 3: CI Webhook Trigger
+
+From your app's CI pipeline:
+
+```yaml
+- name: Notify platform of new release
+  run: |
+    curl -X POST https://www.honeymelon.app/api/webhooks/github/release \
+      -H "Authorization: Bearer ${{ secrets.PLATFORM_CLIENT_TOKEN }}" \
+      -H "Content-Type: application/json" \
+      -d @github-release-webhook-payload.json
+```
+
+### Release Process Details
+
+1. **In app repository**: Tag, build, sign, notarize, attach artifacts to GitHub Release
+2. **Platform receives webhook or runs sync**:
+   - Fetches release metadata and asset list
+   - Resolves actual commit SHA (not branch name)
+   - Determines channel from tag (alpha/beta/rc/stable)
+   - Auto-links release to first active product
+   - Creates artifact records with download URLs
+3. **Releases are immediately available** via admin UI for publishing
+4. **Mark as downloadable** to make available to customers
 
 ## Admin UI
 
-Use Filament or Laravel Nova to manage:
+Built with Inertia.js and Vue 3, featuring:
 
-- Releases, Artifacts, Channels
-- Licenses, Orders, Revocations
-- Webhook events and retries
+**Dashboard** (`/admin`)
+
+- Download analytics (last 7 days, with sparkline)
+- Revenue tracking
+- Recent orders and licenses
+- Quick stats
+
+**Release Management** (`/admin/releases`)
+
+- List all releases with filters by channel and search
+- Create new releases manually
+- Edit release notes and metadata
+- Mark releases as downloadable
+- Delete releases (cascades to artifacts)
+
+**License Management** (`/admin/licenses`)
+
+- View all licenses with status and activation info
+- Issue new licenses
+- Revoke licenses
+- Track device activations
+
+**Order Management** (`/admin/orders`)
+
+- View all orders from Stripe and manual sources
+- See associated licenses
+- Track payment status
+
+**Artifact Management** (`/admin/artifacts`)
+
+- View all artifacts by platform
+- Track download counts
+- Manage artifact availability
+
+All routes use Wayfinder for type-safe navigation and are protected by Laravel Fortify authentication.
 
 ## Cloudflare
 
@@ -253,6 +400,10 @@ Use Filament or Laravel Nova to manage:
 - Store secrets in GitHub Actions or your secret manager.
 - Redact license keys and PII in logs.
 - If using R2/S3, generate short-lived signed URLs only.
+- **Rate limiting** is enforced on all public API endpoints:
+  - Downloads: 10 requests/min per IP+license combination
+  - General API: 60 requests/min per IP
+  - Customize limits in `bootstrap/app.php` if needed
 
 ## Deployment
 
@@ -299,21 +450,44 @@ The platform includes scheduled tasks for keeping data in sync. Add the Laravel 
 
 **Scheduled commands:**
 
-| Command                | Frequency | Description                                 |
-| ---------------------- | --------- | ------------------------------------------- |
-| `github:sync-releases` | Hourly    | Syncs releases and artifacts from GitHub    |
-| `stripe:sync`          | Daily     | Syncs product and price details from Stripe |
+| Command                | Frequency | Description                                                   |
+| ---------------------- | --------- | ------------------------------------------------------------- |
+| `github:sync-releases` | Hourly    | Syncs releases and artifacts from GitHub, fetches commit SHAs |
+| `stripe:sync`          | Daily     | Syncs product and price details from Stripe                   |
 
 View the schedule with `php artisan schedule:list`.
 
+### Available Artisan Commands
+
+```bash
+# License Management
+php artisan license:generate-keys      # Generate Ed25519 signing keys
+php artisan license:issue              # Issue a new license
+
+# Client Credentials (for CI/webhooks)
+php artisan client:generate            # Generate API client credentials
+php artisan token:personal             # Generate personal access token
+
+# GitHub Sync
+php artisan github:sync-releases       # Manually sync releases from GitHub
+
+# Stripe
+php artisan stripe:sync                # Sync products and prices from Stripe
+```
+
 ## Roadmap
 
-- R2/S3 artifact storage with signed downloads
-- Staged rollouts (percentage, cohorts)
-- Device activations and seat management
-- Stripe support via Cashier (if not using Lemon Squeezy)
-- Public metrics page (downloads, versions)
+- R2/S3 artifact storage with signed downloads (configured)
+- Device activation tracking (implemented)
+- Stripe integration (implemented)
+- GitHub release sync with commit SHA resolution (implemented)
+- Multi-channel support (stable/beta/alpha/rc)
+- Admin dashboard with analytics
+- Rate limiting for download endpoints (10 requests/min per IP+license)
+- Email notifications for license issuance
+- Public metrics page (downloads, version distribution)
 - SBOM and provenance attachment to releases
+- Webhook retry mechanism
 
 ## Contributing
 
