@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('webhook_events', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('provider', 16);
+            $table->string('provider', 16)->index();
             $table->string('type', 32)->index();
             $table->json('payload');
             $table->timestamp('processed_at')->nullable();

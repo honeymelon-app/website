@@ -1,33 +1,52 @@
 <script setup lang="ts">
-import { DataTable, type Column } from '@/components/data-table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+    DataTableBulkActions,
+    DataTablePagination,
+    DataTableRoot,
+    TableFilters,
+    type FilterConfig,
+} from '@/components/data-table';
+import { Button } from '@/components/ui/button';
+import { useDataTable } from '@/composables';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { formatDate, truncateId } from '@/lib/formatters';
-import { getProviderVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import ordersRoute from '@/routes/admin/orders';
 import type { BreadcrumbItem } from '@/types';
-import type { Order, PaginatedResponse } from '@/types/resources';
+import type { FilterParams, PaginatedResponse } from '@/types/api';
+import type { Order } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
-import {
-    BadgeCheck,
-    Clock3,
-    Eye,
-    MoreHorizontal,
-    RotateCcw,
-} from 'lucide-vue-next';
-import { h } from 'vue';
+import { Download, RotateCcw } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { columns } from './columns';
+
+interface Filters {
+    provider?: string;
+    email?: string;
+    email_search?: string;
+    min_amount?: number;
+    max_amount?: number;
+    currency?: string;
+    has_license?: string;
+    license_status?: string;
+    created_after?: string;
+    created_before?: string;
+}
+
+interface Sorting {
+    column: string | null;
+    direction: 'asc' | 'desc';
+}
+
+interface Pagination {
+    pageSize: number;
+    allowedPageSizes: number[];
+}
 
 interface Props {
     orders: PaginatedResponse<Order>;
+    filters: Filters;
+    sorting: Sorting;
+    pagination: Pagination;
 }
 
 const props = defineProps<Props>();
@@ -43,258 +62,127 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-// Column definitions
-const columns: Column<Order>[] = [
+// Filter configuration for TableFilters component
+const filterConfig: FilterConfig[] = [
     {
-        key: 'id',
-        label: 'Order ID',
-        headerClass: 'w-[120px]',
-        render: (row: Order) => {
-            return h(
-                'div',
-                { class: 'font-mono text-sm text-muted-foreground' },
-                truncateId(row.id),
-            );
-        },
-    },
-    {
-        key: 'email',
-        label: 'Email',
-        render: (row: Order) => {
-            return h('div', { class: 'text-sm font-medium' }, row.email);
-        },
+        key: 'email_search',
+        label: 'Search email...',
+        type: 'text',
+        placeholder: 'Search email...',
     },
     {
         key: 'provider',
         label: 'Provider',
-        headerClass: 'w-[100px]',
-        render: (row: Order) => {
-            return h(
-                Badge,
-                {
-                    variant: getProviderVariant(row.provider),
-                    class: 'capitalize',
-                },
-                { default: () => row.provider },
-            );
-        },
+        type: 'select',
+        options: [
+            { label: 'Lemon Squeezy', value: 'ls' },
+            { label: 'Stripe', value: 'stripe' },
+        ],
     },
     {
-        key: 'formatted_amount',
-        label: 'Amount',
-        headerClass: 'w-[120px]',
-        render: (row: Order) => {
-            return h(
-                'div',
-                { class: 'text-sm font-medium' },
-                row.formatted_amount,
-            );
-        },
-    },
-    {
-        key: 'status',
-        label: 'Status',
-        headerClass: 'w-[110px]',
-        render: (row: Order) => {
-            const variant = row.is_refunded ? 'outline' : 'secondary';
-            const label = row.is_refunded ? 'Refunded' : 'Paid';
-            const Icon = row.is_refunded ? RotateCcw : BadgeCheck;
-
-            return h(
-                Badge,
-                { variant, class: 'gap-1 text-xs' },
-                {
-                    default: () => [h(Icon, { class: 'h-3.5 w-3.5' }), label],
-                },
-            );
-        },
-    },
-    {
-        key: 'refund_window',
-        label: 'Refund Window',
-        headerClass: 'w-[140px] text-center',
-        class: 'text-center',
-        render: (row: Order) => {
-            if (row.is_refunded) {
-                return h(
-                    'span',
-                    { class: 'text-muted-foreground text-sm' },
-                    'Processed',
-                );
-            }
-
-            return row.is_within_refund_window
-                ? h(
-                      'span',
-                      {
-                          class: 'text-emerald-600 dark:text-emerald-500 text-sm flex items-center justify-center gap-1',
-                      },
-                      [h(Clock3, { class: 'h-4 w-4' }), 'Open'],
-                  )
-                : h(
-                      'span',
-                      { class: 'text-muted-foreground text-sm' },
-                      'Closed',
-                  );
-        },
-    },
-    {
-        key: 'license_id',
+        key: 'license_status',
         label: 'License',
-        headerClass: 'w-[100px]',
-        render: (row: Order) => {
-            if (!row.license_id) {
-                return h(
-                    'span',
-                    { class: 'text-muted-foreground text-sm' },
-                    '—',
-                );
-            }
-            return h(
-                Badge,
-                { variant: 'outline', class: 'font-mono text-xs' },
-                { default: () => truncateId(row.license_id) },
-            );
-        },
-    },
-    {
-        key: 'created_at',
-        label: 'Created',
-        headerClass: 'w-[140px]',
-        render: (row: Order) => {
-            return h(
-                'time',
-                {
-                    datetime: row.created_at,
-                    class: 'text-sm text-muted-foreground',
-                },
-                formatDate(row.created_at),
-            );
-        },
-    },
-    {
-        key: 'actions',
-        label: '',
-        headerClass: 'w-[50px]',
-        render: (row: Order) => {
-            return h(
-                DropdownMenu,
-                {},
-                {
-                    default: () => [
-                        h(
-                            DropdownMenuTrigger,
-                            { asChild: true },
-                            {
-                                default: () =>
-                                    h(
-                                        Button,
-                                        {
-                                            variant: 'ghost',
-                                            size: 'icon',
-                                            class: 'h-8 w-8',
-                                        },
-                                        {
-                                            default: () => [
-                                                h(
-                                                    'span',
-                                                    { class: 'sr-only' },
-                                                    'Open menu',
-                                                ),
-                                                h(MoreHorizontal, {
-                                                    class: 'h-4 w-4',
-                                                }),
-                                            ],
-                                        },
-                                    ),
-                            },
-                        ),
-                        h(
-                            DropdownMenuContent,
-                            { align: 'end' },
-                            {
-                                default: () => [
-                                    h(
-                                        DropdownMenuLabel,
-                                        {},
-                                        { default: () => 'Actions' },
-                                    ),
-                                    h(
-                                        DropdownMenuItem,
-                                        {
-                                            onClick: () => viewOrder(row),
-                                        },
-                                        {
-                                            default: () => [
-                                                h(Eye, {
-                                                    class: 'mr-2 h-4 w-4',
-                                                }),
-                                                'View Details',
-                                            ],
-                                        },
-                                    ),
-                                    row.can_be_refunded
-                                        ? h(
-                                              DropdownMenuItem,
-                                              {
-                                                  onClick: () =>
-                                                      refundOrder(row),
-                                              },
-                                              {
-                                                  default: () => [
-                                                      h(RotateCcw, {
-                                                          class: 'mr-2 h-4 w-4',
-                                                      }),
-                                                      'Refund Order',
-                                                  ],
-                                              },
-                                          )
-                                        : null,
-                                ],
-                            },
-                        ),
-                    ],
-                },
-            );
-        },
+        type: 'select',
+        options: [
+            { label: 'With License', value: 'with' },
+            { label: 'Without License', value: 'without' },
+        ],
     },
 ];
 
-// Actions
-const viewOrder = (order: Order): void => {
-    router.visit(ordersRoute.show(order.id).url);
-};
+// Reactive filter state that syncs with props
+const filterState = computed<FilterParams>(() => ({
+    email_search: props.filters.email_search,
+    provider: props.filters.provider,
+    license_status: props.filters.license_status,
+}));
 
-const refundOrder = (order: Order): void => {
-    if (!order.can_be_refunded) {
+// Use the data table composable
+const {
+    table,
+    selectedRows,
+    selectedCount,
+    clearSelection,
+    handlePageChange,
+    handlePageSizeChange,
+    handleFilterUpdate,
+    handleFilterClear,
+    paginationMeta,
+    allowedPageSizes,
+} = useDataTable({
+    data: computed(() => props.orders),
+    columns,
+    sorting: computed(() => props.sorting),
+    filters: computed(() => props.filters as Record<string, unknown>),
+    pagination: computed(() => props.pagination),
+    indexUrl: ordersRoute.index().url,
+    getRowId: (row) => row.id,
+    enableRowSelection: true,
+});
+
+// Bulk refund action
+const bulkRefund = () => {
+    const orders = selectedRows.value.filter((order) => order.can_be_refunded);
+
+    if (orders.length === 0) {
+        alert('No refundable orders selected.');
         return;
     }
 
     const confirmed = confirm(
-        `Refund order ${truncateId(order.id)}? This will revoke the associated license.`,
+        `Refund ${orders.length} order(s)? This will revoke their associated licenses.`,
     );
 
     if (!confirmed) {
         return;
     }
 
-    const reason = window.prompt('Refund reason (optional)')?.trim() ?? '';
+    // Process refunds sequentially
+    orders.forEach((order) => {
+        router.post(
+            ordersRoute.refund(order.id).url,
+            { reason: 'Bulk refund' },
+            { preserveScroll: true },
+        );
+    });
 
-    router.post(
-        ordersRoute.refund(order.id).url,
-        { reason: reason || null },
-        {
-            preserveScroll: true,
-        },
-    );
+    clearSelection();
 };
 
-const handlePageChange = (page: number): void => {
-    router.visit(ordersRoute.index().url, {
-        data: { page },
-        preserveState: true,
-        preserveScroll: true,
-    });
+// Export selected orders to CSV
+const exportSelected = () => {
+    const orders = selectedRows.value;
+
+    const headers = [
+        'Order ID',
+        'Email',
+        'Provider',
+        'Amount',
+        'Status',
+        'License ID',
+        'Created',
+    ];
+    const csvContent = [
+        headers.join(','),
+        ...orders.map((order) =>
+            [
+                order.id,
+                order.email,
+                order.provider,
+                order.formatted_amount,
+                order.is_refunded ? 'Refunded' : 'Paid',
+                order.license_id || '',
+                order.created_at,
+            ].join(','),
+        ),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `orders-export-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
 };
 </script>
 
@@ -306,24 +194,68 @@ const handlePageChange = (page: number): void => {
             class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex flex-col gap-2">
-                        <h3 class="text-2xl font-semibold tracking-tight">
+                <!-- Header + Filters -->
+                <div
+                    class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+                >
+                    <div class="flex flex-col gap-1">
+                        <h1 class="text-2xl font-semibold tracking-tight">
                             Orders
-                        </h3>
+                        </h1>
                         <p class="text-sm text-muted-foreground">
                             View and manage customer orders and payments.
                         </p>
                     </div>
+                    <TableFilters
+                        :filters="filterConfig"
+                        :model-value="filterState"
+                        @update:model-value="handleFilterUpdate"
+                        @clear="handleFilterClear"
+                    />
                 </div>
 
-                <DataTable
-                    :columns="columns"
-                    :data="props.orders.data"
-                    :meta="props.orders.meta"
-                    empty-message="No orders found. Orders will appear here when customers make purchases."
-                    @page-change="handlePageChange"
-                />
+                <!-- Bulk Actions Toolbar -->
+                <DataTableBulkActions
+                    :selected-count="selectedCount"
+                    item-label="order"
+                    @clear="clearSelection"
+                >
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        class="h-8"
+                        @click="exportSelected"
+                    >
+                        <Download class="mr-1.5 h-4 w-4" />
+                        Export CSV
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        class="h-8"
+                        @click="bulkRefund"
+                    >
+                        <RotateCcw class="mr-1.5 h-4 w-4" />
+                        Refund Selected
+                    </Button>
+                </DataTableBulkActions>
+
+                <!-- Table -->
+                <div class="space-y-4">
+                    <DataTableRoot
+                        :table="table"
+                        :columns="columns"
+                        empty-message="No orders found. Orders will appear here when customers make purchases."
+                    />
+
+                    <!-- Pagination -->
+                    <DataTablePagination
+                        :meta="paginationMeta"
+                        :allowed-page-sizes="allowedPageSizes"
+                        @page-change="handlePageChange"
+                        @page-size-change="handlePageSizeChange"
+                    />
+                </div>
             </div>
         </div>
     </AppLayout>

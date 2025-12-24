@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Product;
 use App\Models\Release;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -28,7 +29,6 @@ class ReleaseFactory extends Factory
      */
     public function definition(): array
     {
-        // semantic version pieces
         $major = fake()->numberBetween(0, 2);
         $minor = fake()->numberBetween(0, 9);
         $patch = fake()->numberBetween(0, 20);
@@ -37,14 +37,15 @@ class ReleaseFactory extends Factory
         $channel = Arr::random(['stable', 'beta']);
 
         return [
-            // id is UUID via HasUuids
+            'product_id' => Product::query()->inRandomOrder()->value('id') ?? Product::factory(),
             'version' => $version,
             'tag' => "v{$version}",
-            'commit_hash' => bin2hex(random_bytes(20)), // 40-hex like git SHA1
+            'commit_hash' => bin2hex(random_bytes(20)),
             'channel' => $channel,
             'notes' => fake()->paragraphs(asText: true),
             'published_at' => fake()->dateTimeBetween('-180 days', 'now'),
-            'major' => $minor === 0 && $patch === 0, // mark x.0.0 as major
+            'is_downloadable' => true,
+            'major' => $minor === 0 && $patch === 0,
             'user_id' => User::query()->inRandomOrder()->value('id') ?? User::factory(),
         ];
     }
@@ -87,12 +88,26 @@ class ReleaseFactory extends Factory
      */
     public function forVersion(string $version, string $channel = 'stable'): self
     {
-        return $this->state(function () use ($version, $channel) {
-            return [
-                'version' => $version,
-                'tag' => "v{$version}",
-                'channel' => $channel,
-            ];
-        });
+        return $this->state(fn () => [
+            'version' => $version,
+            'tag' => "v{$version}",
+            'channel' => $channel,
+        ]);
+    }
+
+    /**
+     * Associate the release with a specific product.
+     */
+    public function forProduct(Product $product): self
+    {
+        return $this->state(fn () => ['product_id' => $product->id]);
+    }
+
+    /**
+     * Associate the release with a specific user.
+     */
+    public function forUser(User $user): self
+    {
+        return $this->state(fn () => ['user_id' => $user->id]);
     }
 }

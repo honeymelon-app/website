@@ -48,13 +48,39 @@ class DownloadFactory extends Factory
     }
 
     /**
-     * Indicate the download has no license (guest download).
+     * Indicate the download has no license (anonymous download).
      */
-    public function guest(): static
+    public function withoutLicense(): static
     {
         return $this->state(fn () => [
-            'user_id' => null,
             'license_id' => null,
+        ]);
+    }
+
+    /**
+     * Associate the download with a specific user.
+     */
+    public function forUser(User $user): static
+    {
+        return $this->state(fn () => ['user_id' => $user->id]);
+    }
+
+    /**
+     * Associate the download with a specific artifact.
+     */
+    public function forArtifact(Artifact $artifact): static
+    {
+        return $this->state(fn () => ['artifact_id' => $artifact->id]);
+    }
+
+    /**
+     * Associate the download with a specific license.
+     */
+    public function forLicense(License $license): static
+    {
+        return $this->state(fn () => [
+            'license_id' => $license->id,
+            'user_id' => $license->user_id,
         ]);
     }
 }

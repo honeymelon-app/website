@@ -29,7 +29,7 @@ class LicenseResource extends JsonResource
             'device_id' => $this->device_id,
             'is_activated' => $this->isActivated(),
             'can_be_revoked' => $this->status === LicenseStatus::ACTIVE,
-            'created_at' => $this->created_at->toIso8601String(),
+            'created_at' => $this->created_at?->toIso8601String(),
         ];
     }
 }

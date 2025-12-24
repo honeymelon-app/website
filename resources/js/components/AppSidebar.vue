@@ -20,12 +20,12 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import {
     BookOpen,
-    CreditCard,
-    FileArchive,
-    Folder,
-    LayoutGrid,
-    Package,
-    Shield,
+    Gauge,
+    Github,
+    HardDrive,
+    KeyRound,
+    Receipt,
+    Rocket,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -33,27 +33,27 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Dashboard',
         href: dashboard(),
-        icon: LayoutGrid,
+        icon: Gauge,
     },
     {
         title: 'Releases',
         href: releases.index(),
-        icon: Package,
+        icon: Rocket,
     },
     {
         title: 'Orders',
         href: orders.index(),
-        icon: CreditCard,
+        icon: Receipt,
     },
     {
         title: 'Licenses',
         href: licenses.index(),
-        icon: Shield,
+        icon: KeyRound,
     },
     {
         title: 'Artifacts',
         href: artifacts.index(),
-        icon: FileArchive,
+        icon: HardDrive,
     },
 ];
 
@@ -61,7 +61,7 @@ const footerNavItems: NavItem[] = [
     {
         title: 'Github Repo',
         href: 'https://github.com/honeymelon-app/honeymelon',
-        icon: Folder,
+        icon: Github,
     },
     {
         title: 'Documentation',

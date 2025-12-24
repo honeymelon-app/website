@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\GitRepository;
+use Fetch\Http\Response;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Container\Attributes\Singleton;
-use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Support\Facades\Http;
+
+use function Fetch\Http\fetch;
 
 #[Singleton]
 class GithubService implements GitRepository
 {
+    private const BASE_URL = 'https://api.github.com';
+
     public function __construct(
         #[Config('services.github.owner')]
         private readonly string $owner,
@@ -23,136 +26,163 @@ class GithubService implements GitRepository
     ) {}
 
     /**
+     * Fetch all releases from GitHub.
+     *
+     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}>
+     */
+    public function fetchAllReleases(): array
+    {
+        $releases = [];
+        $page = 1;
+        $perPage = 100;
+
+        do {
+            $data = $this->get("/repos/{$this->owner}/{$this->repo}/releases?per_page={$perPage}&page={$page}");
+
+            foreach ($data as $release) {
+                $releases[] = $this->mapRelease($release);
+            }
+
+            $page++;
+        } while (count($data) === $perPage);
+
+        return $releases;
+    }
+
+    /**
      * Fetch a GitHub release by tag.
      *
      * @return array{notes: string, published_at: string, assets: array<int, array{name: string, url: string, size: int, sha256: ?string, signature: ?string}>}
      */
     public function fetchRelease(string $tag): array
     {
-        $response = $this->client()
-            ->get("/repos/{$this->owner}/{$this->repo}/releases/tags/{$tag}")
-            ->throw();
-
-        $data = $response->json();
-
-        $assets = collect($data['assets'] ?? [])
-            ->map(function (array $asset) {
-                return [
-                    'name' => $asset['name'],
-                    'url' => $asset['browser_download_url'],
-                    'size' => $asset['size'],
-                    'sha256' => $this->extractSha256FromAssets($asset['name']),
-                    'signature' => $this->extractSignatureFromAssets($asset['name']),
-                ];
-            })
-            ->toArray();
+        $data = $this->get("/repos/{$this->owner}/{$this->repo}/releases/tags/{$tag}");
 
         return [
             'notes' => $data['body'] ?? '',
             'published_at' => $data['published_at'] ?? now()->toIso8601String(),
-            'assets' => $assets,
+            'assets' => $this->mapAssets($data['assets'] ?? [], withChecksums: true),
         ];
     }
 
     /**
-     * Create the HTTP client with authentication.
-     */
-    protected function client(): PendingRequest
-    {
-        $client = Http::baseUrl('https://api.github.com')
-            ->withHeaders([
-                'Accept' => 'application/vnd.github.v3+json',
-            ]);
-
-        if ($this->token) {
-            $client->withToken($this->token);
-        }
-
-        return $client;
-    }
-
-    /**
-     * Extract SHA256 from assets (look for .sha256 file).
-     */
-    protected function extractSha256FromAssets(string $assetName): ?string
-    {
-        // In a real implementation, we'd fetch the .sha256 file if it exists
-        // For now, return null and let the caller handle it
-        return null;
-    }
-
-    /**
-     * Extract signature from assets (look for .sig file).
-     */
-    protected function extractSignatureFromAssets(string $assetName): ?string
-    {
-        // In a real implementation, we'd fetch the .sig file if it exists
-        // For now, return null and let the caller handle it
-        return null;
-    }
-
-    /**
      * Delete a GitHub release by tag.
-     *
-     * @throws \Illuminate\Http\Client\RequestException
      */
     public function deleteRelease(string $tag): bool
     {
-        // First, get the release ID from the tag
-        $response = $this->client()
-            ->get("/repos/{$this->owner}/{$this->repo}/releases/tags/{$tag}");
+        $response = $this->request('GET', "/repos/{$this->owner}/{$this->repo}/releases/tags/{$tag}");
 
         if ($response->status() === 404) {
-            // Release doesn't exist, nothing to delete
             return true;
         }
 
-        $response->throw();
-        $releaseId = $response->json('id');
-
-        // Delete the release
-        $this->client()
-            ->delete("/repos/{$this->owner}/{$this->repo}/releases/{$releaseId}")
-            ->throw();
+        $this->request('DELETE', "/repos/{$this->owner}/{$this->repo}/releases/{$response->json()['id']}");
 
         return true;
     }
 
     /**
      * Delete a GitHub tag (git ref).
-     *
-     * @throws \Illuminate\Http\Client\RequestException
      */
     public function deleteTag(string $tag): bool
     {
-        $ref = "tags/{$tag}";
+        $response = $this->request('DELETE', "/repos/{$this->owner}/{$this->repo}/git/refs/tags/{$tag}");
 
-        $response = $this->client()
-            ->delete("/repos/{$this->owner}/{$this->repo}/git/refs/{$ref}");
+        return $response->status() === 404 || $response->successful();
+    }
 
-        // 404 means tag doesn't exist, which is fine
-        if ($response->status() === 404) {
-            return true;
-        }
-
-        $response->throw();
+    /**
+     * Delete both the GitHub release and its tag.
+     */
+    public function deleteReleaseAndTag(string $tag): bool
+    {
+        $this->deleteRelease($tag);
+        $this->deleteTag($tag);
 
         return true;
     }
 
     /**
-     * Delete both the GitHub release and its tag.
+     * Make a GET request and return JSON data.
      *
-     * @throws \Illuminate\Http\Client\RequestException
+     * @return array<string, mixed>
      */
-    public function deleteReleaseAndTag(string $tag): bool
+    protected function get(string $endpoint): array
     {
-        // Delete release first (if it exists)
-        $this->deleteRelease($tag);
+        return $this->request('GET', $endpoint)->json();
+    }
 
-        // Then delete the tag
-        $this->deleteTag($tag);
+    /**
+     * Make an HTTP request.
+     */
+    protected function request(string $method, string $endpoint): Response
+    {
+        $options = [
+            'method' => $method,
+            'headers' => $this->buildHeaders(),
+        ];
 
-        return true;
+        return fetch(self::BASE_URL.$endpoint, $options);
+    }
+
+    /**
+     * Build request headers including authentication.
+     *
+     * @return array<string, string>
+     */
+    protected function buildHeaders(): array
+    {
+        $headers = ['Accept' => 'application/vnd.github.v3+json'];
+
+        if ($this->token) {
+            $headers['Authorization'] = "Bearer {$this->token}";
+        }
+
+        return $headers;
+    }
+
+    /**
+     * Map a GitHub release to our internal format.
+     *
+     * @param  array<string, mixed>  $release
+     * @return array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}
+     */
+    protected function mapRelease(array $release): array
+    {
+        return [
+            'id' => $release['id'],
+            'tag' => $release['tag_name'],
+            'name' => $release['name'] ?? $release['tag_name'],
+            'notes' => $release['body'] ?? '',
+            'published_at' => $release['published_at'] ?? $release['created_at'],
+            'prerelease' => $release['prerelease'] ?? false,
+            'draft' => $release['draft'] ?? false,
+            'target_commitish' => $release['target_commitish'] ?? null,
+            'assets' => $this->mapAssets($release['assets'] ?? []),
+        ];
+    }
+
+    /**
+     * Map GitHub assets to our internal format.
+     *
+     * @param  array<int, array<string, mixed>>  $assets
+     * @return array<int, array{name: string, url: string, size: int, sha256?: ?string, signature?: ?string}>
+     */
+    protected function mapAssets(array $assets, bool $withChecksums = false): array
+    {
+        return array_map(function (array $asset) use ($withChecksums) {
+            $mapped = [
+                'name' => $asset['name'],
+                'url' => $asset['browser_download_url'],
+                'size' => $asset['size'],
+            ];
+
+            if ($withChecksums) {
+                $mapped['sha256'] = null;
+                $mapped['signature'] = null;
+            }
+
+            return $mapped;
+        }, $assets);
     }
 }

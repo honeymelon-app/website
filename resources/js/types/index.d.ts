@@ -24,12 +24,6 @@ export interface FlashMessages {
     info?: string;
 }
 
-export interface Cerberus {
-    enabled: boolean;
-    confirmed: boolean;
-    securityUrl?: string;
-}
-
 export type AppPageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -38,7 +32,6 @@ export type AppPageProps<
     auth: Auth;
     sidebarOpen: boolean;
     flash: FlashMessages;
-    cerberus?: Cerberus;
 };
 
 export interface User {

@@ -128,17 +128,11 @@ export interface WebhookEvent {
 // User type (from index.d.ts)
 export interface User {
     id: number;
-    cerberus_id: string | null;
     name: string;
     first_name?: string | null;
     last_name?: string | null;
     email: string;
     avatar?: string | null;
-    organisation?: {
-        id: string | null;
-        slug: string | null;
-        name: string | null;
-    } | null;
     email_verified_at: string | null;
     created_at?: string;
     updated_at?: string;

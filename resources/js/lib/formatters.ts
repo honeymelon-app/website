@@ -143,3 +143,29 @@ export function truncateId(
     }
     return `${str.substring(0, length)}...`;
 }
+
+/**
+ * Generate a UI Avatars URL for a given email.
+ * Creates consistent avatar URLs with initials.
+ * @param email - Email address to generate avatar for
+ * @param size - Size in pixels (default 40)
+ * @returns Avatar URL
+ */
+export function getAvatarUrl(
+    email: string | null | undefined,
+    size: number = 40,
+): string {
+    if (!email) {
+        return `https://ui-avatars.com/api/?name=?&size=${size}&background=f5d78e&color=4a3728&bold=true`;
+    }
+
+    // Extract initials from email (first letter of local part)
+    const localPart = email.split('@')[0] || '?';
+    const initials = localPart
+        .split(/[._-]/)
+        .slice(0, 2)
+        .map((part) => part.charAt(0).toUpperCase())
+        .join('');
+
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(initials || '?')}&size=${size}&background=f5d78e&color=4a3728&bold=true&format=svg`;
+}

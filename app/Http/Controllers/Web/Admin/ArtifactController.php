@@ -4,26 +4,50 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web\Admin;
 
-use App\Constants\DateRanges;
+use App\Filters\ArtifactFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ArtifactController extends Controller
 {
+    private const DEFAULT_PAGE_SIZE = 15;
+
+    private const ALLOWED_PAGE_SIZES = [10, 15, 25, 50, 100];
+
+    private const SORTABLE_COLUMNS = [
+        'filename',
+        'platform',
+        'source',
+        'size',
+        'created_at',
+    ];
+
     /**
      * Display a listing of artifacts.
      */
-    public function index(): Response
+    public function index(Request $request, ArtifactFilter $filter): Response
     {
-        $artifacts = Artifact::query()
+        $pageSize = $this->getValidatedPageSize($request);
+        $sortColumn = $this->getValidatedSortColumn($request);
+        $sortDirection = $this->getValidatedSortDirection($request);
+
+        $query = Artifact::query()
             ->with('release')
-            ->latest('created_at')
-            ->paginate(DateRanges::ADMIN_PAGINATION_SIZE);
+            ->filter($filter);
+
+        if ($sortColumn) {
+            $query->orderBy($sortColumn, $sortDirection);
+        } else {
+            $query->latest('created_at');
+        }
+
+        $artifacts = $query->paginate($pageSize)->withQueryString();
 
         // Check R2 sync status for each artifact
         $disk = Storage::disk('s3');
@@ -57,6 +81,21 @@ class ArtifactController extends Controller
                     'prev' => $artifacts->previousPageUrl(),
                     'next' => $artifacts->nextPageUrl(),
                 ],
+            ],
+            'filters' => $request->only([
+                'platform',
+                'source',
+                'notarized',
+                'release_id',
+                'search',
+            ]),
+            'sorting' => [
+                'column' => $sortColumn,
+                'direction' => $sortDirection,
+            ],
+            'pagination' => [
+                'pageSize' => $pageSize,
+                'allowedPageSizes' => self::ALLOWED_PAGE_SIZES,
             ],
         ]);
     }
@@ -167,5 +206,28 @@ class ArtifactController extends Controller
                 'message' => 'Error checking R2: '.$e->getMessage(),
             ];
         }
+    }
+
+    private function getValidatedPageSize(Request $request): int
+    {
+        $pageSize = (int) $request->input('per_page', self::DEFAULT_PAGE_SIZE);
+
+        return in_array($pageSize, self::ALLOWED_PAGE_SIZES, true)
+            ? $pageSize
+            : self::DEFAULT_PAGE_SIZE;
+    }
+
+    private function getValidatedSortColumn(Request $request): ?string
+    {
+        $column = $request->input('sort');
+
+        return in_array($column, self::SORTABLE_COLUMNS, true) ? $column : null;
+    }
+
+    private function getValidatedSortDirection(Request $request): string
+    {
+        $direction = $request->input('direction', 'desc');
+
+        return in_array($direction, ['asc', 'desc'], true) ? $direction : 'desc';
     }
 }

@@ -1,28 +1,47 @@
 <script setup lang="ts">
-import { DataTable, type Column } from '@/components/data-table';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+    DataTableBulkActions,
+    DataTablePagination,
+    DataTableRoot,
+    TableFilters,
+    type FilterConfig,
+} from '@/components/data-table';
+import { Button } from '@/components/ui/button';
+import { useDataTable } from '@/composables';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { formatDate } from '@/lib/formatters';
-import { getChannelVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import releasesRoute from '@/routes/admin/releases';
 import type { BreadcrumbItem } from '@/types';
-import type { PaginatedResponse, Release } from '@/types/resources';
+import type { FilterParams, PaginatedResponse } from '@/types/api';
+import type { Release } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
-import { Eye, MoreHorizontal, PackageSearch, Rocket } from 'lucide-vue-next';
-import { h } from 'vue';
+import { Download, Trash2 } from 'lucide-vue-next';
+import { computed } from 'vue';
+import { columns } from './columns';
+
+interface Filters {
+    version?: string;
+    tag?: string;
+    channel?: string;
+    major?: string;
+    search?: string;
+}
+
+interface Sorting {
+    column: string | null;
+    direction: 'asc' | 'desc';
+}
+
+interface Pagination {
+    pageSize: number;
+    allowedPageSizes: number[];
+}
 
 interface Props {
     releases: PaginatedResponse<Release>;
+    filters: Filters;
+    sorting: Sorting;
+    pagination: Pagination;
 }
 
 const props = defineProps<Props>();
@@ -38,224 +57,113 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const columns: Column<Release>[] = [
+// Filter configuration for TableFilters component
+const filterConfig: FilterConfig[] = [
     {
-        key: 'version',
-        label: 'Version',
-        headerClass: 'w-[120px]',
-        render: (row: Release) => {
-            return h('div', { class: 'font-mono font-medium' }, row.version);
-        },
-    },
-    {
-        key: 'tag',
-        label: 'Tag',
-        class: 'font-mono text-xs text-muted-foreground',
-    },
-    {
-        key: 'commit_hash',
-        label: 'Commit',
-        headerClass: 'w-[110px]',
-        render: (row: Release) => {
-            return h(
-                'div',
-                { class: 'font-mono text-xs text-muted-foreground' },
-                row.commit_hash?.slice(0, 7) ?? '—',
-            );
-        },
+        key: 'search',
+        label: 'Search version...',
+        type: 'text',
+        placeholder: 'Search version...',
     },
     {
         key: 'channel',
         label: 'Channel',
-        headerClass: 'w-[100px]',
-        render: (row: Release) => {
-            return h(
-                Badge,
-                {
-                    variant: getChannelVariant(row.channel),
-                    class: 'capitalize',
-                },
-                { default: () => row.channel },
-            );
-        },
-    },
-    {
-        key: 'major',
-        label: 'Major',
-        headerClass: 'w-[80px] text-center',
-        class: 'text-center',
-        render: (row: Release) => {
-            return row.major
-                ? h(
-                      Badge,
-                      { variant: 'destructive', class: 'text-xs' },
-                      { default: () => 'Major' },
-                  )
-                : h('span', { class: 'text-muted-foreground' }, '—');
-        },
-    },
-    {
-        key: 'artifacts_count',
-        label: 'Artifacts',
-        headerClass: 'w-[110px] text-center',
-        class: 'text-center',
-        render: (row: Release) => {
-            const count = row.artifacts_count ?? 0;
-            return h(
-                Badge,
-                { variant: 'outline', class: 'font-mono text-xs' },
-                { default: () => `${count} file${count === 1 ? '' : 's'}` },
-            );
-        },
-    },
-    {
-        key: 'published_at',
-        label: 'Published',
-        headerClass: 'w-[140px]',
-        render: (row: Release) => {
-            if (!row.published_at) {
-                return h(
-                    'div',
-                    { class: 'text-sm text-muted-foreground' },
-                    'Not published',
-                );
-            }
-            return h('div', { class: 'text-sm' }, formatDate(row.published_at));
-        },
-    },
-    {
-        key: 'created_at',
-        label: 'Created',
-        headerClass: 'w-[140px]',
-        render: (row: Release) => {
-            return h(
-                'time',
-                {
-                    datetime: row.created_at,
-                    class: 'text-sm text-muted-foreground',
-                },
-                formatDate(row.created_at),
-            );
-        },
-    },
-    {
-        key: 'actions',
-        label: '',
-        headerClass: 'w-[50px]',
-        render: (row: Release) => {
-            return h(
-                DropdownMenu,
-                {},
-                {
-                    default: () => [
-                        h(
-                            DropdownMenuTrigger,
-                            { asChild: true },
-                            {
-                                default: () =>
-                                    h(
-                                        Button,
-                                        {
-                                            variant: 'ghost',
-                                            size: 'icon',
-                                            class: 'h-8 w-8',
-                                        },
-                                        {
-                                            default: () => [
-                                                h(
-                                                    'span',
-                                                    { class: 'sr-only' },
-                                                    'Open menu',
-                                                ),
-                                                h(MoreHorizontal, {
-                                                    class: 'h-4 w-4',
-                                                }),
-                                            ],
-                                        },
-                                    ),
-                            },
-                        ),
-                        h(
-                            DropdownMenuContent,
-                            { align: 'end' },
-                            {
-                                default: () => [
-                                    h(
-                                        DropdownMenuLabel,
-                                        {},
-                                        { default: () => 'Actions' },
-                                    ),
-                                    h(
-                                        DropdownMenuItem,
-                                        {
-                                            onClick: () => viewRelease(row),
-                                        },
-                                        {
-                                            default: () => [
-                                                h(Eye, {
-                                                    class: 'mr-2 h-4 w-4',
-                                                }),
-                                                'View Details',
-                                            ],
-                                        },
-                                    ),
-                                    h(
-                                        DropdownMenuItem,
-                                        {
-                                            onClick: () =>
-                                                viewRelease(row, 'artifacts'),
-                                        },
-                                        {
-                                            default: () => [
-                                                h(PackageSearch, {
-                                                    class: 'mr-2 h-4 w-4',
-                                                }),
-                                                'View Artifacts',
-                                            ],
-                                        },
-                                    ),
-                                    h(DropdownMenuSeparator),
-                                    h(
-                                        DropdownMenuItem,
-                                        {
-                                            onClick: () => publishRelease(row),
-                                        },
-                                        {
-                                            default: () => [
-                                                h(Rocket, {
-                                                    class: 'mr-2 h-4 w-4',
-                                                }),
-                                                'Publish to Channel',
-                                            ],
-                                        },
-                                    ),
-                                ],
-                            },
-                        ),
-                    ],
-                },
-            );
-        },
+        type: 'select',
+        options: [
+            { label: 'Stable', value: 'stable' },
+            { label: 'Beta', value: 'beta' },
+        ],
     },
 ];
 
-// Actions
-const viewRelease = (release: Release, section?: 'artifacts'): void => {
-    const url = `${releasesRoute.show(release.id).url}${section === 'artifacts' ? '#artifacts' : ''}`;
-    router.visit(url);
-};
+// Reactive filter state that syncs with props
+const filterState = computed<FilterParams>(() => ({
+    search: props.filters.search,
+    channel: props.filters.channel,
+}));
 
-const publishRelease = (release: Release): void => {
-    console.log('Publish release:', release.version);
-    // Implement publish logic
-};
+// Use the data table composable
+const {
+    table,
+    selectedRows,
+    selectedCount,
+    clearSelection,
+    handlePageChange,
+    handlePageSizeChange,
+    handleFilterUpdate,
+    handleFilterClear,
+    paginationMeta,
+    allowedPageSizes,
+} = useDataTable({
+    data: computed(() => props.releases),
+    columns,
+    sorting: computed(() => props.sorting),
+    filters: computed(() => props.filters as Record<string, unknown>),
+    pagination: computed(() => props.pagination),
+    indexUrl: releasesRoute.index().url,
+    getRowId: (row) => row.id,
+    enableRowSelection: true,
+});
 
-const handlePageChange = (page: number): void => {
-    router.visit(releasesRoute.index().url, {
-        data: { page },
-        preserveState: true,
-        preserveScroll: true,
+// Bulk delete action
+const bulkDelete = () => {
+    const releases = selectedRows.value;
+
+    if (releases.length === 0) {
+        return;
+    }
+
+    const confirmed = confirm(
+        `Delete ${releases.length} release(s)? This will also delete their artifacts and cannot be undone.`,
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    releases.forEach((release) => {
+        router.delete(releasesRoute.destroy(release.id).url, {
+            preserveScroll: true,
+        });
     });
+
+    clearSelection();
+};
+
+// Export selected releases to CSV
+const exportSelected = () => {
+    const releases = selectedRows.value;
+
+    const headers = [
+        'Version',
+        'Tag',
+        'Channel',
+        'Major',
+        'Artifacts',
+        'Published',
+        'Created',
+    ];
+    const csvContent = [
+        headers.join(','),
+        ...releases.map((release) =>
+            [
+                release.version,
+                release.tag,
+                release.channel,
+                release.major ? 'Yes' : 'No',
+                release.artifacts_count ?? 0,
+                release.published_at || 'Not published',
+                release.created_at,
+            ].join(','),
+        ),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `releases-export-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
 };
 </script>
 
@@ -267,28 +175,73 @@ const handlePageChange = (page: number): void => {
             class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex flex-col gap-2">
-                        <h3 class="text-2xl font-semibold tracking-tight">
+                <!-- Header + Filters -->
+                <div
+                    class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+                >
+                    <div class="flex flex-col gap-1">
+                        <h1 class="text-2xl font-semibold tracking-tight">
                             Releases
-                        </h3>
+                        </h1>
                         <p class="text-sm text-muted-foreground">
                             Manage your application releases and versions.
                         </p>
                     </div>
-
-                    <Button @click="router.visit('/admin/releases/create')">
-                        Create Release
-                    </Button>
+                    <div class="flex items-center gap-3">
+                        <TableFilters
+                            :filters="filterConfig"
+                            :model-value="filterState"
+                            @update:model-value="handleFilterUpdate"
+                            @clear="handleFilterClear"
+                        />
+                        <Button @click="router.visit('/admin/releases/create')">
+                            Create Release
+                        </Button>
+                    </div>
                 </div>
 
-                <DataTable
-                    :columns="columns"
-                    :data="props.releases.data"
-                    :meta="props.releases.meta"
-                    empty-message="No releases found. Create your first release to get started."
-                    @page-change="handlePageChange"
-                />
+                <!-- Bulk Actions Toolbar -->
+                <DataTableBulkActions
+                    :selected-count="selectedCount"
+                    item-label="release"
+                    @clear="clearSelection"
+                >
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        class="h-8"
+                        @click="exportSelected"
+                    >
+                        <Download class="mr-1.5 h-4 w-4" />
+                        Export CSV
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        class="h-8"
+                        @click="bulkDelete"
+                    >
+                        <Trash2 class="mr-1.5 h-4 w-4" />
+                        Delete Selected
+                    </Button>
+                </DataTableBulkActions>
+
+                <!-- Table -->
+                <div class="space-y-4">
+                    <DataTableRoot
+                        :table="table"
+                        :columns="columns"
+                        empty-message="No releases found. Create your first release to get started."
+                    />
+
+                    <!-- Pagination -->
+                    <DataTablePagination
+                        :meta="paginationMeta"
+                        :allowed-page-sizes="allowedPageSizes"
+                        @page-change="handlePageChange"
+                        @page-size-change="handlePageSizeChange"
+                    />
+                </div>
             </div>
         </div>
     </AppLayout>

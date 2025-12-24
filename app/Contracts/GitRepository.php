@@ -11,6 +11,13 @@ use Illuminate\Container\Attributes\Bind;
 interface GitRepository
 {
     /**
+     * Fetch all releases.
+     *
+     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, target_commitish: ?string, assets: array<int, array{name: string, url: string, size: int}>}>
+     */
+    public function fetchAllReleases(): array;
+
+    /**
      * Fetch a release by tag.
      *
      * @return array{notes: string, published_at: string, assets: array<int, array{name: string, url: string, size: int, sha256: ?string, signature: ?string}>}

@@ -1,24 +1,27 @@
 <script setup lang="ts">
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { AreaChart } from '@/components/ui/chart-area';
-import { BarChart } from '@/components/ui/chart-bar';
-import { DonutChart } from '@/components/ui/chart-donut';
-import { Separator } from '@/components/ui/separator';
+import { LineChart } from '@/components/ui/chart-line';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { formatCurrency, formatDate } from '@/lib/formatters';
+import { formatCurrency } from '@/lib/formatters';
 import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/vue3';
+import licensesRoute from '@/routes/admin/licenses';
+import ordersRoute from '@/routes/admin/orders';
+import releasesRoute from '@/routes/admin/releases';
+import { type BreadcrumbItem, type SharedData } from '@/types';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
-    ArrowDownRight,
-    ArrowUpRight,
+    ArrowRight,
     DollarSign,
-    PackageOpen,
-    ShieldCheck,
+    KeyRound,
+    Package,
+    Receipt,
+    TrendingDown,
     TrendingUp,
 } from 'lucide-vue-next';
+import { computed } from 'vue';
 
 interface Metrics {
     total_orders: number;
@@ -49,9 +52,9 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
-    licenses_by_status: Array<{ status: string; count: number }>;
-    artifacts_by_platform: Array<{ platform: string; count: number }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
+    licenses_by_status: Array<{ status: string; count: number; }>;
+    artifacts_by_platform: Array<{ platform: string; count: number; }>;
 }
 
 interface Props {
@@ -61,7 +64,7 @@ interface Props {
     charts: ChartData;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -69,6 +72,67 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: dashboard().url,
     },
 ];
+
+const page = usePage<SharedData>();
+
+const userName = computed(() => {
+    const name = page.props.auth.user?.name ?? 'there';
+    return name.split(' ')[0];
+});
+
+const greeting = computed(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+        return 'Good morning';
+    }
+    if (hour < 18) {
+        return 'Good afternoon';
+    }
+    return 'Good evening';
+});
+
+function formatChange(value: number): string {
+    const sign = value >= 0 ? '+' : '';
+    return `${sign}${value.toFixed(1)}%`;
+}
+
+function getInitials(email: string): string {
+    const parts = email.split('@')[0].split(/[._-]/);
+    if (parts.length >= 2) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].substring(0, 2).toUpperCase();
+}
+
+function getRelativeTime(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+        return 'Just now';
+    }
+    if (diffMins < 60) {
+        return `${diffMins}m ago`;
+    }
+    if (diffHours < 24) {
+        return `${diffHours}h ago`;
+    }
+    if (diffDays < 7) {
+        return `${diffDays}d ago`;
+    }
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+const revenueChartData = computed(() => {
+    return props.charts.orders_over_time.map((item) => ({
+        date: item.date,
+        Revenue: item.revenue / 100,
+    }));
+});
 </script>
 
 <template>
@@ -77,282 +141,253 @@ const breadcrumbs: BreadcrumbItem[] = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex h-full flex-1 flex-col gap-6 p-6">
             <!-- Header -->
-            <div class="flex items-center justify-between">
-                <div>
-                    <h2 class="text-3xl font-bold tracking-tight">Dashboard</h2>
-                    <p class="text-muted-foreground">
-                        Overview of your platform metrics and activity
-                    </p>
-                </div>
+            <div class="flex flex-col gap-1">
+                <h1 class="text-2xl font-semibold tracking-tight">
+                    {{ greeting }}, {{ userName }}
+                </h1>
+                <p class="text-sm text-muted-foreground">
+                    Here's what's happening with your platform today.
+                </p>
             </div>
 
             <!-- Metrics Grid -->
-            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <!-- Total Orders -->
-                <Card>
-                    <CardHeader
-                        class="flex flex-row items-center justify-between space-y-0 pb-2"
-                    >
-                        <CardTitle class="text-sm font-medium"
-                            >Total Orders</CardTitle
-                        >
-                        <PackageOpen class="size-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">
-                            {{ metrics.total_orders }}
-                        </div>
-                        <p class="flex items-center gap-1 text-xs">
-                            <ArrowUpRight
-                                v-if="metrics.orders_change >= 0"
-                                class="size-4 text-green-500"
-                            />
-                            <ArrowDownRight
-                                v-else
-                                class="size-4 text-red-500"
-                            />
-                            <span
-                                :class="
-                                    metrics.orders_change >= 0
-                                        ? 'text-green-500'
-                                        : 'text-red-500'
-                                "
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Total Revenue -->
+                <Card class="relative overflow-hidden">
+                    <CardContent class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div
+                                class="flex size-10 items-center justify-center rounded-full bg-emerald-500/10"
                             >
-                                {{ Math.abs(metrics.orders_change) }}%
-                            </span>
-                            <span class="text-muted-foreground">
-                                from last month
-                            </span>
-                        </p>
+                                <DollarSign
+                                    class="size-5 text-emerald-600 dark:text-emerald-400"
+                                />
+                            </div>
+                            <div
+                                class="flex items-center gap-1 text-sm"
+                                :class="metrics.revenue_change >= 0
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                    "
+                            >
+                                <TrendingUp
+                                    v-if="metrics.revenue_change >= 0"
+                                    class="size-4"
+                                />
+                                <TrendingDown v-else class="size-4" />
+                                {{ formatChange(metrics.revenue_change) }}
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-muted-foreground">
+                                Total Revenue
+                            </p>
+                            <p class="mt-1 text-3xl font-semibold">
+                                {{ formatCurrency(metrics.total_revenue_cents) }}
+                            </p>
+                        </div>
                     </CardContent>
                 </Card>
 
-                <!-- Total Revenue -->
-                <Card>
-                    <CardHeader
-                        class="flex flex-row items-center justify-between space-y-0 pb-2"
-                    >
-                        <CardTitle class="text-sm font-medium"
-                            >Total Revenue</CardTitle
-                        >
-                        <DollarSign class="size-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">
-                            {{ formatCurrency(metrics.total_revenue_cents) }}
-                        </div>
-                        <p class="flex items-center gap-1 text-xs">
-                            <ArrowUpRight
-                                v-if="metrics.revenue_change >= 0"
-                                class="size-4 text-green-500"
-                            />
-                            <ArrowDownRight
-                                v-else
-                                class="size-4 text-red-500"
-                            />
-                            <span
-                                :class="
-                                    metrics.revenue_change >= 0
-                                        ? 'text-green-500'
-                                        : 'text-red-500'
-                                "
+                <!-- Total Orders -->
+                <Card class="relative overflow-hidden">
+                    <CardContent class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div
+                                class="flex size-10 items-center justify-center rounded-full bg-blue-500/10"
                             >
-                                {{ Math.abs(metrics.revenue_change) }}%
-                            </span>
-                            <span class="text-muted-foreground">
-                                from last month
-                            </span>
-                        </p>
+                                <Receipt
+                                    class="size-5 text-blue-600 dark:text-blue-400"
+                                />
+                            </div>
+                            <div
+                                class="flex items-center gap-1 text-sm"
+                                :class="metrics.orders_change >= 0
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                    "
+                            >
+                                <TrendingUp
+                                    v-if="metrics.orders_change >= 0"
+                                    class="size-4"
+                                />
+                                <TrendingDown v-else class="size-4" />
+                                {{ formatChange(metrics.orders_change) }}
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-muted-foreground">
+                                Total Orders
+                            </p>
+                            <p class="mt-1 text-3xl font-semibold">
+                                {{ metrics.total_orders.toLocaleString() }}
+                            </p>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <!-- Active Licenses -->
-                <Card>
-                    <CardHeader
-                        class="flex flex-row items-center justify-between space-y-0 pb-2"
-                    >
-                        <CardTitle class="text-sm font-medium"
-                            >Active Licenses</CardTitle
-                        >
-                        <ShieldCheck class="size-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">
-                            {{ metrics.active_licenses }}
-                        </div>
-                        <p class="flex items-center gap-1 text-xs">
-                            <ArrowUpRight
-                                v-if="metrics.licenses_change >= 0"
-                                class="size-4 text-green-500"
-                            />
-                            <ArrowDownRight
-                                v-else
-                                class="size-4 text-red-500"
-                            />
-                            <span
-                                :class="
-                                    metrics.licenses_change >= 0
-                                        ? 'text-green-500'
-                                        : 'text-red-500'
-                                "
+                <Card class="relative overflow-hidden">
+                    <CardContent class="p-6">
+                        <div class="flex items-center justify-between">
+                            <div
+                                class="flex size-10 items-center justify-center rounded-full bg-amber-500/10"
                             >
-                                {{ Math.abs(metrics.licenses_change) }}%
-                            </span>
-                            <span class="text-muted-foreground">
-                                from last month
-                            </span>
-                        </p>
+                                <KeyRound
+                                    class="size-5 text-amber-600 dark:text-amber-400"
+                                />
+                            </div>
+                            <div
+                                class="flex items-center gap-1 text-sm"
+                                :class="metrics.licenses_change >= 0
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                    "
+                            >
+                                <TrendingUp
+                                    v-if="metrics.licenses_change >= 0"
+                                    class="size-4"
+                                />
+                                <TrendingDown v-else class="size-4" />
+                                {{ formatChange(metrics.licenses_change) }}
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-muted-foreground">
+                                Active Licenses
+                            </p>
+                            <p class="mt-1 text-3xl font-semibold">
+                                {{ metrics.active_licenses.toLocaleString() }}
+                            </p>
+                        </div>
                     </CardContent>
                 </Card>
 
                 <!-- Total Releases -->
-                <Card>
-                    <CardHeader
-                        class="flex flex-row items-center justify-between space-y-0 pb-2"
-                    >
-                        <CardTitle class="text-sm font-medium"
-                            >Published Releases</CardTitle
-                        >
-                        <TrendingUp class="size-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-2xl font-bold">
-                            {{ metrics.total_releases }}
-                        </div>
-                        <p class="text-xs text-muted-foreground">
-                            All-time published releases
-                        </p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <!-- Charts Row -->
-            <div class="grid gap-4 lg:grid-cols-7">
-                <!-- Orders & Revenue Over Time -->
-                <Card class="lg:col-span-4">
-                    <CardHeader>
-                        <CardTitle>Orders & Revenue (Last 30 Days)</CardTitle>
-                    </CardHeader>
-                    <CardContent class="pl-2">
-                        <AreaChart
-                            v-if="charts.orders_over_time.length > 0"
-                            :data="charts.orders_over_time"
-                            index="date"
-                            :categories="['orders', 'revenue']"
-                            :colors="[
-                                'hsl(var(--chart-1))',
-                                'hsl(var(--chart-2))',
-                            ]"
-                            :y-formatter="
-                                (tick: number | Date) => {
-                                    return typeof tick === 'number'
-                                        ? tick.toFixed(0)
-                                        : '';
-                                }
-                            "
-                            class="h-[300px]"
-                        />
-                        <div
-                            v-else
-                            class="flex h-[300px] items-center justify-center text-sm text-muted-foreground"
-                        >
-                            No data available
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- License Status Distribution -->
-                <Card class="lg:col-span-3">
-                    <CardHeader>
-                        <CardTitle>License Status Distribution</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <DonutChart
-                            v-if="charts.licenses_by_status.length > 0"
-                            :data="charts.licenses_by_status"
-                            index="status"
-                            category="count"
-                            :colors="[
-                                'hsl(var(--chart-1))',
-                                'hsl(var(--chart-2))',
-                                'hsl(var(--chart-3))',
-                            ]"
-                            class="mx-auto h-[300px]"
-                        />
-                        <div
-                            v-else
-                            class="flex h-[300px] items-center justify-center text-sm text-muted-foreground"
-                        >
-                            No data available
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <!-- Platform Distribution -->
-            <div class="grid gap-4 lg:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Artifacts by Platform</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <BarChart
-                            v-if="charts.artifacts_by_platform.length > 0"
-                            :data="charts.artifacts_by_platform"
-                            index="platform"
-                            :categories="['count']"
-                            :colors="['hsl(var(--chart-1))']"
-                            class="h-[250px]"
-                        />
-                        <div
-                            v-else
-                            class="flex h-[250px] items-center justify-center text-sm text-muted-foreground"
-                        >
-                            No data available
-                        </div>
-                    </CardContent>
-                </Card>
-
-                <!-- Recent Orders -->
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Recent Orders</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div class="space-y-4">
+                <Card class="relative overflow-hidden">
+                    <CardContent class="p-6">
+                        <div class="flex items-center justify-between">
                             <div
-                                v-if="recent_orders.length === 0"
-                                class="flex h-[250px] items-center justify-center text-sm text-muted-foreground"
+                                class="flex size-10 items-center justify-center rounded-full bg-purple-500/10"
                             >
-                                No orders yet
+                                <Package
+                                    class="size-5 text-purple-600 dark:text-purple-400"
+                                />
                             </div>
-                            <div
-                                v-for="order in recent_orders"
-                                :key="order.id"
-                                class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
+                        </div>
+                        <div class="mt-4">
+                            <p class="text-sm text-muted-foreground">
+                                Published Releases
+                            </p>
+                            <p class="mt-1 text-3xl font-semibold">
+                                {{ metrics.total_releases.toLocaleString() }}
+                            </p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <!-- Main Content -->
+            <div class="grid gap-6 lg:grid-cols-5">
+                <!-- Revenue Chart -->
+                <Card class="lg:col-span-3">
+                    <CardHeader class="pb-2">
+                        <div class="flex items-center justify-between">
+                            <CardTitle class="text-base font-medium">
+                                Revenue
+                            </CardTitle>
+                            <span class="text-sm text-muted-foreground">
+                                Last 30 days
+                            </span>
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <LineChart
+                            v-if="revenueChartData.length > 0"
+                            :data="revenueChartData"
+                            index="date"
+                            :categories="['Revenue']"
+                            :colors="['var(--color-honey-500)']"
+                            :y-formatter="(value: number) =>
+                                formatCurrency(value * 100)
+                                "
+                            :show-legend="false"
+                            class="h-[280px]"
+                        />
+                        <div
+                            v-else
+                            class="flex h-[280px] items-center justify-center text-sm text-muted-foreground"
+                        >
+                            No revenue data yet
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <!-- Activity Feed -->
+                <Card class="lg:col-span-2">
+                    <CardHeader class="pb-2">
+                        <div class="flex items-center justify-between">
+                            <CardTitle class="text-base font-medium">
+                                Recent Activity
+                            </CardTitle>
+                            <Link
+                                :href="ordersRoute.index().url"
+                                class="text-sm text-muted-foreground transition-colors hover:text-foreground"
                             >
-                                <div class="space-y-1">
-                                    <p class="text-sm leading-none font-medium">
+                                View all
+                            </Link>
+                        </div>
+                    </CardHeader>
+                    <CardContent class="p-0">
+                        <div
+                            v-if="
+                                recent_orders.length === 0 &&
+                                recent_licenses.length === 0
+                            "
+                            class="flex h-[280px] items-center justify-center text-sm text-muted-foreground"
+                        >
+                            No recent activity
+                        </div>
+                        <div v-else class="divide-y">
+                            <div
+                                v-for="order in recent_orders.slice(0, 5)"
+                                :key="order.id"
+                                class="flex items-center gap-3 px-6 py-3"
+                            >
+                                <Avatar class="size-9">
+                                    <AvatarFallback
+                                        class="bg-muted text-xs font-medium"
+                                    >
+                                        {{ getInitials(order.email) }}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div class="min-w-0 flex-1">
+                                    <p
+                                        class="truncate text-sm font-medium leading-none"
+                                    >
                                         {{ order.email }}
                                     </p>
-                                    <p class="text-sm text-muted-foreground">
-                                        {{ formatDate(order.created_at) }}
+                                    <p
+                                        class="mt-1 text-xs text-muted-foreground"
+                                    >
+                                        New order •
+                                        {{ getRelativeTime(order.created_at) }}
                                     </p>
                                 </div>
-                                <div class="flex items-center gap-2">
+                                <div class="text-right">
+                                    <p class="text-sm font-semibold">
+                                        {{ order.formatted_amount }}
+                                    </p>
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="
-                                            getStatusVariant(
-                                                order.license_status,
-                                            )
-                                        "
+                                        :variant="getStatusVariant(
+                                            order.license_status,
+                                        )
+                                            "
+                                        class="mt-1"
                                     >
                                         {{ order.license_status }}
                                     </Badge>
-                                    <div class="font-medium">
-                                        {{ order.formatted_amount }}
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -360,50 +395,74 @@ const breadcrumbs: BreadcrumbItem[] = [
                 </Card>
             </div>
 
-            <!-- Recent Licenses -->
-            <Card>
-                <CardHeader>
-                    <CardTitle>Recent Licenses</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div class="space-y-4">
+            <!-- Quick Actions -->
+            <div class="grid gap-4 sm:grid-cols-3">
+                <Link
+                    :href="ordersRoute.index().url"
+                    class="group rounded-lg border bg-card p-5 transition-colors hover:bg-accent"
+                >
+                    <div class="flex items-center justify-between">
                         <div
-                            v-if="recent_licenses.length === 0"
-                            class="flex h-[100px] items-center justify-center text-sm text-muted-foreground"
+                            class="flex size-10 items-center justify-center rounded-lg bg-blue-500/10"
                         >
-                            No licenses issued yet
-                        </div>
-                        <div
-                            v-for="(license, index) in recent_licenses"
-                            :key="license.id"
-                        >
-                            <div class="flex items-center justify-between">
-                                <div class="space-y-1">
-                                    <p
-                                        class="font-mono text-sm leading-none font-medium"
-                                    >
-                                        {{ license.key_plain }}
-                                    </p>
-                                    <p class="text-sm text-muted-foreground">
-                                        Max Version:
-                                        {{ license.max_major_version }} •
-                                        {{ formatDate(license.created_at) }}
-                                    </p>
-                                </div>
-                                <Badge
-                                    :variant="getStatusVariant(license.status)"
-                                >
-                                    {{ license.status }}
-                                </Badge>
-                            </div>
-                            <Separator
-                                v-if="index < recent_licenses.length - 1"
-                                class="my-4"
+                            <Receipt
+                                class="size-5 text-blue-600 dark:text-blue-400"
                             />
                         </div>
+                        <ArrowRight
+                            class="size-5 text-muted-foreground transition-transform group-hover:translate-x-1"
+                        />
                     </div>
-                </CardContent>
-            </Card>
+                    <h3 class="mt-4 font-medium">Orders</h3>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        View and manage customer orders
+                    </p>
+                </Link>
+
+                <Link
+                    :href="licensesRoute.index().url"
+                    class="group rounded-lg border bg-card p-5 transition-colors hover:bg-accent"
+                >
+                    <div class="flex items-center justify-between">
+                        <div
+                            class="flex size-10 items-center justify-center rounded-lg bg-amber-500/10"
+                        >
+                            <KeyRound
+                                class="size-5 text-amber-600 dark:text-amber-400"
+                            />
+                        </div>
+                        <ArrowRight
+                            class="size-5 text-muted-foreground transition-transform group-hover:translate-x-1"
+                        />
+                    </div>
+                    <h3 class="mt-4 font-medium">Licenses</h3>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        Manage license keys and activations
+                    </p>
+                </Link>
+
+                <Link
+                    :href="releasesRoute.index().url"
+                    class="group rounded-lg border bg-card p-5 transition-colors hover:bg-accent"
+                >
+                    <div class="flex items-center justify-between">
+                        <div
+                            class="flex size-10 items-center justify-center rounded-lg bg-purple-500/10"
+                        >
+                            <Package
+                                class="size-5 text-purple-600 dark:text-purple-400"
+                            />
+                        </div>
+                        <ArrowRight
+                            class="size-5 text-muted-foreground transition-transform group-hover:translate-x-1"
+                        />
+                    </div>
+                    <h3 class="mt-4 font-medium">Releases</h3>
+                    <p class="mt-1 text-sm text-muted-foreground">
+                        Publish and manage app releases
+                    </p>
+                </Link>
+            </div>
         </div>
     </AppLayout>
 </template>

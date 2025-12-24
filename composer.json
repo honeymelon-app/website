@@ -9,11 +9,12 @@
         "control-plane",
         "application"
     ],
-    "license": "MIT",
+    "license": "proprietary",
     "require": {
-        "php": "^8.5",
+        "php": "^8.4",
         "graham-campbell/github": "^13.0",
         "inertiajs/inertia-laravel": "^2.0",
+        "jerome/fetch-php": "^3.3",
         "jerome/filterable": "^2.1",
         "laravel/fortify": "^1.33",
         "laravel/framework": "^12.0",

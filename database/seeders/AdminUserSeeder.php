@@ -8,6 +8,11 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * Seeds the admin user from configuration values.
+ *
+ * This seeder is idempotent and safe to run multiple times.
+ */
 class AdminUserSeeder extends Seeder
 {
     /**
@@ -15,12 +20,14 @@ class AdminUserSeeder extends Seeder
      */
     public function run(): void
     {
+        $email = config('app.admin_email', 'admin@honeymelon.app');
+        $password = config('app.admin_password', 'changeme');
+
         User::firstOrCreate(
-            ['email' => 'admin@honeymelon.app'],
+            ['email' => $email],
             [
                 'name' => 'Admin',
-                'email' => 'admin@honeymelon.app',
-                'password' => Hash::make(env('ADMIN_PASSWORD', 'changeme')),
+                'password' => Hash::make($password),
                 'email_verified_at' => now(),
             ]
         );

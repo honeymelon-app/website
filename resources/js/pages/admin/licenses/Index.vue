@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { DataTable, type Column } from '@/components/data-table';
+import {
+    DataTableBulkActions,
+    DataTablePagination,
+    DataTableRoot,
+    TableFilters,
+    type FilterConfig,
+} from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,14 +17,6 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -28,27 +26,41 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useDataTable } from '@/composables';
 import { useCopyToClipboard } from '@/composables/useCopyToClipboard';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { formatDate, formatDateTime, truncateId } from '@/lib/formatters';
+import { formatDateTime } from '@/lib/formatters';
 import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
 import licensesRoute from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
-import type { License, PaginatedResponse } from '@/types/resources';
+import type { FilterParams, PaginatedResponse } from '@/types/api';
+import type { License } from '@/types/resources';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import {
-    Check,
-    Copy,
-    Eye,
-    MoreHorizontal,
-    Plus,
-    ShieldOff,
-} from 'lucide-vue-next';
-import { computed, h, ref } from 'vue';
+import { Check, Copy, Download, Plus, ShieldOff } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
+import { columns } from './columns';
+
+interface Filters {
+    search?: string;
+    status?: string;
+}
+
+interface Sorting {
+    column: string | null;
+    direction: 'asc' | 'desc';
+}
+
+interface Pagination {
+    pageSize: number;
+    allowedPageSizes: number[];
+}
 
 interface Props {
     licenses: PaginatedResponse<License>;
+    filters: Filters;
+    sorting: Sorting;
+    pagination: Pagination;
     license_key?: string;
     license_email?: string;
     available_versions: number[];
@@ -102,205 +114,33 @@ const issueForm = useForm({
     max_major_version: defaultMaxMajorVersion,
 });
 
-// Column definitions
-const columns: Column<License>[] = [
+// Filter configuration for TableFilters component
+const filterConfig: FilterConfig[] = [
     {
-        key: 'id',
-        label: 'License ID',
-        headerClass: 'w-[120px]',
-        render: (row: License) => {
-            return h(
-                'div',
-                { class: 'font-mono text-sm text-muted-foreground' },
-                truncateId(row.id),
-            );
-        },
+        key: 'search',
+        label: 'Search...',
+        type: 'text',
+        placeholder: 'Search by ID...',
     },
     {
         key: 'status',
         label: 'Status',
-        headerClass: 'w-[100px]',
-        render: (row: License) => {
-            return h(
-                Badge,
-                { variant: getStatusVariant(row.status), class: 'capitalize' },
-                { default: () => row.status },
-            );
-        },
-    },
-    {
-        key: 'max_major_version',
-        label: 'Max Version',
-        headerClass: 'w-[120px]',
-        render: (row: License) => {
-            return h(
-                'div',
-                { class: 'text-sm text-muted-foreground' },
-                row.max_major_version === 999
-                    ? 'Lifetime'
-                    : `v${row.max_major_version}.x`,
-            );
-        },
-    },
-    {
-        key: 'issued_at',
-        label: 'Issued',
-        headerClass: 'w-[140px]',
-        render: (row: License) => {
-            if (!row.issued_at) {
-                return h(
-                    'div',
-                    { class: 'text-sm text-muted-foreground' },
-                    'Not issued',
-                );
-            }
-            return h('div', { class: 'text-sm' }, formatDate(row.issued_at));
-        },
-    },
-    {
-        key: 'activation_count',
-        label: 'Activations',
-        headerClass: 'w-[110px]',
-        render: (row: License) => {
-            return h(
-                Badge,
-                { variant: 'outline', class: 'font-mono text-xs' },
-                {
-                    default: () =>
-                        `${row.activation_count} device${row.activation_count === 1 ? '' : 's'}`,
-                },
-            );
-        },
-    },
-    {
-        key: 'device_id',
-        label: 'Device ID',
-        headerClass: 'w-[160px]',
-        render: (row: License) => {
-            if (!row.device_id) {
-                return h(
-                    'span',
-                    { class: 'text-muted-foreground text-sm' },
-                    'Not activated',
-                );
-            }
-
-            return h(
-                'div',
-                { class: 'font-mono text-xs text-muted-foreground truncate' },
-                truncateId(row.device_id),
-            );
-        },
-    },
-    {
-        key: 'created_at',
-        label: 'Created',
-        headerClass: 'w-[140px]',
-        render: (row: License) => {
-            return h(
-                'time',
-                {
-                    datetime: row.created_at,
-                    class: 'text-sm text-muted-foreground',
-                },
-                formatDate(row.created_at),
-            );
-        },
-    },
-    {
-        key: 'actions',
-        label: '',
-        headerClass: 'w-[50px]',
-        render: (row: License) => {
-            return h(
-                DropdownMenu,
-                {},
-                {
-                    default: () => [
-                        h(
-                            DropdownMenuTrigger,
-                            { asChild: true },
-                            {
-                                default: () =>
-                                    h(
-                                        Button,
-                                        {
-                                            variant: 'ghost',
-                                            size: 'icon',
-                                            class: 'h-8 w-8',
-                                        },
-                                        {
-                                            default: () => [
-                                                h(
-                                                    'span',
-                                                    { class: 'sr-only' },
-                                                    'Open menu',
-                                                ),
-                                                h(MoreHorizontal, {
-                                                    class: 'h-4 w-4',
-                                                }),
-                                            ],
-                                        },
-                                    ),
-                            },
-                        ),
-                        h(
-                            DropdownMenuContent,
-                            { align: 'end' },
-                            {
-                                default: () =>
-                                    [
-                                        h(
-                                            DropdownMenuLabel,
-                                            {},
-                                            { default: () => 'Actions' },
-                                        ),
-                                        h(
-                                            DropdownMenuItem,
-                                            {
-                                                onClick: () => viewLicense(row),
-                                            },
-                                            {
-                                                default: () => [
-                                                    h(Eye, {
-                                                        class: 'mr-2 h-4 w-4',
-                                                    }),
-                                                    'View Details',
-                                                ],
-                                            },
-                                        ),
-                                        row.status === 'active'
-                                            ? h(DropdownMenuSeparator)
-                                            : null,
-                                        row.status === 'active'
-                                            ? h(
-                                                  DropdownMenuItem,
-                                                  {
-                                                      onClick: () =>
-                                                          revokeLicense(row),
-                                                      class: 'text-destructive focus:text-destructive',
-                                                  },
-                                                  {
-                                                      default: () => [
-                                                          h(ShieldOff, {
-                                                              class: 'mr-2 h-4 w-4',
-                                                          }),
-                                                          'Revoke License',
-                                                      ],
-                                                  },
-                                              )
-                                            : null,
-                                    ].filter(Boolean),
-                            },
-                        ),
-                    ],
-                },
-            );
-        },
+        type: 'select',
+        options: [
+            { label: 'Active', value: 'active' },
+            { label: 'Revoked', value: 'revoked' },
+            { label: 'Pending', value: 'pending' },
+        ],
     },
 ];
 
-// Actions
+// Reactive filter state that syncs with props
+const filterState = computed<FilterParams>(() => ({
+    search: props.filters.search,
+    status: props.filters.status,
+}));
+
+// Actions for the columns
 const viewLicense = (license: License): void => {
     selectedLicense.value = license;
     isDetailsDialogOpen.value = true;
@@ -322,6 +162,109 @@ const revokeLicense = (license: License): void => {
     }
 };
 
+// Use the data table composable
+const {
+    table,
+    selectedRows,
+    selectedCount,
+    clearSelection,
+    handlePageChange,
+    handlePageSizeChange,
+    handleFilterUpdate,
+    handleFilterClear,
+    paginationMeta,
+    allowedPageSizes,
+} = useDataTable({
+    data: computed(() => props.licenses),
+    columns,
+    sorting: computed(() => props.sorting),
+    filters: computed(() => props.filters as Record<string, unknown>),
+    pagination: computed(() => props.pagination),
+    indexUrl: licensesRoute.index().url,
+    getRowId: (row) => row.id,
+    enableRowSelection: true,
+    meta: {
+        viewLicense,
+        revokeLicense,
+    },
+});
+
+// Bulk revoke action
+const bulkRevoke = () => {
+    const licenses = selectedRows.value;
+
+    if (licenses.length === 0) {
+        return;
+    }
+
+    const activeCount = licenses.filter((l) => l.status === 'active').length;
+
+    if (activeCount === 0) {
+        alert('No active licenses selected to revoke.');
+        return;
+    }
+
+    const confirmed = confirm(
+        `Revoke ${activeCount} active license(s)? This action cannot be undone.`,
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    licenses
+        .filter((l) => l.status === 'active')
+        .forEach((license) => {
+            router.post(
+                '/api/admin/licenses/revoke',
+                { license_id: license.id },
+                {
+                    preserveScroll: true,
+                },
+            );
+        });
+
+    clearSelection();
+};
+
+// Export selected licenses to CSV
+const exportSelected = () => {
+    const licenses = selectedRows.value;
+
+    const headers = [
+        'License ID',
+        'Status',
+        'Max Version',
+        'Activations',
+        'Device ID',
+        'Issued',
+        'Created',
+    ];
+    const csvContent = [
+        headers.join(','),
+        ...licenses.map((license) =>
+            [
+                license.id,
+                license.status,
+                license.max_major_version === 999
+                    ? 'Lifetime'
+                    : `v${license.max_major_version}.x`,
+                license.activation_count ?? 0,
+                license.device_id || '',
+                license.issued_at || 'Not issued',
+                license.created_at,
+            ].join(','),
+        ),
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `licenses-export-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+};
+
 const handleIssueLicense = (): void => {
     issueForm.post(licensesRoute.store().url, {
         preserveScroll: true,
@@ -329,14 +272,6 @@ const handleIssueLicense = (): void => {
             isIssueDialogOpen.value = false;
             issueForm.reset();
         },
-    });
-};
-
-const handlePageChange = (page: number): void => {
-    router.visit(licensesRoute.index().url, {
-        data: { page },
-        preserveState: true,
-        preserveScroll: true,
     });
 };
 </script>
@@ -349,176 +284,235 @@ const handlePageChange = (page: number): void => {
             class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
         >
             <div class="flex flex-col gap-6">
-                <div class="flex items-center justify-between">
-                    <div class="flex flex-col gap-2">
-                        <h3 class="text-2xl font-semibold tracking-tight">
+                <!-- Header + Filters -->
+                <div
+                    class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+                >
+                    <div class="flex flex-col gap-1">
+                        <h1 class="text-2xl font-semibold tracking-tight">
                             Licenses
-                        </h3>
+                        </h1>
                         <p class="text-sm text-muted-foreground">
                             Manage and issue product licenses for customers.
                         </p>
                     </div>
+                    <div class="flex items-center gap-3">
+                        <TableFilters
+                            :filters="filterConfig"
+                            :model-value="filterState"
+                            @update:model-value="handleFilterUpdate"
+                            @clear="handleFilterClear"
+                        />
+                        <Dialog v-model:open="isIssueDialogOpen">
+                            <DialogTrigger as-child>
+                                <Button>
+                                    <Plus class="mr-2 h-4 w-4" />
+                                    Issue License
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Issue New License</DialogTitle>
+                                    <DialogDescription>
+                                        Create a new license key for a customer.
+                                        The license key will be generated
+                                        automatically.
+                                    </DialogDescription>
+                                </DialogHeader>
 
-                    <Dialog v-model:open="isIssueDialogOpen">
-                        <DialogTrigger as-child>
-                            <Button>
-                                <Plus class="mr-2 h-4 w-4" />
-                                Issue License
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                            <DialogHeader>
-                                <DialogTitle>Issue New License</DialogTitle>
-                                <DialogDescription>
-                                    Create a new license key for a customer. The
-                                    license key will be generated automatically.
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <form
-                                @submit.prevent="handleIssueLicense"
-                                class="space-y-4"
-                            >
-                                <div class="space-y-2">
-                                    <Label for="email">Customer Email</Label>
-                                    <Input
-                                        id="email"
-                                        v-model="issueForm.email"
-                                        type="email"
-                                        placeholder="customer@example.com"
-                                        required
-                                    />
-                                    <p
-                                        v-if="issueForm.errors.email"
-                                        class="text-sm text-destructive"
-                                    >
-                                        {{ issueForm.errors.email }}
-                                    </p>
-                                </div>
-
-                                <div class="space-y-2">
-                                    <Label for="max_major_version"
-                                        >Max Major Version</Label
-                                    >
-                                    <Select
-                                        v-model="issueForm.max_major_version"
-                                    >
-                                        <SelectTrigger id="max_major_version">
-                                            <SelectValue
-                                                placeholder="Select version"
-                                            />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem
-                                                v-for="option in versionOptions"
-                                                :key="option.value"
-                                                :value="option.value"
-                                            >
-                                                {{ option.label }}
-                                            </SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <p
-                                        v-if="
-                                            issueForm.errors.max_major_version
-                                        "
-                                        class="text-sm text-destructive"
-                                    >
-                                        {{ issueForm.errors.max_major_version }}
-                                    </p>
-                                </div>
-
-                                <DialogFooter>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        @click="isIssueDialogOpen = false"
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        type="submit"
-                                        :disabled="issueForm.processing"
-                                    >
-                                        {{
-                                            issueForm.processing
-                                                ? 'Issuing...'
-                                                : 'Issue License'
-                                        }}
-                                    </Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
-
-                    <!-- Success Modal -->
-                    <Dialog v-model:open="isSuccessDialogOpen">
-                        <DialogContent class="sm:max-w-2xl">
-                            <DialogHeader>
-                                <DialogTitle
-                                    >License Issued Successfully</DialogTitle
+                                <form
+                                    @submit.prevent="handleIssueLicense"
+                                    class="space-y-4"
                                 >
-                                <DialogDescription>
-                                    The license has been generated and is ready
-                                    to use. Make sure to copy it now as it won't
-                                    be shown again.
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <div class="space-y-4">
-                                <div class="space-y-2">
-                                    <Label>Customer Email</Label>
-                                    <Input
-                                        :value="generatedLicenseEmail"
-                                        readonly
-                                        class="font-mono text-sm"
-                                    />
-                                </div>
-
-                                <div class="space-y-2">
-                                    <Label>License Key</Label>
-                                    <div class="flex gap-2">
+                                    <div class="space-y-2">
+                                        <Label for="email"
+                                            >Customer Email</Label
+                                        >
                                         <Input
-                                            :value="generatedLicenseKey"
-                                            readonly
-                                            class="flex-1 font-mono text-xs"
+                                            id="email"
+                                            v-model="issueForm.email"
+                                            type="email"
+                                            placeholder="customer@example.com"
+                                            required
                                         />
+                                        <p
+                                            v-if="issueForm.errors.email"
+                                            class="text-sm text-destructive"
+                                        >
+                                            {{ issueForm.errors.email }}
+                                        </p>
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <Label for="max_major_version"
+                                            >Max Major Version</Label
+                                        >
+                                        <Select
+                                            v-model="issueForm.max_major_version
+                                                "
+                                        >
+                                            <SelectTrigger
+                                                id="max_major_version"
+                                            >
+                                                <SelectValue
+                                                    placeholder="Select version"
+                                                />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem
+                                                    v-for="option in versionOptions"
+                                                    :key="option.value"
+                                                    :value="option.value"
+                                                >
+                                                    {{ option.label }}
+                                                </SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <p
+                                            v-if="
+                                                issueForm.errors
+                                                    .max_major_version
+                                            "
+                                            class="text-sm text-destructive"
+                                        >
+                                            {{
+                                                issueForm.errors
+                                                    .max_major_version
+                                            }}
+                                        </p>
+                                    </div>
+
+                                    <DialogFooter>
                                         <Button
                                             type="button"
                                             variant="outline"
-                                            size="icon"
-                                            @click="copyToClipboard"
+                                            @click="isIssueDialogOpen = false"
                                         >
-                                            <Check
-                                                v-if="isCopied"
-                                                class="h-4 w-4"
-                                            />
-                                            <Copy v-else class="h-4 w-4" />
+                                            Cancel
                                         </Button>
-                                    </div>
-                                    <p class="text-xs text-muted-foreground">
-                                        This key will only be shown once. Make
-                                        sure to copy and save it securely.
-                                    </p>
-                                </div>
-                            </div>
+                                        <Button
+                                            type="submit"
+                                            :disabled="issueForm.processing"
+                                        >
+                                            {{
+                                                issueForm.processing
+                                                    ? 'Issuing...'
+                                                    : 'Issue License'
+                                            }}
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
 
-                            <DialogFooter>
-                                <Button @click="isSuccessDialogOpen = false">
-                                    Close
-                                </Button>
-                            </DialogFooter>
-                        </DialogContent>
-                    </Dialog>
+                        <!-- Success Modal -->
+                        <Dialog v-model:open="isSuccessDialogOpen">
+                            <DialogContent class="sm:max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle
+                                        >License Issued
+                                        Successfully</DialogTitle
+                                    >
+                                    <DialogDescription>
+                                        The license has been generated and is
+                                        ready to use. Make sure to copy it now
+                                        as it won't be shown again.
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <div class="space-y-4">
+                                    <div class="space-y-2">
+                                        <Label>Customer Email</Label>
+                                        <Input
+                                            :value="generatedLicenseEmail"
+                                            readonly
+                                            class="font-mono text-sm"
+                                        />
+                                    </div>
+
+                                    <div class="space-y-2">
+                                        <Label>License Key</Label>
+                                        <div class="flex gap-2">
+                                            <Input
+                                                :value="generatedLicenseKey"
+                                                readonly
+                                                class="flex-1 font-mono text-xs"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="icon"
+                                                @click="copyToClipboard"
+                                            >
+                                                <Check
+                                                    v-if="isCopied"
+                                                    class="h-4 w-4"
+                                                />
+                                                <Copy v-else class="h-4 w-4" />
+                                            </Button>
+                                        </div>
+                                        <p
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            This key will only be shown once.
+                                            Make sure to copy and save it
+                                            securely.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <DialogFooter>
+                                    <Button @click="isSuccessDialogOpen = false"
+                                        >Close</Button
+                                    >
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
 
-                <DataTable
-                    :columns="columns"
-                    :data="props.licenses.data"
-                    :meta="props.licenses.meta"
-                    empty-message="No licenses found. Issue your first license to get started."
-                    @page-change="handlePageChange"
-                />
+                <!-- Bulk Actions Toolbar -->
+                <DataTableBulkActions
+                    :selected-count="selectedCount"
+                    item-label="license"
+                    @clear="clearSelection"
+                >
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        class="h-8"
+                        @click="exportSelected"
+                    >
+                        <Download class="mr-1.5 h-4 w-4" />
+                        Export CSV
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="sm"
+                        class="h-8"
+                        @click="bulkRevoke"
+                    >
+                        <ShieldOff class="mr-1.5 h-4 w-4" />
+                        Revoke Selected
+                    </Button>
+                </DataTableBulkActions>
+
+                <!-- Table -->
+                <div class="space-y-4">
+                    <DataTableRoot
+                        :table="table"
+                        :columns="columns"
+                        empty-message="No licenses found. Issue your first license to get started."
+                    />
+
+                    <!-- Pagination -->
+                    <DataTablePagination
+                        :meta="paginationMeta"
+                        :allowed-page-sizes="allowedPageSizes"
+                        @page-change="handlePageChange"
+                        @page-size-change="handlePageSizeChange"
+                    />
+                </div>
             </div>
         </div>
 
@@ -527,9 +521,10 @@ const handlePageChange = (page: number): void => {
             <DialogContent class="max-w-2xl">
                 <DialogHeader>
                     <DialogTitle>License Details</DialogTitle>
-                    <DialogDescription>
-                        Detailed information about the selected license.
-                    </DialogDescription>
+                    <DialogDescription
+                        >Detailed information about the selected
+                        license.</DialogDescription
+                    >
                 </DialogHeader>
 
                 <div v-if="selectedLicense" class="grid gap-6 py-4">
@@ -554,9 +549,8 @@ const handlePageChange = (page: number): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="
-                                    getStatusVariant(selectedLicense.status)
-                                "
+                                :variant="getStatusVariant(selectedLicense.status)
+                                    "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -615,7 +609,7 @@ const handlePageChange = (page: number): void => {
                             <span v-if="selectedLicense.issued_at">
                                 {{ formatDateTime(selectedLicense.issued_at) }}
                             </span>
-                            <span v-else> Not issued yet </span>
+                            <span v-else>Not issued yet</span>
                         </div>
                     </div>
 
@@ -638,7 +632,7 @@ const handlePageChange = (page: number): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                                isDetailsDialogOpen = false;
+                            isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />

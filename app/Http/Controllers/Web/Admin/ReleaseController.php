@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Web\Admin;
 
+use App\Filters\ReleaseFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ReleaseResource;
 use App\Models\Release;
 use App\Services\GithubService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
@@ -16,16 +18,39 @@ use Inertia\Response;
 
 class ReleaseController extends Controller
 {
+    private const DEFAULT_PAGE_SIZE = 15;
+
+    private const ALLOWED_PAGE_SIZES = [10, 15, 25, 50, 100];
+
+    private const SORTABLE_COLUMNS = [
+        'version',
+        'tag',
+        'channel',
+        'published_at',
+        'created_at',
+    ];
+
     /**
      * Display a listing of releases.
      */
-    public function index(): Response
+    public function index(Request $request, ReleaseFilter $filter): Response
     {
-        $releases = Release::query()
+        $pageSize = $this->getValidatedPageSize($request);
+        $sortColumn = $this->getValidatedSortColumn($request);
+        $sortDirection = $this->getValidatedSortDirection($request);
+
+        $query = Release::query()
             ->with('user')
             ->withCount('artifacts')
-            ->latest('published_at')
-            ->paginate(20);
+            ->filter($filter);
+
+        if ($sortColumn) {
+            $query->orderBy($sortColumn, $sortDirection);
+        } else {
+            $query->latest('published_at');
+        }
+
+        $releases = $query->paginate($pageSize)->withQueryString();
 
         return Inertia::render('admin/releases/Index', [
             'releases' => [
@@ -44,6 +69,21 @@ class ReleaseController extends Controller
                     'prev' => $releases->previousPageUrl(),
                     'next' => $releases->nextPageUrl(),
                 ],
+            ],
+            'filters' => $request->only([
+                'version',
+                'tag',
+                'channel',
+                'major',
+                'search',
+            ]),
+            'sorting' => [
+                'column' => $sortColumn,
+                'direction' => $sortDirection,
+            ],
+            'pagination' => [
+                'pageSize' => $pageSize,
+                'allowedPageSizes' => self::ALLOWED_PAGE_SIZES,
             ],
         ]);
     }
@@ -107,5 +147,28 @@ class ReleaseController extends Controller
                 [$release]
             );
         }
+    }
+
+    private function getValidatedPageSize(Request $request): int
+    {
+        $pageSize = (int) $request->input('per_page', self::DEFAULT_PAGE_SIZE);
+
+        return in_array($pageSize, self::ALLOWED_PAGE_SIZES, true)
+            ? $pageSize
+            : self::DEFAULT_PAGE_SIZE;
+    }
+
+    private function getValidatedSortColumn(Request $request): ?string
+    {
+        $column = $request->input('sort');
+
+        return in_array($column, self::SORTABLE_COLUMNS, true) ? $column : null;
+    }
+
+    private function getValidatedSortDirection(Request $request): string
+    {
+        $direction = $request->input('direction', 'desc');
+
+        return in_array($direction, ['asc', 'desc'], true) ? $direction : 'desc';
     }
 }
