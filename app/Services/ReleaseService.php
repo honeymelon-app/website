@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Models\Artifact;
+use App\Models\Product;
 use App\Models\Release;
 use Illuminate\Support\Facades\Log;
 
@@ -20,6 +21,12 @@ class ReleaseService
     {
         Log::info('Recording release', ['version' => $data['version'], 'channel' => $data['channel']]);
 
+        $product = Product::query()->where('is_active', true)->first();
+
+        if (! $product) {
+            throw new \RuntimeException('No active product found to associate with release');
+        }
+
         $release = Release::updateOrCreate(
             [
                 'version' => $data['version'],
@@ -28,6 +35,7 @@ class ReleaseService
                 'commit_hash' => $data['commit_hash'],
             ],
             [
+                'product_id' => $product->id,
                 'notes' => $data['notes'],
                 'published_at' => $data['published_at'],
                 'major' => $data['major'],

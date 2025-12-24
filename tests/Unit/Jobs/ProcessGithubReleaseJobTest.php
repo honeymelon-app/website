@@ -6,6 +6,7 @@ namespace Tests\Unit\Jobs;
 
 use App\Enums\ReleaseChannel;
 use App\Jobs\ProcessGithubReleaseJob;
+use App\Models\Product;
 use App\Models\User;
 use App\Services\GithubService;
 use App\Services\ReleaseService;
@@ -19,6 +20,7 @@ class ProcessGithubReleaseJobTest extends TestCase
     public function test_attaches_uploaded_artifacts_from_payload(): void
     {
         $user = User::factory()->create();
+        Product::factory()->create();
 
         $payload = [
             'notes' => 'Release with uploaded artifacts',

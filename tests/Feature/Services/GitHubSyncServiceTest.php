@@ -7,6 +7,7 @@ namespace Tests\Feature\Services;
 use App\Contracts\GitRepository;
 use App\Enums\ReleaseChannel;
 use App\Models\Artifact;
+use App\Models\Product;
 use App\Models\Release;
 use App\Services\GitHubSyncService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -17,6 +18,12 @@ use Tests\TestCase;
 class GitHubSyncServiceTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Product::factory()->create();
+    }
 
     protected function tearDown(): void
     {
