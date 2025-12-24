@@ -4,7 +4,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import type { DefineComponent } from 'vue';
-import { createApp, h } from 'vue';
+import { createSSRApp, h } from 'vue';
 import { initializeTheme } from './composables/useAppearance';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
@@ -17,7 +17,7 @@ createInertiaApp({
             import.meta.glob<DefineComponent>('./pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        createApp({
+        createSSRApp({
             render: () => h(App, props, () => h(Toaster, { richColors: true })),
         })
             .use(plugin)

@@ -3,12 +3,36 @@ import ContentSection from '@/components/marketing/ContentSection.vue';
 import Card from '@/components/ui/card/Card.vue';
 import CardContent from '@/components/ui/card/CardContent.vue';
 import Separator from '@/components/ui/separator/Separator.vue';
+import { useSeoMeta } from '@/composables';
 import MarketingLayout from '@/layouts/MarketingLayout.vue';
 import { Head } from '@inertiajs/vue3';
+
+const { headTags } = useSeoMeta({
+    title: 'Privacy Policy - Honeymelon',
+    description:
+        'Privacy policy for Honeymelon macOS media converter. We collect zero telemetry or usage data. Your files never leave your device.',
+    canonical: '/privacy',
+    ogType: 'article',
+});
 </script>
 
 <template>
-    <Head title="Privacy Policy - Honeymelon" />
+    <Head>
+        <title>{{ headTags.title }}</title>
+        <meta name="description" :content="headTags.description" />
+        <link rel="canonical" :href="headTags.canonical" />
+        <meta name="robots" :content="headTags.robots" />
+        <meta property="og:title" :content="headTags.ogTitle" />
+        <meta property="og:description" :content="headTags.ogDescription" />
+        <meta property="og:image" :content="headTags.ogImage" />
+        <meta property="og:url" :content="headTags.ogUrl" />
+        <meta property="og:type" :content="headTags.ogType" />
+        <meta property="og:site_name" :content="headTags.ogSiteName" />
+        <meta name="twitter:card" :content="headTags.twitterCard" />
+        <meta name="twitter:title" :content="headTags.twitterTitle" />
+        <meta name="twitter:description" :content="headTags.twitterDescription" />
+        <meta name="twitter:image" :content="headTags.twitterImage" />
+    </Head>
 
     <MarketingLayout>
         <ContentSection

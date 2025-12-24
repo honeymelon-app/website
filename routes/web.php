@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ReleaseChannel;
+use App\Http\Controllers\SeoController;
 use App\Http\Controllers\Web\Admin\ArtifactController;
 use App\Http\Controllers\Web\Admin\DashboardController;
 use App\Http\Controllers\Web\Admin\LicenseController;
@@ -17,6 +18,14 @@ use App\Models\Artifact;
 use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+/*
+|--------------------------------------------------------------------------
+| SEO Routes (robots.txt and sitemap.xml)
+|--------------------------------------------------------------------------
+*/
+Route::get('/robots.txt', [SeoController::class, 'robots'])->name('robots');
+Route::get('/sitemap.xml', [SeoController::class, 'sitemap'])->name('sitemap');
 
 /*
 |--------------------------------------------------------------------------
@@ -46,9 +55,8 @@ Route::get('/', function () {
 
 Route::get('/download', DownloadController::class)->name('download');
 
-Route::get('/pricing', function () {
-    return Inertia::render('Pricing');
-})->name('pricing');
+// SEO-friendly redirects to landing page sections (301 for search engines)
+Route::redirect('/pricing', '/#pricing', 301)->name('pricing');
 
 Route::get('/privacy', function () {
     return Inertia::render('Privacy');

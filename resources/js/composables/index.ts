@@ -5,3 +5,11 @@ export type {
     UseDataTableOptions,
     UseDataTableReturn,
 } from './useDataTable';
+
+export {
+    useSeoMeta,
+    generateSoftwareApplicationSchema,
+    generateOrganizationSchema,
+    generateFaqSchema,
+} from './useSeoMeta';
+export type { SeoMeta, UseSeoMetaOptions } from './useSeoMeta';

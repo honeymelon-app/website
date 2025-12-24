@@ -44,7 +44,7 @@ import { ArrowRight, ChevronRight } from 'lucide-vue-next';
                     >
                         <Button as-child size="lg" class="h-12 px-8 text-base">
                             <a href="#download">
-                                Download for macOS
+                                Download Free
                                 <ArrowRight class="ml-2 h-4 w-4" />
                             </a>
                         </Button>
@@ -61,10 +61,10 @@ import { ArrowRight, ChevronRight } from 'lucide-vue-next';
                         </Button>
                     </div>
 
-                    <!-- Trust line -->
+                    <!-- Trust line with SEO-truthful messaging -->
                     <p class="mt-6 text-sm text-muted-foreground/70">
-                        No subscription. No account required. Files stay on your
-                        Mac.
+                        Free download. Paid license required to use. Files stay
+                        on your Mac.
                     </p>
                 </div>
             </AnimatedSection>

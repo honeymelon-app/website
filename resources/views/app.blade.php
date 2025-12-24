@@ -4,6 +4,11 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        {{-- Google Search Console verification --}}
+        @if(config('seo.google_site_verification'))
+        <meta name="google-site-verification" content="{{ config('seo.google_site_verification') }}">
+        @endif
+
         {{-- Inline script to detect system dark mode preference and apply it immediately --}}
         <script>
             (function() {
@@ -38,6 +43,22 @@
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
+
+        {{-- Plausible Analytics (if configured) --}}
+        @if(config('seo.analytics.plausible_domain'))
+        <script defer data-domain="{{ config('seo.analytics.plausible_domain') }}" src="https://plausible.io/js/script.js"></script>
+        @endif
+
+        {{-- Google Analytics 4 (if configured) --}}
+        @if(config('seo.analytics.ga4_id'))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('seo.analytics.ga4_id') }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ config('seo.analytics.ga4_id') }}');
+        </script>
+        @endif
 
         @vite(['resources/js/app.ts', "resources/js/pages/{$page['component']}.vue"])
         @inertiaHead
