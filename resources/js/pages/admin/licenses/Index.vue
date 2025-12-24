@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ConfirmDialog } from '@/components/admin';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -86,6 +87,15 @@ const isIssueDialogOpen = ref(false);
 const isDetailsDialogOpen = ref(false);
 const selectedLicense = ref<License | null>(null);
 
+// Revoke dialog state
+const isRevokeDialogOpen = ref(false);
+const licenseToRevoke = ref<License | null>(null);
+const isRevoking = ref(false);
+
+// Bulk revoke dialog state
+const isBulkRevokeDialogOpen = ref(false);
+const isBulkRevoking = ref(false);
+
 // Success modal state
 const isSuccessDialogOpen = ref(!!props.license_key);
 const generatedLicenseKey = ref(props.license_key || '');
@@ -147,19 +157,26 @@ const viewLicense = (license: License): void => {
 };
 
 const revokeLicense = (license: License): void => {
-    if (
-        confirm(
-            `Are you sure you want to revoke license ${license.id.substring(0, 8)}?`,
-        )
-    ) {
-        router.post(
-            '/api/admin/licenses/revoke',
-            { license_id: license.id },
-            {
-                preserveScroll: true,
+    licenseToRevoke.value = license;
+    isRevokeDialogOpen.value = true;
+};
+
+const confirmRevokeLicense = (): void => {
+    if (!licenseToRevoke.value) return;
+
+    isRevoking.value = true;
+    router.post(
+        '/api/admin/licenses/revoke',
+        { license_id: licenseToRevoke.value.id },
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                isRevoking.value = false;
+                isRevokeDialogOpen.value = false;
+                licenseToRevoke.value = null;
             },
-        );
-    }
+        },
+    );
 };
 
 // Use the data table composable
@@ -190,41 +207,42 @@ const {
 });
 
 // Bulk revoke action
+const activeSelectedCount = computed(
+    () => selectedRows.value.filter((l) => l.status === 'active').length,
+);
+
 const bulkRevoke = () => {
-    const licenses = selectedRows.value;
-
-    if (licenses.length === 0) {
+    if (activeSelectedCount.value === 0) {
         return;
     }
+    isBulkRevokeDialogOpen.value = true;
+};
 
-    const activeCount = licenses.filter((l) => l.status === 'active').length;
+const confirmBulkRevoke = () => {
+    const licenses = selectedRows.value.filter((l) => l.status === 'active');
 
-    if (activeCount === 0) {
-        alert('No active licenses selected to revoke.');
-        return;
-    }
+    if (licenses.length === 0) return;
 
-    const confirmed = confirm(
-        `Revoke ${activeCount} active license(s)? This action cannot be undone.`,
-    );
+    isBulkRevoking.value = true;
 
-    if (!confirmed) {
-        return;
-    }
-
-    licenses
-        .filter((l) => l.status === 'active')
-        .forEach((license) => {
-            router.post(
-                '/api/admin/licenses/revoke',
-                { license_id: license.id },
-                {
-                    preserveScroll: true,
+    let completed = 0;
+    licenses.forEach((license) => {
+        router.post(
+            '/api/admin/licenses/revoke',
+            { license_id: license.id },
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    completed++;
+                    if (completed === licenses.length) {
+                        isBulkRevoking.value = false;
+                        isBulkRevokeDialogOpen.value = false;
+                        clearSelection();
+                    }
                 },
-            );
-        });
-
-    clearSelection();
+            },
+        );
+    });
 };
 
 // Export selected licenses to CSV
@@ -491,10 +509,11 @@ const handleIssueLicense = (): void => {
                         variant="destructive"
                         size="sm"
                         class="h-8"
+                        :disabled="activeSelectedCount === 0"
                         @click="bulkRevoke"
                     >
                         <ShieldOff class="mr-1.5 h-4 w-4" />
-                        Revoke Selected
+                        Revoke Selected ({{ activeSelectedCount }})
                     </Button>
                 </DataTableBulkActions>
 
@@ -644,5 +663,47 @@ const handleIssueLicense = (): void => {
                 </div>
             </DialogContent>
         </Dialog>
+
+        <!-- Single Revoke Confirmation Dialog -->
+        <ConfirmDialog
+            v-model:open="isRevokeDialogOpen"
+            title="Revoke License"
+            confirm-label="Revoke License"
+            :loading="isRevoking"
+            :show-trigger="false"
+            @confirm="confirmRevokeLicense"
+        >
+            <p class="mb-4">
+                Are you sure you want to revoke license
+                <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                    {{ licenseToRevoke?.id.substring(0, 8) }}... </code
+                >?
+            </p>
+            <ul class="list-disc space-y-1 pl-6 text-sm text-muted-foreground">
+                <li>The license will no longer be valid for activation</li>
+                <li>Already activated installations will continue to work</li>
+                <li>This action cannot be undone</li>
+            </ul>
+        </ConfirmDialog>
+
+        <!-- Bulk Revoke Confirmation Dialog -->
+        <ConfirmDialog
+            v-model:open="isBulkRevokeDialogOpen"
+            title="Revoke Selected Licenses"
+            confirm-label="Revoke All"
+            :loading="isBulkRevoking"
+            :show-trigger="false"
+            @confirm="confirmBulkRevoke"
+        >
+            <p class="mb-4">
+                Are you sure you want to revoke
+                <strong>{{ activeSelectedCount }}</strong> active license(s)?
+            </p>
+            <ul class="list-disc space-y-1 pl-6 text-sm text-muted-foreground">
+                <li>These licenses will no longer be valid for activation</li>
+                <li>Already activated installations will continue to work</li>
+                <li>This action cannot be undone</li>
+            </ul>
+        </ConfirmDialog>
     </AppLayout>
 </template>

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Web\Settings\PasswordController;
+use App\Http\Controllers\Web\Settings\ProductController;
 use App\Http\Controllers\Web\Settings\ProfileController;
 use App\Http\Controllers\Web\Settings\TwoFactorAuthenticationController;
 use Illuminate\Support\Facades\Route;
@@ -22,4 +23,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('settings/two-factor', [TwoFactorAuthenticationController::class, 'show'])
         ->name('two-factor.show');
+
+    Route::get('settings/product', [ProductController::class, 'edit'])->name('product.edit');
+    Route::put('settings/product', [ProductController::class, 'update'])->name('product.update');
+    Route::post('settings/product/sync', [ProductController::class, 'sync'])->name('product.sync');
+    Route::post('settings/product/preview', [ProductController::class, 'preview'])->name('product.preview');
 });

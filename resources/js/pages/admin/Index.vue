@@ -58,9 +58,9 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
-    licenses_by_status: Array<{ status: string; count: number; }>;
-    artifacts_by_platform: Array<{ platform: string; count: number; }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
+    licenses_by_status: Array<{ status: string; count: number }>;
+    artifacts_by_platform: Array<{ platform: string; count: number }>;
 }
 
 interface VisitorAnalytics {
@@ -73,10 +73,10 @@ interface VisitorAnalytics {
         visits: number;
         unique_visitors: number;
     }>;
-    visits_by_page: Array<{ page: string; visits: number; }>;
-    visits_by_device: Array<{ device: string; count: number; }>;
-    visits_by_browser: Array<{ browser: string; count: number; }>;
-    top_referrers: Array<{ referrer: string; url: string; count: number; }>;
+    visits_by_page: Array<{ page: string; visits: number }>;
+    visits_by_device: Array<{ device: string; count: number }>;
+    visits_by_browser: Array<{ browser: string; count: number }>;
+    top_referrers: Array<{ referrer: string; url: string; count: number }>;
 }
 
 interface Props {
@@ -232,10 +232,11 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="metrics.revenue_change >= 0
+                                :class="
+                                    metrics.revenue_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                    "
+                                "
                             >
                                 <TrendingUp
                                     v-if="metrics.revenue_change >= 0"
@@ -271,10 +272,11 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="metrics.orders_change >= 0
+                                :class="
+                                    metrics.orders_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                    "
+                                "
                             >
                                 <TrendingUp
                                     v-if="metrics.orders_change >= 0"
@@ -308,10 +310,11 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="metrics.licenses_change >= 0
+                                :class="
+                                    metrics.licenses_change >= 0
                                         ? 'text-emerald-600 dark:text-emerald-400'
                                         : 'text-red-600 dark:text-red-400'
-                                    "
+                                "
                             >
                                 <TrendingUp
                                     v-if="metrics.licenses_change >= 0"
@@ -377,8 +380,9 @@ function getDeviceIcon(device: string) {
                             index="date"
                             :categories="['Revenue']"
                             :colors="['var(--color-honey-500)']"
-                            :y-formatter="(value: number) => formatCurrency(value * 100)
-                                "
+                            :y-formatter="
+                                (value: number) => formatCurrency(value * 100)
+                            "
                             :show-legend="false"
                             class="h-[280px]"
                         />
@@ -448,10 +452,11 @@ function getDeviceIcon(device: string) {
                                     </p>
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="getStatusVariant(
-                                            order.license_status,
-                                        )
-                                            "
+                                        :variant="
+                                            getStatusVariant(
+                                                order.license_status,
+                                            )
+                                        "
                                         class="mt-1"
                                     >
                                         {{ order.license_status }}
@@ -482,10 +487,11 @@ function getDeviceIcon(device: string) {
                                 </div>
                                 <div
                                     class="flex items-center gap-1 text-sm"
-                                    :class="visitor_analytics.visits_change >= 0
+                                    :class="
+                                        visitor_analytics.visits_change >= 0
                                             ? 'text-emerald-600 dark:text-emerald-400'
                                             : 'text-red-600 dark:text-red-400'
-                                        "
+                                    "
                                 >
                                     <TrendingUp
                                         v-if="
@@ -585,9 +591,9 @@ function getDeviceIcon(device: string) {
                                         visitor_analytics.visits_by_page
                                             .length > 0
                                             ? formatPageName(
-                                                visitor_analytics
-                                                    .visits_by_page[0].page,
-                                            )
+                                                  visitor_analytics
+                                                      .visits_by_page[0].page,
+                                              )
                                             : '-'
                                     }}
                                 </p>
@@ -620,8 +626,9 @@ function getDeviceIcon(device: string) {
                                     'var(--color-sky-500)',
                                     'var(--color-violet-500)',
                                 ]"
-                                :y-formatter="(value: number) => value.toLocaleString()
-                                    "
+                                :y-formatter="
+                                    (value: number) => value.toLocaleString()
+                                "
                                 class="h-[280px]"
                             />
                             <div

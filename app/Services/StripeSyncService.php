@@ -184,4 +184,125 @@ final class StripeSyncService
 
         return $result;
     }
+
+    /**
+     * Push local product changes to Stripe.
+     *
+     * @return array{product_updated: bool, price_created: bool, new_price_id: ?string}
+     */
+    public function pushToStripe(Product $product): array
+    {
+        $result = [
+            'product_updated' => false,
+            'price_created' => false,
+            'new_price_id' => null,
+        ];
+
+        if (! $product->stripe_product_id) {
+            Log::debug('Cannot push to Stripe: no Stripe product ID', ['product_id' => $product->id]);
+
+            return $result;
+        }
+
+        $this->updateStripeProduct($product);
+        $result['product_updated'] = true;
+
+        $priceResult = $this->syncPriceToStripe($product);
+        if ($priceResult) {
+            $result['price_created'] = true;
+            $result['new_price_id'] = $priceResult;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Update a product in Stripe with local values.
+     */
+    protected function updateStripeProduct(Product $product): void
+    {
+        try {
+            StripeProduct::update($product->stripe_product_id, [
+                'name' => $product->name,
+                'description' => $product->description ?? '',
+            ]);
+
+            Log::info('Updated Stripe product', [
+                'product_id' => $product->id,
+                'stripe_product_id' => $product->stripe_product_id,
+            ]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to update Stripe product', [
+                'product_id' => $product->id,
+                'stripe_product_id' => $product->stripe_product_id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Sync price to Stripe. Creates a new price if amount changed (Stripe prices are immutable).
+     *
+     * @return string|null The new price ID if created, null otherwise
+     */
+    protected function syncPriceToStripe(Product $product): ?string
+    {
+        if (! $product->stripe_price_id) {
+            return $this->createStripePrice($product);
+        }
+
+        $currentPrice = $this->fetchStripePrice($product->stripe_price_id);
+
+        if (! $currentPrice) {
+            return $this->createStripePrice($product);
+        }
+
+        if ($currentPrice['amount'] === $product->price_cents &&
+            $currentPrice['currency'] === $product->currency) {
+            Log::debug('Price unchanged, skipping Stripe price update', [
+                'product_id' => $product->id,
+            ]);
+
+            return null;
+        }
+
+        return $this->createStripePrice($product);
+    }
+
+    /**
+     * Create a new price in Stripe and set it as the default.
+     */
+    protected function createStripePrice(Product $product): ?string
+    {
+        try {
+            $price = Price::create([
+                'product' => $product->stripe_product_id,
+                'unit_amount' => $product->price_cents,
+                'currency' => $product->currency,
+            ]);
+
+            StripeProduct::update($product->stripe_product_id, [
+                'default_price' => $price->id,
+            ]);
+
+            $product->update(['stripe_price_id' => $price->id]);
+
+            Log::info('Created new Stripe price', [
+                'product_id' => $product->id,
+                'stripe_price_id' => $price->id,
+                'amount' => $product->price_cents,
+            ]);
+
+            return $price->id;
+        } catch (\Throwable $e) {
+            Log::error('Failed to create Stripe price', [
+                'product_id' => $product->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
 }
