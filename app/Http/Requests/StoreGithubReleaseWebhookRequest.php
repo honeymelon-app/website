@@ -40,8 +40,8 @@ class StoreGithubReleaseWebhookRequest extends FormRequest
             'artifacts.*.url' => ['required_with:artifacts', 'string', 'max:2048'],
             'artifacts.*.path' => ['nullable', 'string', 'max:2048'],
             'artifacts.*.size' => ['nullable', 'integer', 'min:0'],
-            'artifacts.*.sha256' => ValidationRules::optionalString(),
-            'artifacts.*.signature' => ValidationRules::optionalString(),
+            'artifacts.*.sha256' => ['nullable', 'string', 'max:255'],
+            'artifacts.*.signature' => ['nullable', 'string', 'max:512'],
             'artifacts.*.notarized' => ['nullable', 'boolean'],
         ];
     }
