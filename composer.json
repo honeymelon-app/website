@@ -14,7 +14,7 @@
         "php": "^8.4",
         "graham-campbell/github": "^13.0",
         "inertiajs/inertia-laravel": "^2.0",
-        "jerome/fetch-php": "^3.3",
+        "jerome/fetch-php": "^3.4",
         "jerome/filterable": "^2.1",
         "laravel/fortify": "^1.33",
         "laravel/framework": "^12.0",
