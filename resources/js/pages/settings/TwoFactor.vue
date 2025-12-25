@@ -11,6 +11,7 @@ import { show } from '@/routes/two-factor';
 import type { AppPageProps, BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 interface Props {
     qrCode?: string;
@@ -50,6 +51,10 @@ const enableTwoFactorAuthentication = (): void => {
             preserveScroll: true,
             onSuccess: () => {
                 confirming.value = true;
+                toast.success('Two-factor enabled. Confirm to finish.');
+            },
+            onError: () => {
+                toast.error('Failed to enable two-factor authentication.');
             },
         },
     );
@@ -62,6 +67,10 @@ const confirmTwoFactorAuthentication = (): void => {
         onSuccess: () => {
             confirming.value = false;
             showingRecoveryCodes.value = true;
+            toast.success('Two-factor authentication enabled.');
+        },
+        onError: () => {
+            toast.error('Please check the code and try again.');
         },
     });
 };
@@ -74,6 +83,10 @@ const regenerateRecoveryCodes = (): void => {
             preserveScroll: true,
             onSuccess: () => {
                 showingRecoveryCodes.value = true;
+                toast.success('Recovery codes regenerated.');
+            },
+            onError: () => {
+                toast.error('Failed to regenerate recovery codes.');
             },
         },
     );
@@ -87,6 +100,10 @@ const showRecoveryCodes = (): void => {
             preserveScroll: true,
             onSuccess: () => {
                 showingRecoveryCodes.value = true;
+                toast.success('Recovery codes loaded.');
+            },
+            onError: () => {
+                toast.error('Failed to load recovery codes.');
             },
         },
     );
@@ -95,6 +112,15 @@ const showRecoveryCodes = (): void => {
 const disableTwoFactorAuthentication = (): void => {
     router.delete('/user/two-factor-authentication', {
         preserveScroll: true,
+        onSuccess: () => {
+            confirming.value = false;
+            showingRecoveryCodes.value = false;
+            confirmationForm.reset();
+            toast.success('Two-factor authentication disabled.');
+        },
+        onError: () => {
+            toast.error('Failed to disable two-factor authentication.');
+        },
     });
 };
 </script>

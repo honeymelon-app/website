@@ -10,6 +10,7 @@ import SettingsLayout from '@/layouts/settings/Layout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
 
 const breadcrumbItems: BreadcrumbItem[] = [
     {
@@ -32,6 +33,7 @@ const submit = () => {
         preserveScroll: true,
         onSuccess: () => {
             form.reset();
+            toast.success('Password updated');
         },
         onError: () => {
             if (form.errors.password) {
@@ -42,6 +44,8 @@ const submit = () => {
                 form.reset('current_password');
                 currentPasswordInput.value?.focus();
             }
+
+            toast.error('Please fix the highlighted errors.');
         },
     });
 };

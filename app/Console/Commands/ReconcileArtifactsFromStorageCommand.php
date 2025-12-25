@@ -7,6 +7,7 @@ namespace App\Console\Commands;
 use App\Models\Release;
 use App\Services\ReleaseService;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
 class ReconcileArtifactsFromStorageCommand extends Command
@@ -96,9 +97,7 @@ class ReconcileArtifactsFromStorageCommand extends Command
                 continue;
             }
 
-            $release = Release::query()->where('version', $version)->first()
-                ?? Release::query()->where('tag', 'v'.$version)->first()
-                ?? Release::query()->where('tag', $version)->first();
+            $release = $this->findReleaseForVersion($version);
 
             if (! $release) {
                 $stats['no_release']++;
@@ -226,10 +225,47 @@ class ReconcileArtifactsFromStorageCommand extends Command
     protected function extractVersionFromFilename(string $filename): ?string
     {
         // Match common semver: 1.2.3, optionally prefixed by v and optionally with prerelease/build.
-        if (preg_match('/\bv?(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)\b/', $filename, $m) === 1) {
+        // Do NOT use word boundaries here because underscores are word characters in regex.
+        // Example: Honeymelon_0.0.4_aarch64.dmg
+        if (preg_match('/(?<!\d)v?(\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?)(?!\d)/', $filename, $m) === 1) {
             return $m[1];
         }
 
         return null;
+    }
+
+    protected function findReleaseForVersion(string $version): ?Release
+    {
+        $candidates = array_values(array_unique([
+            $version,
+            'v'.$version,
+        ]));
+
+        foreach ($candidates as $candidate) {
+            $release = Release::query()
+                ->where('version', $candidate)
+                ->orWhere('tag', $candidate)
+                ->first();
+
+            if ($release) {
+                return $release;
+            }
+        }
+
+        $matches = Release::query()
+            ->where(function (Builder $query) use ($version) {
+                $query->where('version', 'like', '%'.$version.'%')
+                    ->orWhere('tag', 'like', '%'.$version.'%');
+            })
+            ->orderByDesc('published_at')
+            ->orderByDesc('created_at')
+            ->limit(2)
+            ->get();
+
+        if ($matches->count() !== 1) {
+            return null;
+        }
+
+        return $matches->first();
     }
 }

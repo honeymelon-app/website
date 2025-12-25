@@ -48,4 +48,21 @@ class ReconcileArtifactsFromStorageTest extends TestCase
         $this->assertSame('honeymelon-1.2.3.dmg', $artifact->filename);
         $this->assertSame('releases/darwin-aarch64/20250101000000-abc123-honeymelon-1.2.3.dmg', $artifact->path);
     }
+
+    public function test_it_matches_versions_inside_underscore_delimited_filenames(): void
+    {
+        Storage::fake('r2');
+
+        $release = Release::factory()->forVersion('1.2.3')->create();
+
+        Storage::disk('r2')->put('releases/darwin-aarch64/20251210041215-ifr0vt-Honeymelon_1.2.3_aarch64.dmg', str_repeat('a', 10));
+
+        $this->artisan('artifacts:reconcile-storage --disk=r2 --prefix=releases/ --apply')
+            ->assertExitCode(0);
+
+        $artifact = Artifact::query()->where('release_id', $release->id)->where('filename', 'Honeymelon_1.2.3_aarch64.dmg')->first();
+
+        $this->assertNotNull($artifact);
+        $this->assertSame('releases/darwin-aarch64/20251210041215-ifr0vt-Honeymelon_1.2.3_aarch64.dmg', $artifact->path);
+    }
 }

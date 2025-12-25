@@ -11,6 +11,7 @@ import SettingsLayout from '@/layouts/settings/Layout.vue';
 import type { AppPageProps, BreadcrumbItem } from '@/types';
 import { Head, useForm, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { toast } from 'vue-sonner';
 
 interface Props {
     mustVerifyEmail?: boolean;
@@ -37,6 +38,12 @@ const breadcrumbItems: BreadcrumbItem[] = [
 const submit = () => {
     form.put('/settings/profile', {
         preserveScroll: true,
+        onSuccess: () => {
+            toast.success('Changes saved');
+        },
+        onError: () => {
+            toast.error('Please fix the highlighted errors.');
+        },
     });
 };
 </script>
@@ -90,13 +97,6 @@ const submit = () => {
                         >
                             Click here to re-send the verification email.
                         </a>
-                    </div>
-
-                    <div
-                        v-if="props.status === 'profile-updated'"
-                        class="text-sm font-medium text-green-600"
-                    >
-                        Profile updated successfully.
                     </div>
 
                     <Button type="submit" :disabled="form.processing">
