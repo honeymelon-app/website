@@ -6,10 +6,12 @@ namespace App\Http\Controllers\Web\Admin;
 
 use App\Filters\OrderFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\OrderRefundRequest;
 use App\Http\Resources\OrderCollection;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Services\RefundService;
+use App\Support\IndexQueryParams;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -17,10 +19,6 @@ use Inertia\Response;
 
 class OrderController extends Controller
 {
-    private const DEFAULT_PAGE_SIZE = 15;
-
-    private const ALLOWED_PAGE_SIZES = [10, 15, 25, 50, 100];
-
     private const SORTABLE_COLUMNS = [
         'email',
         'provider',
@@ -34,21 +32,22 @@ class OrderController extends Controller
      */
     public function index(Request $request, OrderFilter $filter): Response
     {
-        $pageSize = $this->getValidatedPageSize($request);
-        $sortColumn = $this->getValidatedSortColumn($request);
-        $sortDirection = $this->getValidatedSortDirection($request);
+        $params = IndexQueryParams::fromRequest(
+            request: $request,
+            sortableColumns: self::SORTABLE_COLUMNS,
+        );
 
         $query = Order::query()
             ->with('license')
             ->filter($filter);
 
-        if ($sortColumn) {
-            $query->orderBy($sortColumn, $sortDirection);
+        if ($params->sortColumn !== null) {
+            $query->orderBy($params->sortColumn, $params->sortDirection);
         } else {
             $query->latest('created_at');
         }
 
-        $orders = $query->paginate($pageSize)->withQueryString();
+        $orders = $query->paginate($params->pageSize)->withQueryString();
 
         return Inertia::render('admin/orders/Index', [
             'orders' => new OrderCollection($orders),
@@ -65,12 +64,12 @@ class OrderController extends Controller
                 'created_before',
             ]),
             'sorting' => [
-                'column' => $sortColumn,
-                'direction' => $sortDirection,
+                'column' => $params->sortColumn,
+                'direction' => $params->sortDirection,
             ],
             'pagination' => [
-                'pageSize' => $pageSize,
-                'allowedPageSizes' => self::ALLOWED_PAGE_SIZES,
+                'pageSize' => $params->pageSize,
+                'allowedPageSizes' => IndexQueryParams::ALLOWED_PAGE_SIZES,
             ],
         ]);
     }
@@ -88,54 +87,22 @@ class OrderController extends Controller
     /**
      * Process a refund for the specified order.
      */
-    public function refund(Request $request, Order $order, RefundService $refundService): RedirectResponse
+    public function refund(OrderRefundRequest $request, Order $order, RefundService $refundService): RedirectResponse
     {
-        $request->validate([
-            'reason' => ['nullable', 'string', 'max:500'],
-        ]);
-
         try {
-            $refundService->refund($order, $request->input('reason'));
+            $refundService->refund($order, $request->validated('reason'));
 
             return redirect()
                 ->route('admin.orders.show', $order)
                 ->with('success', 'Order has been refunded successfully. The associated license has been revoked.');
         } catch (\Exception $e) {
-            return redirect()
-                ->route('admin.orders.show', $order)
-                ->with('error', 'Failed to process refund: '.$e->getMessage());
+            return $this->handleWebException(
+                $e,
+                'admin.orders.show',
+                'Failed to process refund',
+                ['order_id' => $order->id],
+                [$order]
+            );
         }
-    }
-
-    /**
-     * Get validated page size from request.
-     */
-    private function getValidatedPageSize(Request $request): int
-    {
-        $pageSize = (int) $request->input('per_page', self::DEFAULT_PAGE_SIZE);
-
-        return in_array($pageSize, self::ALLOWED_PAGE_SIZES, true)
-            ? $pageSize
-            : self::DEFAULT_PAGE_SIZE;
-    }
-
-    /**
-     * Get validated sort column from request.
-     */
-    private function getValidatedSortColumn(Request $request): ?string
-    {
-        $column = $request->input('sort');
-
-        return in_array($column, self::SORTABLE_COLUMNS, true) ? $column : null;
-    }
-
-    /**
-     * Get validated sort direction from request.
-     */
-    private function getValidatedSortDirection(Request $request): string
-    {
-        $direction = strtolower($request->input('direction', 'desc'));
-
-        return in_array($direction, ['asc', 'desc'], true) ? $direction : 'desc';
     }
 }

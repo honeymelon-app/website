@@ -7,12 +7,14 @@ namespace App\Http\Controllers\Web\Admin;
 use App\Enums\ReleaseChannel;
 use App\Filters\LicenseFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminRevokeLicenseRequest;
 use App\Http\Requests\StoreLicenseRequest;
 use App\Http\Resources\LicenseResource;
 use App\Models\License;
 use App\Models\Order;
 use App\Models\Release;
 use App\Services\LicenseService;
+use App\Support\IndexQueryParams;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -21,10 +23,6 @@ use Inertia\Response;
 
 class LicenseController extends Controller
 {
-    private const DEFAULT_PAGE_SIZE = 15;
-
-    private const ALLOWED_PAGE_SIZES = [10, 15, 25, 50, 100];
-
     private const SORTABLE_COLUMNS = [
         'status',
         'max_major_version',
@@ -37,9 +35,10 @@ class LicenseController extends Controller
      */
     public function index(Request $request, LicenseFilter $filter): Response
     {
-        $pageSize = $this->getValidatedPageSize($request);
-        $sortColumn = $this->getValidatedSortColumn($request);
-        $sortDirection = $this->getValidatedSortDirection($request);
+        $params = IndexQueryParams::fromRequest(
+            request: $request,
+            sortableColumns: self::SORTABLE_COLUMNS,
+        );
 
         $availableMajorVersions = Release::query()
             ->whereIn('channel', [
@@ -59,13 +58,13 @@ class LicenseController extends Controller
             ->with('order')
             ->filter($filter);
 
-        if ($sortColumn) {
-            $query->orderBy($sortColumn, $sortDirection);
+        if ($params->sortColumn !== null) {
+            $query->orderBy($params->sortColumn, $params->sortDirection);
         } else {
             $query->latest('created_at');
         }
 
-        $licenses = $query->paginate($pageSize)->withQueryString();
+        $licenses = $query->paginate($params->pageSize)->withQueryString();
 
         return Inertia::render('admin/licenses/Index', [
             'licenses' => [
@@ -92,12 +91,12 @@ class LicenseController extends Controller
                 'search',
             ]),
             'sorting' => [
-                'column' => $sortColumn,
-                'direction' => $sortDirection,
+                'column' => $params->sortColumn,
+                'direction' => $params->sortDirection,
             ],
             'pagination' => [
-                'pageSize' => $pageSize,
-                'allowedPageSizes' => self::ALLOWED_PAGE_SIZES,
+                'pageSize' => $params->pageSize,
+                'allowedPageSizes' => IndexQueryParams::ALLOWED_PAGE_SIZES,
             ],
             'available_versions' => $availableMajorVersions,
         ]);
@@ -147,12 +146,8 @@ class LicenseController extends Controller
     /**
      * Revoke a license manually.
      */
-    public function revoke(Request $request, License $license, LicenseService $licenseService): RedirectResponse
+    public function revoke(AdminRevokeLicenseRequest $request, License $license, LicenseService $licenseService): RedirectResponse
     {
-        $request->validate([
-            'reason' => ['nullable', 'string', 'max:500'],
-        ]);
-
         if (! $license->isActive()) {
             return redirect()
                 ->route('admin.licenses.show', $license)
@@ -166,32 +161,13 @@ class LicenseController extends Controller
                 ->route('admin.licenses.show', $license)
                 ->with('success', 'License has been revoked successfully.');
         } catch (\Exception $e) {
-            return redirect()
-                ->route('admin.licenses.show', $license)
-                ->with('error', 'Failed to revoke license: '.$e->getMessage());
+            return $this->handleWebException(
+                $e,
+                'admin.licenses.show',
+                'Failed to revoke license',
+                ['license_id' => $license->id],
+                [$license]
+            );
         }
-    }
-
-    private function getValidatedPageSize(Request $request): int
-    {
-        $pageSize = (int) $request->input('per_page', self::DEFAULT_PAGE_SIZE);
-
-        return in_array($pageSize, self::ALLOWED_PAGE_SIZES, true)
-            ? $pageSize
-            : self::DEFAULT_PAGE_SIZE;
-    }
-
-    private function getValidatedSortColumn(Request $request): ?string
-    {
-        $column = $request->input('sort');
-
-        return in_array($column, self::SORTABLE_COLUMNS, true) ? $column : null;
-    }
-
-    private function getValidatedSortDirection(Request $request): string
-    {
-        $direction = $request->input('direction', 'desc');
-
-        return in_array($direction, ['asc', 'desc'], true) ? $direction : 'desc';
     }
 }

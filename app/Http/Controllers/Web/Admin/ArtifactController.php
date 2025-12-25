@@ -8,6 +8,7 @@ use App\Filters\ArtifactFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArtifactResource;
 use App\Models\Artifact;
+use App\Support\IndexQueryParams;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -16,10 +17,6 @@ use Inertia\Response;
 
 class ArtifactController extends Controller
 {
-    private const DEFAULT_PAGE_SIZE = 15;
-
-    private const ALLOWED_PAGE_SIZES = [10, 15, 25, 50, 100];
-
     private const SORTABLE_COLUMNS = [
         'filename',
         'platform',
@@ -33,21 +30,22 @@ class ArtifactController extends Controller
      */
     public function index(Request $request, ArtifactFilter $filter): Response
     {
-        $pageSize = $this->getValidatedPageSize($request);
-        $sortColumn = $this->getValidatedSortColumn($request);
-        $sortDirection = $this->getValidatedSortDirection($request);
+        $params = IndexQueryParams::fromRequest(
+            request: $request,
+            sortableColumns: self::SORTABLE_COLUMNS,
+        );
 
         $query = Artifact::query()
             ->with('release')
             ->filter($filter);
 
-        if ($sortColumn) {
-            $query->orderBy($sortColumn, $sortDirection);
+        if ($params->sortColumn !== null) {
+            $query->orderBy($params->sortColumn, $params->sortDirection);
         } else {
             $query->latest('created_at');
         }
 
-        $artifacts = $query->paginate($pageSize)->withQueryString();
+        $artifacts = $query->paginate($params->pageSize)->withQueryString();
 
         // Check R2 sync status for each artifact
         $disk = Storage::disk('s3');
@@ -90,12 +88,12 @@ class ArtifactController extends Controller
                 'search',
             ]),
             'sorting' => [
-                'column' => $sortColumn,
-                'direction' => $sortDirection,
+                'column' => $params->sortColumn,
+                'direction' => $params->sortDirection,
             ],
             'pagination' => [
-                'pageSize' => $pageSize,
-                'allowedPageSizes' => self::ALLOWED_PAGE_SIZES,
+                'pageSize' => $params->pageSize,
+                'allowedPageSizes' => IndexQueryParams::ALLOWED_PAGE_SIZES,
             ],
         ]);
     }
@@ -206,28 +204,5 @@ class ArtifactController extends Controller
                 'message' => 'Error checking R2: '.$e->getMessage(),
             ];
         }
-    }
-
-    private function getValidatedPageSize(Request $request): int
-    {
-        $pageSize = (int) $request->input('per_page', self::DEFAULT_PAGE_SIZE);
-
-        return in_array($pageSize, self::ALLOWED_PAGE_SIZES, true)
-            ? $pageSize
-            : self::DEFAULT_PAGE_SIZE;
-    }
-
-    private function getValidatedSortColumn(Request $request): ?string
-    {
-        $column = $request->input('sort');
-
-        return in_array($column, self::SORTABLE_COLUMNS, true) ? $column : null;
-    }
-
-    private function getValidatedSortDirection(Request $request): string
-    {
-        $direction = $request->input('direction', 'desc');
-
-        return in_array($direction, ['asc', 'desc'], true) ? $direction : 'desc';
     }
 }
