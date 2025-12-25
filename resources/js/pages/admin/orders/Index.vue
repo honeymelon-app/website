@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
+import {
+    AdminLoadingState,
+    AdminPage,
+    AdminSection,
+    AdminToolbar,
+    ConfirmDialog,
+} from '@/components/admin';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -16,7 +24,7 @@ import type { FilterParams, PaginatedResponse } from '@/types/api';
 import type { Order } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
 import { Download, RotateCcw } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { columns } from './columns';
 
 interface Filters {
@@ -61,6 +69,13 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: ordersRoute.index().url,
     },
 ];
+
+// Bulk refund dialog state
+const isBulkRefundDialogOpen = ref(false);
+const isBulkRefunding = ref(false);
+const refundableCount = computed(
+    () => selectedRows.value.filter((order) => order.can_be_refunded).length,
+);
 
 // Filter configuration for TableFilters component
 const filterConfig: FilterConfig[] = [
@@ -120,33 +135,51 @@ const {
     enableRowSelection: true,
 });
 
+// Loading state for initial render
+const isInitialLoad = ref(true);
+
+onMounted(() => {
+    // Brief loading state for skeleton UI
+    setTimeout(() => {
+        isInitialLoad.value = false;
+    }, 150);
+});
+
 // Bulk refund action
 const bulkRefund = () => {
+    if (refundableCount.value === 0) {
+        return;
+    }
+    isBulkRefundDialogOpen.value = true;
+};
+
+const confirmBulkRefund = () => {
     const orders = selectedRows.value.filter((order) => order.can_be_refunded);
 
     if (orders.length === 0) {
-        alert('No refundable orders selected.');
         return;
     }
 
-    const confirmed = confirm(
-        `Refund ${orders.length} order(s)? This will revoke their associated licenses.`,
-    );
+    isBulkRefunding.value = true;
 
-    if (!confirmed) {
-        return;
-    }
-
-    // Process refunds sequentially
+    let completed = 0;
     orders.forEach((order) => {
         router.post(
             ordersRoute.refund(order.id).url,
             { reason: 'Bulk refund' },
-            { preserveScroll: true },
+            {
+                preserveScroll: true,
+                onFinish: () => {
+                    completed++;
+                    if (completed === orders.length) {
+                        isBulkRefunding.value = false;
+                        isBulkRefundDialogOpen.value = false;
+                        clearSelection();
+                    }
+                },
+            },
         );
     });
-
-    clearSelection();
 };
 
 // Export selected orders to CSV
@@ -190,29 +223,22 @@ const exportSelected = () => {
     <Head title="Orders" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
-            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
-        >
-            <div class="flex flex-col gap-6">
+        <AdminPage>
+            <AdminSection>
                 <!-- Header + Filters -->
-                <div
-                    class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+                <AdminToolbar
+                    title="Orders"
+                    subtitle="View and manage customer orders and payments."
                 >
-                    <div class="flex flex-col gap-1">
-                        <h1 class="text-2xl font-semibold tracking-tight">
-                            Orders
-                        </h1>
-                        <p class="text-sm text-muted-foreground">
-                            View and manage customer orders and payments.
-                        </p>
-                    </div>
-                    <TableFilters
-                        :filters="filterConfig"
-                        :model-value="filterState"
-                        @update:model-value="handleFilterUpdate"
-                        @clear="handleFilterClear"
-                    />
-                </div>
+                    <template #filters>
+                        <TableFilters
+                            :filters="filterConfig"
+                            :model-value="filterState"
+                            @update:model-value="handleFilterUpdate"
+                            @clear="handleFilterClear"
+                        />
+                    </template>
+                </AdminToolbar>
 
                 <!-- Bulk Actions Toolbar -->
                 <DataTableBulkActions
@@ -226,27 +252,47 @@ const exportSelected = () => {
                         class="h-8"
                         @click="exportSelected"
                     >
-                        <Download class="mr-1.5 h-4 w-4" />
+                        <Download class="mr-2 h-4 w-4" />
                         Export CSV
                     </Button>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        class="h-8"
-                        @click="bulkRefund"
+                    <ConfirmDialog
+                        v-model:open="isBulkRefundDialogOpen"
+                        title="Refund Orders?"
+                        :description="`Refund ${refundableCount} order(s)? This will revoke their associated licenses and cannot be undone.`"
+                        confirm-label="Refund"
+                        :loading="isBulkRefunding"
+                        @confirm="confirmBulkRefund"
                     >
-                        <RotateCcw class="mr-1.5 h-4 w-4" />
-                        Refund Selected
-                    </Button>
+                        <template #trigger>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                class="h-8"
+                                :disabled="refundableCount === 0"
+                            >
+                                <RotateCcw class="mr-2 h-4 w-4" />
+                                Refund Selected
+                            </Button>
+                        </template>
+                    </ConfirmDialog>
                 </DataTableBulkActions>
 
                 <!-- Table -->
                 <div class="space-y-4">
+                    <AdminLoadingState v-if="isInitialLoad" :rows="5" />
                     <DataTableRoot
+                        v-else
                         :table="table"
                         :columns="columns"
-                        empty-message="No orders found. Orders will appear here when customers make purchases."
-                    />
+                    >
+                        <template #empty>
+                            <AdminEmptyState
+                                icon="Receipt"
+                                title="No orders yet"
+                                description="Orders will appear here when customers make purchases."
+                            />
+                        </template>
+                    </DataTableRoot>
 
                     <!-- Pagination -->
                     <DataTablePagination
@@ -256,7 +302,7 @@ const exportSelected = () => {
                         @page-size-change="handlePageSizeChange"
                     />
                 </div>
-            </div>
-        </div>
+            </AdminSection>
+        </AdminPage>
     </AppLayout>
 </template>

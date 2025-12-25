@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import artifacts from '@/routes/admin/artifacts';
+import faqs from '@/routes/admin/faqs';
 import licenses from '@/routes/admin/licenses';
 import orders from '@/routes/admin/orders';
 import releases from '@/routes/admin/releases';
@@ -20,6 +21,7 @@ import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/vue3';
 import {
     BookOpen,
+    CircleHelp,
     Gauge,
     Github,
     HardDrive,
@@ -54,6 +56,11 @@ const mainNavItems: NavItem[] = [
         title: 'Artifacts',
         href: artifacts.index(),
         icon: HardDrive,
+    },
+    {
+        title: 'FAQs',
+        href: faqs.index(),
+        icon: CircleHelp,
     },
 ];
 

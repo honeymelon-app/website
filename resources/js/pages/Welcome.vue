@@ -18,43 +18,24 @@ import {
 import MarketingLayout from '@/layouts/MarketingLayout.vue';
 import type { Artifact, Product } from '@/types/api';
 import { Head, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
+
+interface Faq {
+    question: string;
+    answer: string;
+}
 
 const props = defineProps<{
     artifact?: Artifact | null;
     product?: Product | null;
+    faqs?: Faq[];
 }>();
 
 const page = usePage();
 const appUrl = computed(() => (page.props.appUrl as string) || '');
 
-// FAQ data for both display and structured data
-const faqs = [
-    {
-        question: 'Is Honeymelon free?',
-        answer: 'Honeymelon is free to download. A paid license is required to use the app. The license is a one-time purchase with no subscriptions.',
-    },
-    {
-        question: 'What are the system requirements?',
-        answer: 'Honeymelon requires macOS 13 (Ventura) or later and an Apple Silicon chip (M1 or newer). Intel-based Macs are not supported.',
-    },
-    {
-        question: 'Does Honeymelon work offline?',
-        answer: 'Yes. Honeymelon requires a one-time internet connection to activate your license. After that, the app runs fully offline—no telemetry, no license checks, nothing.',
-    },
-    {
-        question: 'What file formats are supported?',
-        answer: 'Honeymelon supports MP4, MOV, MKV, WebM, and GIF for video; M4A, MP3, FLAC, WAV, and Opus for audio; and PNG, JPEG, and WebP for images. Powered by FFmpeg.',
-    },
-    {
-        question: 'Do you collect my files or data?',
-        answer: 'No. All conversions happen locally on your Mac. Your files never leave your device, and we collect zero telemetry or usage data.',
-    },
-    {
-        question: 'Can I use my license on multiple Macs?',
-        answer: "Each license activates on one Mac device. The activation is one-time and cannot be transferred. If you need Honeymelon on multiple Macs, you'll need a separate license for each.",
-    },
-];
+// Use FAQs from props or fallback to empty array
+const faqs = computed(() => props.faqs || []);
 
 // Generate price for structured data
 const priceData = computed(() => {
@@ -93,7 +74,7 @@ const jsonLdSchemas = computed(() => {
     );
 
     // FAQ schema
-    schemas.push(generateFaqSchema(faqs));
+    schemas.push(generateFaqSchema(faqs.value));
 
     return schemas;
 });
@@ -106,6 +87,23 @@ const { headTags, jsonLdScript } = useSeoMeta({
     canonical: '/',
     ogImage: '/images/og-image.png',
     jsonLd: jsonLdSchemas,
+});
+
+// Inject JSON-LD script into document head
+onMounted(() => {
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = jsonLdScript.value;
+    script.id = 'json-ld-schema';
+    document.head.appendChild(script);
+});
+
+// Clean up on unmount
+onUnmounted(() => {
+    const script = document.getElementById('json-ld-schema');
+    if (script) {
+        document.head.removeChild(script);
+    }
 });
 </script>
 
@@ -132,9 +130,6 @@ const { headTags, jsonLdScript } = useSeoMeta({
             :content="headTags.twitterDescription"
         />
         <meta name="twitter:image" :content="headTags.twitterImage" />
-
-        <!-- JSON-LD Structured Data -->
-        <script type="application/ld+json" v-html="jsonLdScript" />
     </Head>
 
     <MarketingLayout>

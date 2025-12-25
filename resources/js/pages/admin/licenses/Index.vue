@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { ConfirmDialog } from '@/components/admin';
+import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
+import { AdminLoadingState, AdminPage, AdminSection, AdminToolbar, ConfirmDialog } from '@/components/admin';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -39,7 +40,7 @@ import type { FilterParams, PaginatedResponse } from '@/types/api';
 import type { License } from '@/types/resources';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Check, Copy, Download, Plus, ShieldOff } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { columns } from './columns';
 
 interface Filters {
@@ -206,6 +207,16 @@ const {
     },
 });
 
+// Loading state for initial render
+const isInitialLoad = ref(true);
+
+onMounted(() => {
+    // Brief loading state for skeleton UI
+    setTimeout(() => {
+        isInitialLoad.value = false;
+    }, 150);
+});
+
 // Bulk revoke action
 const activeSelectedCount = computed(
     () => selectedRows.value.filter((l) => l.status === 'active').length,
@@ -298,29 +309,22 @@ const handleIssueLicense = (): void => {
     <Head title="Licenses" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
-            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
-        >
-            <div class="flex flex-col gap-6">
+        <AdminPage>
+            <AdminSection>
                 <!-- Header + Filters -->
-                <div
-                    class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+                <AdminToolbar
+                    title="Licenses"
+                    subtitle="Manage and issue product licenses for customers."
                 >
-                    <div class="flex flex-col gap-1">
-                        <h1 class="text-2xl font-semibold tracking-tight">
-                            Licenses
-                        </h1>
-                        <p class="text-sm text-muted-foreground">
-                            Manage and issue product licenses for customers.
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-3">
+                    <template #filters>
                         <TableFilters
                             :filters="filterConfig"
                             :model-value="filterState"
                             @update:model-value="handleFilterUpdate"
                             @clear="handleFilterClear"
                         />
+                    </template>
+                    <template #actions>
                         <Dialog v-model:open="isIssueDialogOpen">
                             <DialogTrigger as-child>
                                 <Button>
@@ -342,7 +346,7 @@ const handleIssueLicense = (): void => {
                                     @submit.prevent="handleIssueLicense"
                                     class="space-y-4"
                                 >
-                                    <div class="space-y-2">
+                                    <div class="grid gap-2">
                                         <Label for="email"
                                             >Customer Email</Label
                                         >
@@ -361,14 +365,13 @@ const handleIssueLicense = (): void => {
                                         </p>
                                     </div>
 
-                                    <div class="space-y-2">
+                                    <div class="grid gap-2">
                                         <Label for="max_major_version"
                                             >Max Major Version</Label
                                         >
                                         <Select
-                                            v-model="
-                                                issueForm.max_major_version
-                                            "
+                                            v-model="issueForm.max_major_version
+                                                "
                                         >
                                             <SelectTrigger
                                                 id="max_major_version"
@@ -440,7 +443,7 @@ const handleIssueLicense = (): void => {
                                 </DialogHeader>
 
                                 <div class="space-y-4">
-                                    <div class="space-y-2">
+                                    <div class="grid gap-2">
                                         <Label>Customer Email</Label>
                                         <Input
                                             :value="generatedLicenseEmail"
@@ -449,7 +452,7 @@ const handleIssueLicense = (): void => {
                                         />
                                     </div>
 
-                                    <div class="space-y-2">
+                                    <div class="grid gap-2">
                                         <Label>License Key</Label>
                                         <div class="flex gap-2">
                                             <Input
@@ -487,8 +490,8 @@ const handleIssueLicense = (): void => {
                                 </DialogFooter>
                             </DialogContent>
                         </Dialog>
-                    </div>
-                </div>
+                    </template>
+                </AdminToolbar>
 
                 <!-- Bulk Actions Toolbar -->
                 <DataTableBulkActions
@@ -502,7 +505,7 @@ const handleIssueLicense = (): void => {
                         class="h-8"
                         @click="exportSelected"
                     >
-                        <Download class="mr-1.5 h-4 w-4" />
+                        <Download class="mr-2 h-4 w-4" />
                         Export CSV
                     </Button>
                     <Button
@@ -512,18 +515,32 @@ const handleIssueLicense = (): void => {
                         :disabled="activeSelectedCount === 0"
                         @click="bulkRevoke"
                     >
-                        <ShieldOff class="mr-1.5 h-4 w-4" />
+                        <ShieldOff class="mr-2 h-4 w-4" />
                         Revoke Selected ({{ activeSelectedCount }})
                     </Button>
                 </DataTableBulkActions>
 
                 <!-- Table -->
                 <div class="space-y-4">
+                    <AdminLoadingState v-if="isInitialLoad" :rows="5" />
                     <DataTableRoot
+                        v-else
                         :table="table"
                         :columns="columns"
-                        empty-message="No licenses found. Issue your first license to get started."
-                    />
+                    >
+                        <template #empty>
+                            <AdminEmptyState
+                                icon="KeyRound"
+                                title="No licenses yet"
+                                description="Issue your first license to get started."
+                            >
+                                <Button @click="isIssueDialogOpen = true">
+                                    <Plus class="mr-2 h-4 w-4" />
+                                    Issue License
+                                </Button>
+                            </AdminEmptyState>
+                        </template>
+                    </DataTableRoot>
 
                     <!-- Pagination -->
                     <DataTablePagination
@@ -533,8 +550,8 @@ const handleIssueLicense = (): void => {
                         @page-size-change="handlePageSizeChange"
                     />
                 </div>
-            </div>
-        </div>
+            </AdminSection>
+        </AdminPage>
 
         <!-- License Details Modal -->
         <Dialog v-model:open="isDetailsDialogOpen">
@@ -569,9 +586,8 @@ const handleIssueLicense = (): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="
-                                    getStatusVariant(selectedLicense.status)
-                                "
+                                :variant="getStatusVariant(selectedLicense.status)
+                                    "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -653,7 +669,7 @@ const handleIssueLicense = (): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                                isDetailsDialogOpen = false;
+                            isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />

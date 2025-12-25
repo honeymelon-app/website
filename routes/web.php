@@ -4,6 +4,7 @@ use App\Enums\ReleaseChannel;
 use App\Http\Controllers\SeoController;
 use App\Http\Controllers\Web\Admin\ArtifactController;
 use App\Http\Controllers\Web\Admin\DashboardController;
+use App\Http\Controllers\Web\Admin\FaqController;
 use App\Http\Controllers\Web\Admin\LicenseController;
 use App\Http\Controllers\Web\Admin\OrderController;
 use App\Http\Controllers\Web\Admin\ReleaseController;
@@ -47,9 +48,20 @@ Route::get('/', function () {
         ->where('is_active', true)
         ->first();
 
+    $faqs = \App\Models\Faq::query()
+        ->where('is_active', true)
+        ->orderBy('order')
+        ->get(['question', 'answer'])
+        ->map(fn ($faq) => [
+            'question' => $faq->question,
+            'answer' => $faq->answer,
+        ])
+        ->toArray();
+
     return Inertia::render('Welcome', [
         'artifact' => $latestArtifact ? (new ArtifactResource($latestArtifact))->resolve() : null,
         'product' => $product ? (new ProductResource($product))->resolve() : null,
+        'faqs' => $faqs,
     ]);
 })->name('home');
 
@@ -104,6 +116,7 @@ Route::middleware('auth')->group(function () {
         Route::post('licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
         Route::post('orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
+        Route::resource('faqs', FaqController::class)->only(['index', 'store', 'update', 'destroy']);
     });
 });
 

@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
+import {
+    AdminLoadingState,
+    AdminPage,
+    AdminSection,
+    AdminToolbar,
+    ConfirmDialog,
+} from '@/components/admin';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -15,8 +23,8 @@ import type { BreadcrumbItem } from '@/types';
 import type { FilterParams, PaginatedResponse } from '@/types/api';
 import type { Release } from '@/types/resources';
 import { Head, router } from '@inertiajs/vue3';
-import { Download, Trash2 } from 'lucide-vue-next';
-import { computed } from 'vue';
+import { Download, Plus, Trash2 } from 'lucide-vue-next';
+import { computed, onMounted, ref } from 'vue';
 import { columns } from './columns';
 
 interface Filters {
@@ -56,6 +64,10 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: releasesRoute.index().url,
     },
 ];
+
+// Bulk delete dialog state
+const isBulkDeleteDialogOpen = ref(false);
+const isBulkDeleting = ref(false);
 
 // Filter configuration for TableFilters component
 const filterConfig: FilterConfig[] = [
@@ -105,29 +117,47 @@ const {
     enableRowSelection: true,
 });
 
+// Loading state for initial render
+const isInitialLoad = ref(true);
+
+onMounted(() => {
+    // Brief loading state for skeleton UI
+    setTimeout(() => {
+        isInitialLoad.value = false;
+    }, 150);
+});
+
 // Bulk delete action
 const bulkDelete = () => {
+    if (selectedRows.value.length === 0) {
+        return;
+    }
+    isBulkDeleteDialogOpen.value = true;
+};
+
+const confirmBulkDelete = () => {
     const releases = selectedRows.value;
 
     if (releases.length === 0) {
         return;
     }
 
-    const confirmed = confirm(
-        `Delete ${releases.length} release(s)? This will also delete their artifacts and cannot be undone.`,
-    );
+    isBulkDeleting.value = true;
 
-    if (!confirmed) {
-        return;
-    }
-
+    let completed = 0;
     releases.forEach((release) => {
         router.delete(releasesRoute.destroy(release.id).url, {
             preserveScroll: true,
+            onFinish: () => {
+                completed++;
+                if (completed === releases.length) {
+                    isBulkDeleting.value = false;
+                    isBulkDeleteDialogOpen.value = false;
+                    clearSelection();
+                }
+            },
         });
     });
-
-    clearSelection();
 };
 
 // Export selected releases to CSV
@@ -171,34 +201,28 @@ const exportSelected = () => {
     <Head title="Releases" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
-            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
-        >
-            <div class="flex flex-col gap-6">
+        <AdminPage>
+            <AdminSection>
                 <!-- Header + Filters -->
-                <div
-                    class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+                <AdminToolbar
+                    title="Releases"
+                    subtitle="Manage your application releases and versions."
                 >
-                    <div class="flex flex-col gap-1">
-                        <h1 class="text-2xl font-semibold tracking-tight">
-                            Releases
-                        </h1>
-                        <p class="text-sm text-muted-foreground">
-                            Manage your application releases and versions.
-                        </p>
-                    </div>
-                    <div class="flex items-center gap-3">
+                    <template #filters>
                         <TableFilters
                             :filters="filterConfig"
                             :model-value="filterState"
                             @update:model-value="handleFilterUpdate"
                             @clear="handleFilterClear"
                         />
+                    </template>
+                    <template #actions>
                         <Button @click="router.visit('/admin/releases/create')">
+                            <Plus class="mr-2 h-4 w-4" />
                             Create Release
                         </Button>
-                    </div>
-                </div>
+                    </template>
+                </AdminToolbar>
 
                 <!-- Bulk Actions Toolbar -->
                 <DataTableBulkActions
@@ -212,27 +236,51 @@ const exportSelected = () => {
                         class="h-8"
                         @click="exportSelected"
                     >
-                        <Download class="mr-1.5 h-4 w-4" />
+                        <Download class="mr-2 h-4 w-4" />
                         Export CSV
                     </Button>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        class="h-8"
-                        @click="bulkDelete"
+                    <ConfirmDialog
+                        v-model:open="isBulkDeleteDialogOpen"
+                        title="Delete Releases?"
+                        :description="`Delete ${selectedCount} release(s)? This will also delete their artifacts and cannot be undone.`"
+                        confirm-label="Delete"
+                        :loading="isBulkDeleting"
+                        @confirm="confirmBulkDelete"
                     >
-                        <Trash2 class="mr-1.5 h-4 w-4" />
-                        Delete Selected
-                    </Button>
+                        <template #trigger>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                class="h-8"
+                            >
+                                <Trash2 class="mr-2 h-4 w-4" />
+                                Delete Selected
+                            </Button>
+                        </template>
+                    </ConfirmDialog>
                 </DataTableBulkActions>
 
                 <!-- Table -->
                 <div class="space-y-4">
+                    <AdminLoadingState v-if="isInitialLoad" :rows="5" />
                     <DataTableRoot
+                        v-else
                         :table="table"
                         :columns="columns"
-                        empty-message="No releases found. Create your first release to get started."
-                    />
+                    >
+                        <template #empty>
+                            <AdminEmptyState
+                                icon="Package"
+                                title="No releases yet"
+                                description="Create your first release to get started."
+                            >
+                                <Button @click="router.visit('/admin/releases/create')">
+                                    <Plus class="mr-2 h-4 w-4" />
+                                    Create Release
+                                </Button>
+                            </AdminEmptyState>
+                        </template>
+                    </DataTableRoot>
 
                     <!-- Pagination -->
                     <DataTablePagination
@@ -242,7 +290,7 @@ const exportSelected = () => {
                         @page-size-change="handlePageSizeChange"
                     />
                 </div>
-            </div>
-        </div>
+            </AdminSection>
+        </AdminPage>
     </AppLayout>
 </template>

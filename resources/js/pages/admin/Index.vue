@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { AdminPage, AdminSection } from '@/components/admin';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,9 +60,9 @@ interface RecentLicense {
 }
 
 interface ChartData {
-    orders_over_time: Array<{ date: string; orders: number; revenue: number }>;
-    licenses_by_status: Array<{ status: string; count: number }>;
-    artifacts_by_platform: Array<{ platform: string; count: number }>;
+    orders_over_time: Array<{ date: string; orders: number; revenue: number; }>;
+    licenses_by_status: Array<{ status: string; count: number; }>;
+    artifacts_by_platform: Array<{ platform: string; count: number; }>;
 }
 
 interface VisitorAnalytics {
@@ -74,17 +75,17 @@ interface VisitorAnalytics {
         visits: number;
         unique_visitors: number;
     }>;
-    visits_by_page: Array<{ page: string; visits: number }>;
-    visits_by_device: Array<{ device: string; count: number }>;
-    visits_by_browser: Array<{ browser: string; count: number }>;
-    top_referrers: Array<{ referrer: string; url: string; count: number }>;
+    visits_by_page: Array<{ page: string; visits: number; }>;
+    visits_by_device: Array<{ device: string; count: number; }>;
+    visits_by_browser: Array<{ browser: string; count: number; }>;
+    top_referrers: Array<{ referrer: string; url: string; count: number; }>;
 }
 
 interface DownloadAnalytics {
     total_downloads: number;
     downloads_today: number;
     downloads_change: number;
-    downloads_by_artifact: Array<{ artifact_name: string; count: number }>;
+    downloads_by_artifact: Array<{ artifact_name: string; count: number; }>;
     recent_downloads: Array<{
         id: string;
         artifact_name: string;
@@ -221,7 +222,7 @@ function getDeviceIcon(device: string) {
     <Head title="Dashboard" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div class="flex h-full flex-1 flex-col gap-6 p-6">
+        <AdminPage>
             <!-- Header -->
             <div class="flex flex-col gap-1">
                 <h1 class="text-2xl font-semibold tracking-tight">
@@ -233,7 +234,7 @@ function getDeviceIcon(device: string) {
             </div>
 
             <!-- Metrics Grid -->
-            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <AdminSection class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
                 <!-- Total Revenue -->
                 <Card class="relative overflow-hidden">
                     <CardContent class="p-6">
@@ -247,11 +248,10 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.revenue_change >= 0
-                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                        : 'text-red-600 dark:text-red-400'
-                                "
+                                :class="metrics.revenue_change >= 0
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.revenue_change >= 0"
@@ -287,11 +287,10 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.orders_change >= 0
-                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                        : 'text-red-600 dark:text-red-400'
-                                "
+                                :class="metrics.orders_change >= 0
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.orders_change >= 0"
@@ -325,11 +324,10 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    metrics.licenses_change >= 0
-                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                        : 'text-red-600 dark:text-red-400'
-                                "
+                                :class="metrics.licenses_change >= 0
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                    "
                             >
                                 <TrendingUp
                                     v-if="metrics.licenses_change >= 0"
@@ -386,11 +384,10 @@ function getDeviceIcon(device: string) {
                             </div>
                             <div
                                 class="flex items-center gap-1 text-sm"
-                                :class="
-                                    download_analytics.downloads_change >= 0
-                                        ? 'text-emerald-600 dark:text-emerald-400'
-                                        : 'text-red-600 dark:text-red-400'
-                                "
+                                :class="download_analytics.downloads_change >= 0
+                                    ? 'text-emerald-600 dark:text-emerald-400'
+                                    : 'text-red-600 dark:text-red-400'
+                                    "
                             >
                                 <TrendingUp
                                     v-if="
@@ -418,10 +415,11 @@ function getDeviceIcon(device: string) {
                         </div>
                     </CardContent>
                 </Card>
-            </div>
+            </AdminSection>
 
             <!-- Main Content -->
-            <div class="grid gap-6 lg:grid-cols-5">
+            <AdminSection>
+                <div class="grid gap-6 lg:grid-cols-5">
                 <!-- Revenue Chart -->
                 <Card class="lg:col-span-3">
                     <CardHeader class="pb-2">
@@ -441,9 +439,8 @@ function getDeviceIcon(device: string) {
                             index="date"
                             :categories="['Revenue']"
                             :colors="['var(--color-honey-500)']"
-                            :y-formatter="
-                                (value: number) => formatCurrency(value * 100)
-                            "
+                            :y-formatter="(value: number) => formatCurrency(value * 100)
+                                "
                             :show-legend="false"
                             class="h-[280px]"
                         />
@@ -513,11 +510,10 @@ function getDeviceIcon(device: string) {
                                     </p>
                                     <Badge
                                         v-if="order.license_status"
-                                        :variant="
-                                            getStatusVariant(
-                                                order.license_status,
-                                            )
-                                        "
+                                        :variant="getStatusVariant(
+                                            order.license_status,
+                                        )
+                                            "
                                         class="mt-1"
                                     >
                                         {{ order.license_status }}
@@ -527,14 +523,16 @@ function getDeviceIcon(device: string) {
                         </div>
                     </CardContent>
                 </Card>
-            </div>
+                </div>
+            </AdminSection>
 
             <!-- Visitor Analytics Section -->
-            <div class="space-y-4">
+            <AdminSection>
+                <div class="space-y-4">
                 <h2 class="text-lg font-semibold">Visitor Analytics</h2>
 
                 <!-- Visitor Metrics -->
-                <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                     <!-- Total Visits -->
                     <Card>
                         <CardContent class="p-6">
@@ -548,11 +546,10 @@ function getDeviceIcon(device: string) {
                                 </div>
                                 <div
                                     class="flex items-center gap-1 text-sm"
-                                    :class="
-                                        visitor_analytics.visits_change >= 0
-                                            ? 'text-emerald-600 dark:text-emerald-400'
-                                            : 'text-red-600 dark:text-red-400'
-                                    "
+                                    :class="visitor_analytics.visits_change >= 0
+                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                        : 'text-red-600 dark:text-red-400'
+                                        "
                                 >
                                     <TrendingUp
                                         v-if="
@@ -652,9 +649,9 @@ function getDeviceIcon(device: string) {
                                         visitor_analytics.visits_by_page
                                             .length > 0
                                             ? formatPageName(
-                                                  visitor_analytics
-                                                      .visits_by_page[0].page,
-                                              )
+                                                visitor_analytics
+                                                    .visits_by_page[0].page,
+                                            )
                                             : '-'
                                     }}
                                 </p>
@@ -687,9 +684,8 @@ function getDeviceIcon(device: string) {
                                     'var(--color-sky-500)',
                                     'var(--color-violet-500)',
                                 ]"
-                                :y-formatter="
-                                    (value: number) => value.toLocaleString()
-                                "
+                                :y-formatter="(value: number) => value.toLocaleString()
+                                    "
                                 class="h-[280px]"
                             />
                             <div
@@ -879,10 +875,12 @@ function getDeviceIcon(device: string) {
                         </div>
                     </CardContent>
                 </Card>
-            </div>
+                </div>
+            </AdminSection>
 
             <!-- Quick Actions -->
-            <div class="grid gap-4 sm:grid-cols-3">
+            <AdminSection>
+            <div class="grid gap-6 sm:grid-cols-3">
                 <Link
                     :href="ordersRoute.index().url"
                     class="group rounded-lg border bg-card p-5 transition-colors hover:bg-accent"
@@ -948,7 +946,8 @@ function getDeviceIcon(device: string) {
                         Publish and manage app releases
                     </p>
                 </Link>
-            </div>
-        </div>
+                </div>
+            </AdminSection>
+        </AdminPage>
     </AppLayout>
 </template>

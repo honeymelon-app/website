@@ -1,4 +1,12 @@
 <script setup lang="ts">
+import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
+import {
+    AdminLoadingState,
+    AdminPage,
+    AdminSection,
+    AdminToolbar,
+    ConfirmDialog,
+} from '@/components/admin';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -6,16 +14,6 @@ import {
     TableFilters,
     type FilterConfig,
 } from '@/components/data-table';
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useDataTable } from '@/composables';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -25,7 +23,7 @@ import type { BreadcrumbItem } from '@/types';
 import type { FilterParams, PaginatedResponse } from '@/types/api';
 import { Head, router } from '@inertiajs/vue3';
 import { Download, Trash2 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { columns, type ArtifactWithSync } from './columns';
 
 interface Filters {
@@ -63,6 +61,15 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: artifactsRoute.index().url,
     },
 ];
+
+// Delete dialog state
+const showDeleteDialog = ref(false);
+const artifactToDelete = ref<ArtifactWithSync | null>(null);
+const isDeleting = ref(false);
+
+// Bulk delete dialog state
+const isBulkDeleteDialogOpen = ref(false);
+const isBulkDeleting = ref(false);
 
 // Filter configuration for TableFilters component
 const filterConfig: FilterConfig[] = [
@@ -115,9 +122,6 @@ const downloadArtifact = (artifact: ArtifactWithSync): void => {
     }
 };
 
-const showDeleteDialog = ref(false);
-const artifactToDelete = ref<ArtifactWithSync | null>(null);
-
 const confirmDelete = (artifact: ArtifactWithSync): void => {
     artifactToDelete.value = artifact;
     showDeleteDialog.value = true;
@@ -128,8 +132,11 @@ const handleDelete = (): void => {
         return;
     }
 
+    isDeleting.value = true;
     router.delete(artifactsRoute.destroy(artifactToDelete.value.id).url, {
-        onSuccess: () => {
+        preserveScroll: true,
+        onFinish: () => {
+            isDeleting.value = false;
             showDeleteDialog.value = false;
             artifactToDelete.value = null;
         },
@@ -169,29 +176,47 @@ const {
     },
 });
 
+// Loading state for initial render
+const isInitialLoad = ref(true);
+
+onMounted(() => {
+    // Brief loading state for skeleton UI
+    setTimeout(() => {
+        isInitialLoad.value = false;
+    }, 150);
+});
+
 // Bulk delete action
 const bulkDelete = () => {
+    if (selectedRows.value.length === 0) {
+        return;
+    }
+    isBulkDeleteDialogOpen.value = true;
+};
+
+const confirmBulkDelete = () => {
     const artifacts = selectedRows.value;
 
     if (artifacts.length === 0) {
         return;
     }
 
-    const confirmed = confirm(
-        `Delete ${artifacts.length} artifact(s)? This will also delete files from storage. This action cannot be undone.`,
-    );
+    isBulkDeleting.value = true;
 
-    if (!confirmed) {
-        return;
-    }
-
+    let completed = 0;
     artifacts.forEach((artifact) => {
         router.delete(artifactsRoute.destroy(artifact.id).url, {
             preserveScroll: true,
+            onFinish: () => {
+                completed++;
+                if (completed === artifacts.length) {
+                    isBulkDeleting.value = false;
+                    isBulkDeleteDialogOpen.value = false;
+                    clearSelection();
+                }
+            },
         });
     });
-
-    clearSelection();
 };
 
 // Export selected artifacts to CSV
@@ -237,29 +262,22 @@ const exportSelected = () => {
     <Head title="Artifacts" />
 
     <AppLayout :breadcrumbs="breadcrumbs">
-        <div
-            class="flex h-full flex-1 flex-col gap-6 overflow-x-auto rounded-xl p-6"
-        >
-            <div class="flex flex-col gap-6">
+        <AdminPage>
+            <AdminSection>
                 <!-- Header + Filters -->
-                <div
-                    class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center"
+                <AdminToolbar
+                    title="Artifacts"
+                    subtitle="Manage build artifacts and storage sync status."
                 >
-                    <div class="flex flex-col gap-1">
-                        <h1 class="text-2xl font-semibold tracking-tight">
-                            Artifacts
-                        </h1>
-                        <p class="text-sm text-muted-foreground">
-                            Manage build artifacts and storage sync status.
-                        </p>
-                    </div>
-                    <TableFilters
-                        :filters="filterConfig"
-                        :model-value="filterState"
-                        @update:model-value="handleFilterUpdate"
-                        @clear="handleFilterClear"
-                    />
-                </div>
+                    <template #filters>
+                        <TableFilters
+                            :filters="filterConfig"
+                            :model-value="filterState"
+                            @update:model-value="handleFilterUpdate"
+                            @clear="handleFilterClear"
+                        />
+                    </template>
+                </AdminToolbar>
 
                 <!-- Bulk Actions Toolbar -->
                 <DataTableBulkActions
@@ -273,27 +291,46 @@ const exportSelected = () => {
                         class="h-8"
                         @click="exportSelected"
                     >
-                        <Download class="mr-1.5 h-4 w-4" />
+                        <Download class="mr-2 h-4 w-4" />
                         Export CSV
                     </Button>
-                    <Button
-                        variant="destructive"
-                        size="sm"
-                        class="h-8"
-                        @click="bulkDelete"
+                    <ConfirmDialog
+                        v-model:open="isBulkDeleteDialogOpen"
+                        title="Delete Artifacts?"
+                        :description="`Delete ${selectedCount} artifact(s)? This will also delete files from storage. This action cannot be undone.`"
+                        confirm-label="Delete"
+                        :loading="isBulkDeleting"
+                        @confirm="confirmBulkDelete"
                     >
-                        <Trash2 class="mr-1.5 h-4 w-4" />
-                        Delete Selected
-                    </Button>
+                        <template #trigger>
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                class="h-8"
+                            >
+                                <Trash2 class="mr-2 h-4 w-4" />
+                                Delete Selected
+                            </Button>
+                        </template>
+                    </ConfirmDialog>
                 </DataTableBulkActions>
 
                 <!-- Table -->
                 <div class="space-y-4">
+                    <AdminLoadingState v-if="isInitialLoad" :rows="5" />
                     <DataTableRoot
+                        v-else
                         :table="table"
                         :columns="columns"
-                        empty-message="No artifacts found."
-                    />
+                    >
+                        <template #empty>
+                            <AdminEmptyState
+                                icon="Package"
+                                title="No artifacts yet"
+                                description="Artifacts will be created automatically when you publish releases."
+                            />
+                        </template>
+                    </DataTableRoot>
 
                     <!-- Pagination -->
                     <DataTablePagination
@@ -303,45 +340,19 @@ const exportSelected = () => {
                         @page-size-change="handlePageSizeChange"
                     />
                 </div>
-            </div>
-        </div>
+            </AdminSection>
+        </AdminPage>
 
         <!-- Delete Confirmation Dialog -->
-        <AlertDialog
-            :open="showDeleteDialog"
-            @update:open="showDeleteDialog = $event"
-        >
-            <AlertDialogContent>
-                <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Artifact</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Are you sure you want to delete "{{
-                            artifactToDelete?.filename
-                        }}"?
-                        <span
-                            v-if="
-                                artifactToDelete?.source === 'r2' ||
-                                artifactToDelete?.source === 's3'
-                            "
-                            class="mt-2 block font-medium text-destructive"
-                        >
-                            This will also delete the file from R2 storage.
-                        </span>
-                        This action cannot be undone.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel @click="cancelDelete"
-                        >Cancel</AlertDialogCancel
-                    >
-                    <AlertDialogAction
-                        @click="handleDelete"
-                        class="bg-destructive hover:bg-destructive/90"
-                    >
-                        Delete
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDialog
+            v-model:open="showDeleteDialog"
+            title="Delete Artifact"
+            :description="`Are you sure you want to delete &quot;${artifactToDelete?.filename}&quot;? ${artifactToDelete?.source === 'r2' || artifactToDelete?.source === 's3' ? 'This will also delete the file from storage.' : ''} This action cannot be undone.`"
+            confirm-label="Delete"
+            :show-trigger="false"
+            :loading="isDeleting"
+            @confirm="handleDelete"
+            @cancel="cancelDelete"
+        />
     </AppLayout>
 </template>
