@@ -13,10 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call([
+        $seeders = [
             AdminUserSeeder::class,
             ProductSeeder::class,
-            DummyDataSeeder::class,
-        ]);
+        ];
+
+        if (app()->isLocal()) {
+            $seeders[] = DummyDataSeeder::class;
+        }
+
+        $this->call($seeders);
     }
 }
