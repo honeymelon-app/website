@@ -28,8 +28,16 @@ class GithubWebhookController extends Controller
             isMajor: (bool) ($data['major'] ?? false),
             userId: auth()->id(),
             payload: [
-                'notes' => $data['notes'],
+                'name' => $data['name'] ?? null,
+                'notes' => $data['notes'] ?? null,
                 'published_at' => $data['published_at'],
+                'author' => $data['author'] ?? null,
+                'html_url' => $data['html_url'] ?? null,
+                'target_commitish' => $data['target_commitish'] ?? null,
+                'github_id' => $data['github_id'] ?? null,
+                'prerelease' => $data['prerelease'] ?? false,
+                'draft' => $data['draft'] ?? false,
+                'github_created_at' => $data['github_created_at'] ?? null,
                 'artifacts' => $data['artifacts'] ?? [],
             ],
         );

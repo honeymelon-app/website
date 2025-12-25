@@ -59,11 +59,19 @@ class ProcessGithubReleaseJob implements ShouldQueue
                 // Create release record
                 $release = $releaseService->recordRelease([
                     'version' => $this->version,
+                    'name' => $this->payload['name'] ?? null,
                     'tag' => $this->tag,
                     'commit_hash' => $this->commitHash,
+                    'author' => $this->payload['author'] ?? null,
+                    'html_url' => $this->payload['html_url'] ?? null,
+                    'target_commitish' => $this->payload['target_commitish'] ?? null,
+                    'github_id' => $this->payload['github_id'] ?? null,
                     'channel' => $this->channel,
+                    'prerelease' => $this->payload['prerelease'] ?? false,
+                    'draft' => $this->payload['draft'] ?? false,
                     'notes' => $notes,
                     'published_at' => $publishedAt ?? now()->toIso8601String(),
+                    'github_created_at' => $this->payload['github_created_at'] ?? null,
                     'major' => $this->isMajor,
                     'user_id' => $this->userId,
                 ]);
@@ -83,13 +91,19 @@ class ProcessGithubReleaseJob implements ShouldQueue
                     $releaseService->attachArtifact($release, [
                         'platform' => $platform,
                         'source' => $asset['source'] ?? 'r2',
+                        'state' => $asset['state'] ?? null,
                         'filename' => $asset['filename'] ?? $asset['name'] ?? null,
+                        'content_type' => $asset['content_type'] ?? null,
                         'size' => $asset['size'] ?? 0,
+                        'download_count' => $asset['download_count'] ?? 0,
                         'sha256' => $asset['sha256'] ?? null,
                         'signature' => $asset['signature'] ?? null,
                         'notarized' => (bool) ($asset['notarized'] ?? false),
                         'url' => $asset['url'] ?? $asset['path'] ?? null,
                         'path' => $asset['path'] ?? null,
+                        'github_id' => $asset['github_id'] ?? null,
+                        'github_created_at' => $asset['github_created_at'] ?? null,
+                        'github_updated_at' => $asset['github_updated_at'] ?? null,
                     ]);
 
                     Log::info('Artifact attached', [

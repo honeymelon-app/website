@@ -26,7 +26,7 @@ class GithubService implements GitRepository
     /**
      * Fetch all releases from GitHub.
      *
-     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}>
+     * @return array<int, array{id: int, github_id: int, tag: string, name: string, notes: string, published_at: string, created_at: string, prerelease: bool, draft: bool, author: ?string, html_url: string, target_commitish: string, assets: array<int, array{id: int, name: string, url: string, size: int, content_type: string, download_count: int, state: string, created_at: string, updated_at: string}>}>
      */
     public function fetchAllReleases(): array
     {
@@ -195,18 +195,23 @@ class GithubService implements GitRepository
      * Map a GitHub release to our internal format.
      *
      * @param  array<string, mixed>  $release
-     * @return array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}
+     * @return array{id: int, github_id: int, tag: string, name: string, notes: string, published_at: string, created_at: string, prerelease: bool, draft: bool, author: ?string, html_url: string, target_commitish: string, assets: array<int, array{id: int, name: string, url: string, size: int, content_type: string, download_count: int, state: string, created_at: string, updated_at: string}>}
      */
     protected function mapRelease(array $release): array
     {
         return [
             'id' => $release['id'],
+            'github_id' => $release['id'],
             'tag' => $release['tag_name'],
             'name' => $release['name'] ?? $release['tag_name'],
             'notes' => $release['body'] ?? '',
             'published_at' => $release['published_at'] ?? $release['created_at'],
+            'created_at' => $release['created_at'],
             'prerelease' => $release['prerelease'] ?? false,
             'draft' => $release['draft'] ?? false,
+            'author' => $release['author']['login'] ?? null,
+            'html_url' => $release['html_url'] ?? '',
+            'target_commitish' => $release['target_commitish'] ?? '',
             'assets' => $this->mapAssets($release['assets'] ?? []),
         ];
     }
@@ -215,15 +220,21 @@ class GithubService implements GitRepository
      * Map GitHub assets to our internal format.
      *
      * @param  array<int, array<string, mixed>>  $assets
-     * @return array<int, array{name: string, url: string, size: int, sha256?: ?string, signature?: ?string}>
+     * @return array<int, array{id: int, name: string, url: string, size: int, content_type: string, download_count: int, state: string, created_at: string, updated_at: string, sha256?: ?string, signature?: ?string}>
      */
     protected function mapAssets(array $assets, bool $withChecksums = false): array
     {
         return array_map(function (array $asset) use ($withChecksums) {
             $mapped = [
+                'id' => $asset['id'],
                 'name' => $asset['name'],
                 'url' => $asset['browser_download_url'],
                 'size' => $asset['size'],
+                'content_type' => $asset['content_type'] ?? 'application/octet-stream',
+                'download_count' => $asset['download_count'] ?? 0,
+                'state' => $asset['state'] ?? 'uploaded',
+                'created_at' => $asset['created_at'] ?? now()->toIso8601String(),
+                'updated_at' => $asset['updated_at'] ?? now()->toIso8601String(),
             ];
 
             if ($withChecksums) {

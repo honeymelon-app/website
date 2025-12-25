@@ -31,11 +31,19 @@ class Release extends Model implements Filterable
     protected $fillable = [
         'product_id',
         'version',
+        'name',
         'tag',
         'commit_hash',
+        'author',
+        'html_url',
+        'target_commitish',
+        'github_id',
         'channel',
+        'prerelease',
+        'draft',
         'notes',
         'published_at',
+        'github_created_at',
         'is_downloadable',
         'major',
         'user_id',
@@ -50,7 +58,10 @@ class Release extends Model implements Filterable
     {
         return [
             'channel' => ReleaseChannel::class,
+            'prerelease' => 'boolean',
+            'draft' => 'boolean',
             'published_at' => 'datetime',
+            'github_created_at' => 'datetime',
             'is_downloadable' => 'boolean',
             'major' => 'boolean',
         ];

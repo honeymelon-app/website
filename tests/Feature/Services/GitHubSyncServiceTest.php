@@ -31,22 +31,77 @@ class GitHubSyncServiceTest extends TestCase
         parent::tearDown();
     }
 
+    /**
+     * Generate a complete GitHub release mock data structure.
+     */
+    protected function mockGithubRelease(array $overrides = []): array
+    {
+        $defaults = [
+            'id' => 123,
+            'github_id' => 123,
+            'tag' => 'v1.0.0',
+            'name' => 'Version 1.0.0',
+            'notes' => 'Release notes',
+            'published_at' => '2024-01-15T10:00:00Z',
+            'created_at' => '2024-01-15T09:00:00Z',
+            'prerelease' => false,
+            'draft' => false,
+            'author' => 'johndoe',
+            'html_url' => 'https://github.com/test/repo/releases/tag/v1.0.0',
+            'target_commitish' => 'main',
+            'assets' => [],
+        ];
+
+        return array_merge($defaults, $overrides);
+    }
+
+    /**
+     * Generate a complete GitHub asset mock data structure.
+     */
+    protected function mockGithubAsset(array $overrides = []): array
+    {
+        $defaults = [
+            'id' => 456,
+            'name' => 'Honeymelon_1.0.0_aarch64.dmg',
+            'url' => 'https://github.com/test/releases/download/v1.0.0/Honeymelon_1.0.0_aarch64.dmg',
+            'size' => 50000000,
+            'content_type' => 'application/x-apple-diskimage',
+            'download_count' => 0,
+            'state' => 'uploaded',
+            'created_at' => '2024-01-15T10:00:00Z',
+            'updated_at' => '2024-01-15T10:00:00Z',
+        ];
+
+        return array_merge($defaults, $overrides);
+    }
+
     public function test_syncs_new_release_from_github(): void
     {
         $githubReleases = [
             [
                 'id' => 123,
+                'github_id' => 123,
                 'tag' => 'v1.0.0',
                 'name' => 'Version 1.0.0',
                 'notes' => 'Initial release',
                 'published_at' => '2024-01-15T10:00:00Z',
+                'created_at' => '2024-01-15T09:00:00Z',
                 'prerelease' => false,
                 'draft' => false,
+                'author' => 'johndoe',
+                'html_url' => 'https://github.com/test/repo/releases/tag/v1.0.0',
+                'target_commitish' => 'main',
                 'assets' => [
                     [
+                        'id' => 456,
                         'name' => 'Honeymelon_1.0.0_aarch64.dmg',
                         'url' => 'https://github.com/test/releases/download/v1.0.0/Honeymelon_1.0.0_aarch64.dmg',
                         'size' => 50000000,
+                        'content_type' => 'application/x-apple-diskimage',
+                        'download_count' => 42,
+                        'state' => 'uploaded',
+                        'created_at' => '2024-01-15T10:00:00Z',
+                        'updated_at' => '2024-01-15T10:00:00Z',
                     ],
                 ],
             ],
@@ -73,14 +128,23 @@ class GitHubSyncServiceTest extends TestCase
         $this->assertDatabaseHas('releases', [
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
+            'name' => 'Version 1.0.0',
             'notes' => 'Initial release',
             'commit_hash' => 'abc123def456',
+            'author' => 'johndoe',
+            'html_url' => 'https://github.com/test/repo/releases/tag/v1.0.0',
+            'target_commitish' => 'main',
+            'github_id' => 123,
         ]);
 
         $this->assertDatabaseHas('artifacts', [
             'platform' => 'darwin-aarch64',
             'filename' => 'Honeymelon_1.0.0_aarch64.dmg',
             'source' => 'github',
+            'content_type' => 'application/x-apple-diskimage',
+            'download_count' => 42,
+            'state' => 'uploaded',
+            'github_id' => 456,
         ]);
     }
 
@@ -89,21 +153,27 @@ class GitHubSyncServiceTest extends TestCase
         $release = Release::factory()->create([
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
+            'name' => 'Version 1.0.0',
             'notes' => 'Initial release',
             'commit_hash' => 'abc123def456',
+            'github_id' => 123,
+            'author' => 'johndoe',
+            'html_url' => 'https://github.com/test/repo/releases/tag/v1.0.0',
+            'target_commitish' => 'main',
+            'prerelease' => false,
+            'draft' => false,
+            'published_at' => '2024-01-15T10:00:00Z',
+            'github_created_at' => '2024-01-15T09:00:00Z',
         ]);
 
         $githubReleases = [
-            [
+            $this->mockGithubRelease([
                 'id' => 123,
+                'github_id' => 123,
                 'tag' => 'v1.0.0',
                 'name' => 'Version 1.0.0',
                 'notes' => 'Initial release',
-                'published_at' => '2024-01-15T10:00:00Z',
-                'prerelease' => false,
-                'draft' => false,
-                'assets' => [],
-            ],
+            ]),
         ];
 
         $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
@@ -131,19 +201,16 @@ class GitHubSyncServiceTest extends TestCase
             'version' => '1.0.0',
             'notes' => 'Old notes',
             'commit_hash' => 'abc123def456',
+            'github_id' => 123,
         ]);
 
         $githubReleases = [
-            [
+            $this->mockGithubRelease([
                 'id' => 123,
+                'github_id' => 123,
                 'tag' => 'v1.0.0',
-                'name' => 'Version 1.0.0',
                 'notes' => 'Updated release notes',
-                'published_at' => '2024-01-15T10:00:00Z',
-                'prerelease' => false,
-                'draft' => false,
-                'assets' => [],
-            ],
+            ]),
         ];
 
         $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
@@ -169,16 +236,12 @@ class GitHubSyncServiceTest extends TestCase
     public function test_skips_draft_releases(): void
     {
         $githubReleases = [
-            [
-                'id' => 123,
+            $this->mockGithubRelease([
                 'tag' => 'v1.0.0',
                 'name' => 'Draft Release',
                 'notes' => 'Not ready yet',
-                'published_at' => '2024-01-15T10:00:00Z',
-                'prerelease' => false,
                 'draft' => true,
-                'assets' => [],
-            ],
+            ]),
         ];
 
         $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
@@ -199,16 +262,12 @@ class GitHubSyncServiceTest extends TestCase
     public function test_detects_prerelease_as_beta_channel(): void
     {
         $githubReleases = [
-            [
-                'id' => 123,
+            $this->mockGithubRelease([
                 'tag' => 'v1.0.0',
                 'name' => 'Beta Release',
                 'notes' => 'Beta notes',
-                'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => true,
-                'draft' => false,
-                'assets' => [],
-            ],
+            ]),
         ];
 
         $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
@@ -231,16 +290,12 @@ class GitHubSyncServiceTest extends TestCase
     public function test_detects_alpha_channel_from_tag(): void
     {
         $githubReleases = [
-            [
-                'id' => 123,
+            $this->mockGithubRelease([
                 'tag' => 'v1.0.0-alpha.1',
                 'name' => 'Alpha Release',
                 'notes' => 'Alpha notes',
-                'published_at' => '2024-01-15T10:00:00Z',
                 'prerelease' => true,
-                'draft' => false,
-                'assets' => [],
-            ],
+            ]),
         ];
 
         $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
@@ -267,25 +322,21 @@ class GitHubSyncServiceTest extends TestCase
             'version' => '1.0.0',
             'notes' => 'Initial release',
             'commit_hash' => 'abc123def456',
+            'github_id' => 123,
         ]);
 
         $githubReleases = [
-            [
+            $this->mockGithubRelease([
                 'id' => 123,
+                'github_id' => 123,
                 'tag' => 'v1.0.0',
-                'name' => 'Version 1.0.0',
-                'notes' => 'Initial release',
-                'published_at' => '2024-01-15T10:00:00Z',
-                'prerelease' => false,
-                'draft' => false,
                 'assets' => [
-                    [
+                    $this->mockGithubAsset([
                         'name' => 'Honeymelon_1.0.0_aarch64.dmg',
-                        'url' => 'https://github.com/test/releases/download/v1.0.0/Honeymelon_1.0.0_aarch64.dmg',
                         'size' => 50000000,
-                    ],
+                    ]),
                 ],
-            ],
+            ]),
         ];
 
         $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
@@ -316,8 +367,17 @@ class GitHubSyncServiceTest extends TestCase
         $release = Release::factory()->create([
             'tag' => 'v1.0.0',
             'version' => '1.0.0',
-            'notes' => 'Initial release',
+            'name' => 'Version 1.0.0',
+            'notes' => 'Release notes',
             'commit_hash' => 'abc123def456',
+            'github_id' => 123,
+            'author' => 'johndoe',
+            'html_url' => 'https://github.com/test/repo/releases/tag/v1.0.0',
+            'target_commitish' => 'main',
+            'prerelease' => false,
+            'draft' => false,
+            'published_at' => '2024-01-15T10:00:00Z',
+            'github_created_at' => '2024-01-15T09:00:00Z',
         ]);
 
         $artifact = Artifact::factory()->create([
@@ -330,22 +390,17 @@ class GitHubSyncServiceTest extends TestCase
         ]);
 
         $githubReleases = [
-            [
+            $this->mockGithubRelease([
                 'id' => 123,
+                'github_id' => 123,
                 'tag' => 'v1.0.0',
-                'name' => 'Version 1.0.0',
-                'notes' => 'Initial release',
-                'published_at' => '2024-01-15T10:00:00Z',
-                'prerelease' => false,
-                'draft' => false,
                 'assets' => [
-                    [
+                    $this->mockGithubAsset([
                         'name' => 'Honeymelon_1.0.0_aarch64.dmg',
-                        'url' => 'https://github.com/test/releases/download/v1.0.0/Honeymelon_1.0.0_aarch64.dmg',
                         'size' => 55000000,
-                    ],
+                    ]),
                 ],
-            ],
+            ]),
         ];
 
         $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {
@@ -377,6 +432,7 @@ class GitHubSyncServiceTest extends TestCase
             'version' => '1.0.0',
             'notes' => 'Initial release',
             'commit_hash' => 'abc123def456',
+            'github_id' => 123,
         ]);
 
         Artifact::factory()->create([
@@ -388,22 +444,17 @@ class GitHubSyncServiceTest extends TestCase
         ]);
 
         $githubReleases = [
-            [
+            $this->mockGithubRelease([
                 'id' => 123,
+                'github_id' => 123,
                 'tag' => 'v1.0.0',
-                'name' => 'Version 1.0.0',
-                'notes' => 'Initial release',
-                'published_at' => '2024-01-15T10:00:00Z',
-                'prerelease' => false,
-                'draft' => false,
                 'assets' => [
-                    [
+                    $this->mockGithubAsset([
                         'name' => 'Honeymelon_1.0.0_aarch64.dmg',
-                        'url' => 'https://github.com/test/releases/download/v1.0.0/Honeymelon_1.0.0_aarch64.dmg',
                         'size' => 50000000,
-                    ],
+                    ]),
                 ],
-            ],
+            ]),
         ];
 
         $this->mock(GitRepository::class, function (MockInterface $mock) use ($githubReleases) {

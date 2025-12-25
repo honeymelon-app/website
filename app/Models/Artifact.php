@@ -27,13 +27,19 @@ class Artifact extends Model implements Filterable
     protected $fillable = [
         'platform',
         'source',
+        'state',
         'filename',
+        'content_type',
         'size',
+        'download_count',
         'sha256',
         'signature',
         'notarized',
         'url',
         'path',
+        'github_id',
+        'github_created_at',
+        'github_updated_at',
         'release_id',
     ];
 
@@ -46,6 +52,8 @@ class Artifact extends Model implements Filterable
     {
         return [
             'notarized' => 'boolean',
+            'github_created_at' => 'datetime',
+            'github_updated_at' => 'datetime',
         ];
     }
 

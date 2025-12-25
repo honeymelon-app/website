@@ -15,13 +15,21 @@ return new class extends Migration
     {
         Schema::create('releases', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->unsignedBigInteger('github_id')->nullable()->unique();
             $table->foreignUuid('product_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('version', 50)->index();
+            $table->string('name')->nullable();
             $table->string('tag', 50)->index();
             $table->string('commit_hash', 1024)->index();
+            $table->string('author')->nullable();
+            $table->string('html_url')->nullable();
+            $table->string('target_commitish')->nullable();
             $table->string('channel', 16)->default(ReleaseChannel::STABLE->value)->index();
+            $table->boolean('prerelease')->default(false);
+            $table->boolean('draft')->default(false);
             $table->text('notes')->nullable();
             $table->timestamp('published_at')->nullable();
+            $table->timestamp('github_created_at')->nullable();
             $table->boolean('is_downloadable')->default(false);
             $table->boolean('major')->default(false);
             $table->foreignIdFor(User::class)->nullable()->index();

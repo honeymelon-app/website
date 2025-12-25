@@ -13,7 +13,7 @@ interface GitRepository
     /**
      * Fetch all releases.
      *
-     * @return array<int, array{id: int, tag: string, name: string, notes: string, published_at: string, prerelease: bool, draft: bool, assets: array<int, array{name: string, url: string, size: int}>}>
+     * @return array<int, array{id: int, github_id: int, tag: string, name: string, notes: string, published_at: string, created_at: string, prerelease: bool, draft: bool, author: ?string, html_url: string, target_commitish: string, assets: array<int, array{id: int, name: string, url: string, size: int, content_type: string, download_count: int, state: string, created_at: string, updated_at: string}>}>
      */
     public function fetchAllReleases(): array;
 

@@ -15,7 +15,7 @@ class ReleaseService
      * Record a release from GitHub data.
      * Uses updateOrCreate for idempotency when webhooks are retried.
      *
-     * @param  array{version: string, tag: string, commit_hash: string, channel: string, notes: string, published_at: string, major: bool, user_id: ?int}  $data
+     * @param  array{version: string, name?: string, tag: string, commit_hash: string, author?: ?string, html_url?: string, target_commitish?: string, github_id?: int, channel: string, prerelease?: bool, draft?: bool, notes: string, published_at: string, github_created_at?: string, major: bool, user_id: ?int}  $data
      */
     public function recordRelease(array $data): Release
     {
@@ -36,8 +36,16 @@ class ReleaseService
             ],
             [
                 'product_id' => $product->id,
+                'name' => $data['name'] ?? null,
+                'author' => $data['author'] ?? null,
+                'html_url' => $data['html_url'] ?? null,
+                'target_commitish' => $data['target_commitish'] ?? null,
+                'github_id' => $data['github_id'] ?? null,
+                'prerelease' => $data['prerelease'] ?? false,
+                'draft' => $data['draft'] ?? false,
                 'notes' => $data['notes'],
                 'published_at' => $data['published_at'],
+                'github_created_at' => $data['github_created_at'] ?? null,
                 'major' => $data['major'],
                 'user_id' => $data['user_id'] ?? null,
             ]
@@ -55,7 +63,7 @@ class ReleaseService
      * Attach an artifact to a release.
      * Uses updateOrCreate for idempotency when webhooks are retried.
      *
-     * @param  array{platform: string, source: string, filename: string, size: int, sha256: ?string, signature: ?string, notarized: bool, url: string, path: ?string}  $artifactData
+     * @param  array{platform: string, source: string, state?: string, filename: string, content_type?: string, size: int, download_count?: int, sha256: ?string, signature: ?string, notarized: bool, url: string, path: ?string, github_id?: int, github_created_at?: string, github_updated_at?: string}  $artifactData
      */
     public function attachArtifact(Release $release, array $artifactData): Artifact
     {
@@ -71,12 +79,18 @@ class ReleaseService
             ],
             [
                 'source' => $artifactData['source'],
+                'state' => $artifactData['state'] ?? null,
+                'content_type' => $artifactData['content_type'] ?? null,
                 'size' => $artifactData['size'],
+                'download_count' => $artifactData['download_count'] ?? 0,
                 'sha256' => $artifactData['sha256'],
                 'signature' => $artifactData['signature'],
                 'notarized' => $artifactData['notarized'],
                 'url' => $artifactData['url'],
                 'path' => $artifactData['path'] ?? null,
+                'github_id' => $artifactData['github_id'] ?? null,
+                'github_created_at' => $artifactData['github_created_at'] ?? null,
+                'github_updated_at' => $artifactData['github_updated_at'] ?? null,
             ]
         );
 
