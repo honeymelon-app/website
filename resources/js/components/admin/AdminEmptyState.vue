@@ -37,10 +37,7 @@ defineProps<Props>();
                 <div
                     class="flex h-16 w-16 items-center justify-center rounded-full bg-muted"
                 >
-                    <Icon
-                        :name="icon"
-                        class="h-8 w-8 text-muted-foreground"
-                    />
+                    <Icon :name="icon" class="h-8 w-8 text-muted-foreground" />
                 </div>
                 <div class="flex flex-col gap-1">
                     <h3 class="text-lg font-semibold">{{ title }}</h3>

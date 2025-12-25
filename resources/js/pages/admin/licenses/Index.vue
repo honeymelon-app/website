@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import {
+    AdminLoadingState,
+    AdminPage,
+    AdminSection,
+    AdminToolbar,
+    ConfirmDialog,
+} from '@/components/admin';
 import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
-import { AdminLoadingState, AdminPage, AdminSection, AdminToolbar, ConfirmDialog } from '@/components/admin';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -370,8 +376,9 @@ const handleIssueLicense = (): void => {
                                             >Max Major Version</Label
                                         >
                                         <Select
-                                            v-model="issueForm.max_major_version
-                                                "
+                                            v-model="
+                                                issueForm.max_major_version
+                                            "
                                         >
                                             <SelectTrigger
                                                 id="max_major_version"
@@ -523,11 +530,7 @@ const handleIssueLicense = (): void => {
                 <!-- Table -->
                 <div class="space-y-4">
                     <AdminLoadingState v-if="isInitialLoad" :rows="5" />
-                    <DataTableRoot
-                        v-else
-                        :table="table"
-                        :columns="columns"
-                    >
+                    <DataTableRoot v-else :table="table" :columns="columns">
                         <template #empty>
                             <AdminEmptyState
                                 icon="KeyRound"
@@ -586,8 +589,9 @@ const handleIssueLicense = (): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="getStatusVariant(selectedLicense.status)
-                                    "
+                                :variant="
+                                    getStatusVariant(selectedLicense.status)
+                                "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -669,7 +673,7 @@ const handleIssueLicense = (): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                            isDetailsDialogOpen = false;
+                                isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />

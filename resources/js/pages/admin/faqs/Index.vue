@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import {
+    AdminLoadingState,
+    AdminPage,
+    AdminSection,
+    AdminToolbar,
+    ConfirmDialog,
+} from '@/components/admin';
 import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
-import { AdminLoadingState, AdminPage, AdminSection, AdminToolbar, ConfirmDialog } from '@/components/admin';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -314,11 +320,7 @@ const openCreateDialog = (): void => {
                 <!-- Table -->
                 <div class="space-y-4">
                     <AdminLoadingState v-if="isInitialLoad" :rows="5" />
-                    <DataTableRoot
-                        v-else
-                        :table="table"
-                        :columns="columns"
-                    >
+                    <DataTableRoot v-else :table="table" :columns="columns">
                         <template #empty>
                             <AdminEmptyState
                                 icon="MessageCircleQuestion"
@@ -552,10 +554,7 @@ const openCreateDialog = (): void => {
                                     v-model="editForm.is_active"
                                     :disabled="editForm.processing"
                                 />
-                                <Label
-                                    for="edit-is-active"
-                                    class="font-normal"
-                                >
+                                <Label for="edit-is-active" class="font-normal">
                                     {{
                                         editForm.is_active
                                             ? 'Active'
@@ -596,9 +595,7 @@ const openCreateDialog = (): void => {
             :show-trigger="false"
             @confirm="confirmDeleteFaq"
         >
-            <p class="mb-4">
-                Are you sure you want to delete this FAQ?
-            </p>
+            <p class="mb-4">Are you sure you want to delete this FAQ?</p>
             <p
                 v-if="faqToDelete"
                 class="mb-4 rounded bg-muted p-3 text-sm font-medium"

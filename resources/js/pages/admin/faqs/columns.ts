@@ -74,11 +74,7 @@ export const columns: ColumnDef<Faq>[] = [
                 () => ['Question', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })],
             ),
         cell: ({ row }) =>
-            h(
-                'span',
-                { class: 'font-medium' },
-                row.getValue('question'),
-            ),
+            h('span', { class: 'font-medium' }, row.getValue('question')),
     },
     {
         accessorKey: 'is_active',
@@ -97,7 +93,9 @@ export const columns: ColumnDef<Faq>[] = [
             h(
                 Badge,
                 {
-                    variant: row.getValue('is_active') ? 'default' : 'secondary',
+                    variant: row.getValue('is_active')
+                        ? 'default'
+                        : 'secondary',
                 },
                 () => (row.getValue('is_active') ? 'Active' : 'Inactive'),
             ),
@@ -182,4 +180,3 @@ export const columns: ColumnDef<Faq>[] = [
         size: 80,
     },
 ];
-

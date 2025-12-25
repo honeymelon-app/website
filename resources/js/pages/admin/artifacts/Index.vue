@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
 import {
     AdminLoadingState,
     AdminPage,
@@ -7,6 +6,7 @@ import {
     AdminToolbar,
     ConfirmDialog,
 } from '@/components/admin';
+import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -186,14 +186,6 @@ onMounted(() => {
     }, 150);
 });
 
-// Bulk delete action
-const bulkDelete = () => {
-    if (selectedRows.value.length === 0) {
-        return;
-    }
-    isBulkDeleteDialogOpen.value = true;
-};
-
 const confirmBulkDelete = () => {
     const artifacts = selectedRows.value;
 
@@ -303,11 +295,7 @@ const exportSelected = () => {
                         @confirm="confirmBulkDelete"
                     >
                         <template #trigger>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                class="h-8"
-                            >
+                            <Button variant="destructive" size="sm" class="h-8">
                                 <Trash2 class="mr-2 h-4 w-4" />
                                 Delete Selected
                             </Button>
@@ -318,11 +306,7 @@ const exportSelected = () => {
                 <!-- Table -->
                 <div class="space-y-4">
                     <AdminLoadingState v-if="isInitialLoad" :rows="5" />
-                    <DataTableRoot
-                        v-else
-                        :table="table"
-                        :columns="columns"
-                    >
+                    <DataTableRoot v-else :table="table" :columns="columns">
                         <template #empty>
                             <AdminEmptyState
                                 icon="Package"

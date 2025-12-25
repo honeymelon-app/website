@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
 import {
     AdminLoadingState,
     AdminPage,
@@ -7,6 +6,7 @@ import {
     AdminToolbar,
     ConfirmDialog,
 } from '@/components/admin';
+import AdminEmptyState from '@/components/admin/AdminEmptyState.vue';
 import {
     DataTableBulkActions,
     DataTablePagination,
@@ -145,14 +145,6 @@ onMounted(() => {
     }, 150);
 });
 
-// Bulk refund action
-const bulkRefund = () => {
-    if (refundableCount.value === 0) {
-        return;
-    }
-    isBulkRefundDialogOpen.value = true;
-};
-
 const confirmBulkRefund = () => {
     const orders = selectedRows.value.filter((order) => order.can_be_refunded);
 
@@ -280,11 +272,7 @@ const exportSelected = () => {
                 <!-- Table -->
                 <div class="space-y-4">
                     <AdminLoadingState v-if="isInitialLoad" :rows="5" />
-                    <DataTableRoot
-                        v-else
-                        :table="table"
-                        :columns="columns"
-                    >
+                    <DataTableRoot v-else :table="table" :columns="columns">
                         <template #empty>
                             <AdminEmptyState
                                 icon="Receipt"
