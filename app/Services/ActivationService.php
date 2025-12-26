@@ -6,6 +6,7 @@ namespace App\Services;
 
 use App\Enums\LicenseStatus;
 use App\Models\License;
+use App\Support\Semver;
 use Illuminate\Support\Facades\Log;
 
 class ActivationService
@@ -19,6 +20,10 @@ class ActivationService
 
     public const ERROR_LICENSE_ALREADY_ACTIVATED = 'license_already_activated';
 
+    public const ERROR_LICENSE_VERSION_NOT_ALLOWED = 'license_version_not_allowed';
+
+    public const ERROR_INVALID_APP_VERSION = 'invalid_app_version';
+
     public function __construct(
         protected LicenseService $licenseService
     ) {}
@@ -30,6 +35,15 @@ class ActivationService
      */
     public function activate(string $licenseKey, string $appVersion, ?string $deviceId = null): array
     {
+        $appMajor = Semver::major($appVersion);
+        if ($appMajor === null) {
+            return [
+                'success' => false,
+                'error' => 'Invalid app version.',
+                'error_code' => self::ERROR_INVALID_APP_VERSION,
+            ];
+        }
+
         // Find and validate the license in one call
         ['license' => $license, 'is_valid' => $isValid] = $this->licenseService->findAndValidate($licenseKey);
 
@@ -67,7 +81,21 @@ class ActivationService
         }
 
         // Check if already activated (one-time activation)
+        // Allow idempotent re-activation on the same device (supports reinstall),
+        // but do not allow switching devices without support.
         if ($license->isActivated()) {
+            if ($deviceId !== null && $license->device_id !== null && hash_equals($license->device_id, $deviceId)) {
+                Log::info('Activation replay accepted for same device', [
+                    'license_id' => $license->id,
+                    'device_id' => $deviceId,
+                ]);
+
+                return [
+                    'success' => true,
+                    'license' => $this->formatLicenseResponse($license, $appVersion),
+                ];
+            }
+
             Log::info('Activation attempted for already-activated license', [
                 'license_id' => $license->id,
                 'activated_at' => $license->activated_at,
@@ -93,6 +121,23 @@ class ActivationService
             ];
         }
 
+        // Enforce major-version licensing (255 == lifetime/all majors)
+        $maxMajor = (int) ($license->max_major_version ?? 0);
+        if ($maxMajor !== 255 && $appMajor > $maxMajor) {
+            Log::info('Activation attempted for unsupported app major version', [
+                'license_id' => $license->id,
+                'app_version' => $appVersion,
+                'app_major' => $appMajor,
+                'max_major_version' => $maxMajor,
+            ]);
+
+            return [
+                'success' => false,
+                'error' => "This license is valid up to Honeymelon {$maxMajor}.x.",
+                'error_code' => self::ERROR_LICENSE_VERSION_NOT_ALLOWED,
+            ];
+        }
+
         // Activate the license
         $license->markAsActivated($deviceId);
 
@@ -106,19 +151,38 @@ class ActivationService
         // The original signed key is already verifiable by the app
         return [
             'success' => true,
-            'license' => [
-                'id' => $license->id,
-                'key' => $license->key_plain,
-                'order_id' => $license->order_id,
-                'status' => $license->status->value,
-                'activated_at' => $license->activated_at->timestamp,
-                'max_major_version' => $license->max_major_version,
-                'product' => 'honeymelon',
-                'app_version' => $appVersion,
-                // Include the signed payload and signature for offline verification
-                'payload' => $license->meta['payload'] ?? null,
-                'signature' => $license->meta['signature'] ?? null,
-            ],
+            'license' => $this->formatLicenseResponse($license, $appVersion),
+        ];
+    }
+
+    /**
+     * @return array{
+     *   id: string,
+     *   key: ?string,
+     *   order_id: string,
+     *   status: string,
+     *   activated_at: int,
+     *   max_major_version: int,
+     *   product: string,
+     *   app_version: string,
+     *   payload: ?string,
+     *   signature: ?string
+     * }
+     */
+    private function formatLicenseResponse(License $license, string $appVersion): array
+    {
+        return [
+            'id' => $license->id,
+            'key' => $license->key_plain,
+            'order_id' => $license->order_id,
+            'status' => $license->status->value,
+            'activated_at' => $license->activated_at?->timestamp ?? now()->timestamp,
+            'max_major_version' => (int) ($license->max_major_version ?? 0),
+            'product' => 'honeymelon',
+            'app_version' => $appVersion,
+            // Include the signed payload and signature for offline verification
+            'payload' => $license->meta['payload'] ?? null,
+            'signature' => $license->meta['signature'] ?? null,
         ];
     }
 }

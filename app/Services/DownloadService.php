@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Constants\DateRanges;
 use App\Models\Artifact;
 use App\Models\Download;
 use App\Models\License;
 use App\Models\User;
+use App\Support\Semver;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -51,6 +54,13 @@ class DownloadService
                     'license_last4' => substr($licenseKey, -4),
                 ]);
                 throw new AccessDeniedHttpException('Invalid or expired license key');
+            }
+
+            $requestedMajor = Semver::major($version);
+            $maxMajor = (int) ($license->max_major_version ?? 0);
+
+            if ($requestedMajor !== null && $maxMajor !== 255 && $requestedMajor > $maxMajor) {
+                throw new AccessDeniedHttpException("Your license is valid up to Honeymelon {$maxMajor}.x");
             }
         }
 
@@ -111,7 +121,10 @@ class DownloadService
         if (in_array($artifact->source, ['r2', 's3']) && $artifact->path) {
             $disk = $artifact->source === 'r2' ? 'r2' : 's3';
 
-            return Storage::disk($disk)->temporaryUrl(
+            /** @var FilesystemAdapter $filesystem */
+            $filesystem = Storage::disk($disk);
+
+            return $filesystem->temporaryUrl(
                 $artifact->path,
                 now()->addMinutes(DateRanges::TEMPORARY_URL_MINUTES),
                 [

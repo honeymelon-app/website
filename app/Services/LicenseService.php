@@ -28,7 +28,7 @@ class LicenseService implements LicenseManager
     {
         $license = License::make([
             'status' => LicenseStatus::ACTIVE,
-            'max_major_version' => max(0, min(999, (int) ($orderData['max_major_version'] ?? 0))),
+            'max_major_version' => max(0, min(255, (int) ($orderData['max_major_version'] ?? 0))),
             'order_id' => $orderData['order_id'],
         ]);
 

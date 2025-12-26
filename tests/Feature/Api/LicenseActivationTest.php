@@ -78,6 +78,7 @@ class LicenseActivationTest extends TestCase
             'status' => LicenseStatus::ACTIVE,
             'activated_at' => now(),
             'activation_count' => 1,
+            'device_id' => 'test-device-123',
         ]);
 
         $response = $this->postJson('/api/licenses/activate', [
@@ -91,6 +92,42 @@ class LicenseActivationTest extends TestCase
                 'error' => 'This license has already been activated.',
                 'error_code' => 'license_already_activated',
             ]);
+    }
+
+    public function test_can_reactivate_already_activated_license_on_same_device(): void
+    {
+        $license = License::factory()->for($this->user)->for($this->order)->create([
+            'status' => LicenseStatus::ACTIVE,
+            'activated_at' => now(),
+            'activation_count' => 1,
+            'device_id' => 'test-device-123',
+        ]);
+
+        $activatedAt = $license->activated_at;
+
+        $response = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '1.0.0',
+            'device_id' => 'test-device-123',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'license' => [
+                    'id' => $license->id,
+                    'status' => 'active',
+                    'product' => 'honeymelon',
+                    'app_version' => '1.0.0',
+                ],
+            ]);
+
+        $license->refresh();
+        $this->assertEquals(1, $license->activation_count);
+        $this->assertEquals('test-device-123', $license->device_id);
+        $this->assertNotNull($license->activated_at);
+        $this->assertNotNull($activatedAt);
+        $this->assertEquals($activatedAt->timestamp, $license->activated_at->timestamp);
     }
 
     public function test_cannot_activate_refunded_license(): void
@@ -170,6 +207,45 @@ class LicenseActivationTest extends TestCase
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['app_version']);
+    }
+
+    public function test_cannot_activate_license_for_higher_app_major_version(): void
+    {
+        $license = License::factory()->for($this->user)->for($this->order)->create([
+            'status' => LicenseStatus::ACTIVE,
+            'activated_at' => null,
+            'max_major_version' => 1,
+        ]);
+
+        $response = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '2.0.0',
+        ]);
+
+        $response->assertForbidden()
+            ->assertJson([
+                'success' => false,
+                'error_code' => 'license_version_not_allowed',
+            ]);
+    }
+
+    public function test_activation_rejects_invalid_app_version(): void
+    {
+        $license = License::factory()->for($this->user)->for($this->order)->create([
+            'status' => LicenseStatus::ACTIVE,
+            'activated_at' => null,
+        ]);
+
+        $response = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => 'not-a-version',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'success' => false,
+                'error_code' => 'invalid_app_version',
+            ]);
     }
 
     public function test_refunded_license_cannot_be_reactivated(): void

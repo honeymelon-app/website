@@ -68,7 +68,7 @@ class IssueLicenseCommand extends Command
             }
         }
 
-        $maxMajor = (int) max(1, $this->option('major') ?? 1);
+        $maxMajor = (int) max(1, min(255, (int) ($this->option('major') ?? 1)));
 
         $license = $licenses->issue([
             'order_id' => $order->getKey(),

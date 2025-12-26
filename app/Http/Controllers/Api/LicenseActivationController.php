@@ -37,9 +37,18 @@ class LicenseActivationController extends Controller
                     $result['error'],
                     $result['error_code']
                 ),
+                ActivationService::ERROR_LICENSE_VERSION_NOT_ALLOWED => ApiResponse::forbidden(
+                    $result['error'],
+                    $result['error_code']
+                ),
                 ActivationService::ERROR_LICENSE_ALREADY_ACTIVATED => ApiResponse::conflict(
                     $result['error'],
                     $result['error_code']
+                ),
+                ActivationService::ERROR_INVALID_APP_VERSION => ApiResponse::error(
+                    $result['error'],
+                    status: 422,
+                    errorCode: $result['error_code']
                 ),
                 default => ApiResponse::error($result['error'], errorCode: $result['error_code'] ?? 'unknown_error'),
             };

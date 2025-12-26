@@ -120,7 +120,7 @@ const versionOptions = computed(() => [
         value: major.toString(),
         label: `Version ${major}.x`,
     })),
-    { value: '999', label: 'Lifetime (All Versions)' },
+    { value: '255', label: 'Lifetime (All Versions)' },
 ]);
 
 const defaultMaxMajorVersion = versionOptions.value[0]?.value ?? '1';

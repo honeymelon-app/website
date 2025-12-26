@@ -26,7 +26,7 @@ class StoreLicenseRequest extends FormRequest
     {
         return [
             'email' => ValidationRules::email(),
-            'max_major_version' => ['required', 'integer', 'min:0', 'max:999'],
+            'max_major_version' => ['required', 'integer', 'min:0', 'max:255'],
         ];
     }
 }
