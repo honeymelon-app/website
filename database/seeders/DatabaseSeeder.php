@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         $seeders = [
             AdminUserSeeder::class,
             ProductSeeder::class,
+            FaqSeeder::class,
         ];
 
         if (app()->isLocal()) {

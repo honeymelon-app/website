@@ -9,7 +9,6 @@ use App\Http\Controllers\Web\Admin\LicenseController;
 use App\Http\Controllers\Web\Admin\OrderController;
 use App\Http\Controllers\Web\Admin\ReleaseController;
 use App\Http\Controllers\Web\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Web\Auth\ConfirmablePasswordController;
 use App\Http\Controllers\Web\Auth\NewPasswordController;
 use App\Http\Controllers\Web\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Web\DownloadController;
@@ -100,9 +99,6 @@ Route::middleware('guest')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-    Route::get('confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
-    Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
-
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     // Redirect dashboard to admin dashboard (no customer dashboard - admin only platform)
