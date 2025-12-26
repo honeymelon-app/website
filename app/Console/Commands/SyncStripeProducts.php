@@ -14,7 +14,7 @@ class SyncStripeProducts extends Command
      *
      * @var string
      */
-    protected $signature = 'stripe:sync {--product= : Sync a specific product by slug}';
+    protected $signature = 'stripe:sync-products {--product= : Sync a specific product by slug}';
 
     /**
      * The console command description.

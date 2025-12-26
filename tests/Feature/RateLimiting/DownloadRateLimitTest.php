@@ -47,7 +47,16 @@ class DownloadRateLimitTest extends TestCase
         // Make 10 requests (the limit per minute)
         for ($i = 0; $i < 10; $i++) {
             $response = $this->get("/api/download?license={$license->key_plain}&version=1.0.0&platform=darwin-aarch64");
-            $this->assertTrue(in_array($response->status(), [302, 400, 403, 404]), "Request {$i} should succeed");
+            $this->assertTrue(
+                in_array($response->status(), [302, 400, 403, 404]),
+                sprintf(
+                    'Request %d should succeed; got status %d (content-type: %s, location: %s)',
+                    $i,
+                    $response->status(),
+                    (string) $response->headers->get('content-type'),
+                    (string) $response->headers->get('location')
+                )
+            );
         }
 
         // 11th request should be rate limited
