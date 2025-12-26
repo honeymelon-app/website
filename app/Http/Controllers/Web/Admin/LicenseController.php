@@ -17,7 +17,6 @@ use App\Services\LicenseService;
 use App\Support\IndexQueryParams;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -109,11 +108,10 @@ class LicenseController extends Controller
     {
         // Create a manual order for admin-issued licenses
         $order = Order::create([
-            'id' => (string) Str::uuid(),
             'provider' => 'manual',
             'external_id' => 'admin-'.now()->timestamp,
             'email' => $request->validated('email'),
-            'amount' => 0,
+            'amount_cents' => 0,
             'currency' => 'USD',
             'meta' => [
                 'issued_by' => 'admin',
