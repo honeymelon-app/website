@@ -7,7 +7,6 @@ namespace App\Services;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Stripe\Charge;
 use Stripe\Price;
@@ -30,8 +29,6 @@ class StripeSyncService
     {
         $stats = ['synced' => 0, 'skipped' => 0, 'errors' => 0];
 
-        Log::info('Starting Stripe product sync');
-
         $startingAfter = null;
 
         do {
@@ -39,27 +36,28 @@ class StripeSyncService
 
             if (! $stripeProducts) {
                 $stats['errors']++;
-
                 break;
             }
 
             foreach ($stripeProducts->data as $stripeProduct) {
+                // Skip products that are not active and are archived (Stripe fields)
+                if (! (bool) ($stripeProduct->active ?? true)) {
+                    $stats['skipped']++;
+                    $startingAfter = $stripeProduct->id;
+
+                    continue;
+                }
+
                 try {
                     $result = $this->syncOrCreateProductFromStripe($stripeProduct);
                     $stats[$result ? 'synced' : 'skipped']++;
                 } catch (\Throwable $e) {
-                    Log::error('Failed to sync product from Stripe', [
-                        'stripe_product_id' => $stripeProduct->id,
-                        'error' => $e->getMessage(),
-                    ]);
                     $stats['errors']++;
                 }
 
                 $startingAfter = $stripeProduct->id;
             }
         } while ($stripeProducts->has_more);
-
-        Log::info('Stripe product sync completed', $stats);
 
         return $stats;
     }
@@ -81,10 +79,6 @@ class StripeSyncService
 
             return StripeProduct::all($params);
         } catch (\Throwable $e) {
-            Log::error('Failed to fetch Stripe products list', [
-                'error' => $e->getMessage(),
-            ]);
-
             return null;
         }
     }
@@ -119,11 +113,6 @@ class StripeSyncService
             ]);
 
             $created = true;
-
-            Log::info('Created product from Stripe', [
-                'product_id' => $product->id,
-                'stripe_product_id' => $stripeProduct->id,
-            ]);
         }
 
         $synced = $this->syncProductFromStripeProduct($product, $stripeProduct);
@@ -175,17 +164,10 @@ class StripeSyncService
         }
 
         if (empty($updates)) {
-            Log::debug('Product already in sync', ['product_id' => $product->id]);
-
             return false;
         }
 
         $product->update($updates);
-
-        Log::info('Product synced from Stripe', [
-            'product_id' => $product->id,
-            'updates' => array_keys($updates),
-        ]);
 
         return true;
     }
@@ -214,8 +196,6 @@ class StripeSyncService
     public function syncProduct(Product $product): bool
     {
         if (! $product->stripe_product_id) {
-            Log::debug('Skipping product without Stripe ID', ['product_id' => $product->id]);
-
             return false;
         }
 
@@ -236,11 +216,6 @@ class StripeSyncService
         try {
             return StripeProduct::retrieve($stripeProductId);
         } catch (\Throwable $e) {
-            Log::error('Failed to fetch Stripe product', [
-                'stripe_product_id' => $stripeProductId,
-                'error' => $e->getMessage(),
-            ]);
-
             return null;
         }
     }
@@ -261,11 +236,6 @@ class StripeSyncService
                 'currency' => $price->currency,
             ];
         } catch (\Throwable $e) {
-            Log::error('Failed to fetch Stripe price', [
-                'stripe_price_id' => $stripePriceId,
-                'error' => $e->getMessage(),
-            ]);
-
             return null;
         }
     }
@@ -318,7 +288,6 @@ class StripeSyncService
         ];
 
         if (! $product->stripe_product_id) {
-            Log::debug('Cannot push to Stripe: no Stripe product ID', ['product_id' => $product->id]);
 
             return $result;
         }
@@ -346,17 +315,7 @@ class StripeSyncService
                 'description' => $product->description ?? '',
             ]);
 
-            Log::info('Updated Stripe product', [
-                'product_id' => $product->id,
-                'stripe_product_id' => $product->stripe_product_id,
-            ]);
         } catch (\Throwable $e) {
-            Log::error('Failed to update Stripe product', [
-                'product_id' => $product->id,
-                'stripe_product_id' => $product->stripe_product_id,
-                'error' => $e->getMessage(),
-            ]);
-
             throw $e;
         }
     }
@@ -380,10 +339,6 @@ class StripeSyncService
 
         if ($currentPrice['amount'] === $product->price_cents &&
             $currentPrice['currency'] === $product->currency) {
-            Log::debug('Price unchanged, skipping Stripe price update', [
-                'product_id' => $product->id,
-            ]);
-
             return null;
         }
 
@@ -408,19 +363,8 @@ class StripeSyncService
 
             $product->update(['stripe_price_id' => $price->id]);
 
-            Log::info('Created new Stripe price', [
-                'product_id' => $product->id,
-                'stripe_price_id' => $price->id,
-                'amount' => $product->price_cents,
-            ]);
-
             return $price->id;
         } catch (\Throwable $e) {
-            Log::error('Failed to create Stripe price', [
-                'product_id' => $product->id,
-                'error' => $e->getMessage(),
-            ]);
-
             throw $e;
         }
     }
@@ -433,8 +377,6 @@ class StripeSyncService
     public function syncOrders(?int $limit = 100, ?string $startingAfter = null): array
     {
         $stats = ['synced' => 0, 'created' => 0, 'skipped' => 0, 'errors' => 0];
-
-        Log::info('Starting Stripe orders sync', ['limit' => $limit]);
 
         try {
             // Fetch charges from Stripe (completed payments)
@@ -452,7 +394,6 @@ class StripeSyncService
             foreach ($charges->data as $charge) {
                 try {
                     if ($charge->status !== 'succeeded') {
-                        Log::debug('Skipping non-succeeded charge', ['charge_id' => $charge->id]);
                         $stats['skipped']++;
 
                         continue;
@@ -461,19 +402,11 @@ class StripeSyncService
                     $result = $this->syncOrder($charge);
                     $stats[$result]++;
                 } catch (\Throwable $e) {
-                    Log::error('Failed to sync order from Stripe', [
-                        'charge_id' => $charge->id,
-                        'error' => $e->getMessage(),
-                    ]);
                     $stats['errors']++;
                 }
             }
 
-            Log::info('Stripe orders sync completed', $stats);
         } catch (\Throwable $e) {
-            Log::error('Failed to fetch orders from Stripe', [
-                'error' => $e->getMessage(),
-            ]);
             $stats['errors']++;
         }
 
@@ -548,28 +481,15 @@ class StripeSyncService
 
             if ($updated) {
                 $existingOrder->update($orderData);
-                Log::info('Order synced from Stripe', [
-                    'order_id' => $existingOrder->id,
-                    'charge_id' => $charge->id,
-                ]);
 
                 return 'synced';
             }
-
-            Log::debug('Order already in sync', ['order_id' => $existingOrder->id]);
 
             return 'skipped';
         }
 
         // Create new order
         $order = Order::create($orderData);
-
-        Log::info('Order created from Stripe', [
-            'order_id' => $order->id,
-            'charge_id' => $charge->id,
-            'amount_cents' => $amountCents,
-            'email' => $email,
-        ]);
 
         return 'created';
     }
