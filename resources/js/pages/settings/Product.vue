@@ -75,8 +75,16 @@ const formatPrice = (cents: number): string => {
 const submit = () => {
     form.put(update().url, {
         preserveScroll: true,
-        onSuccess: () =>
-            toast.success('Product settings updated successfully.'),
+        onSuccess: (page) => {
+            const flash = page.props.flash as Flash | undefined;
+            if (flash?.error) {
+                toast.error(flash.error);
+            } else if (flash?.success) {
+                toast.success(flash.success);
+            } else {
+                toast.success('Product settings updated successfully.');
+            }
+        },
         onError: () => toast.error('Failed to update product settings.'),
     });
 };
@@ -136,6 +144,21 @@ const previewFromStripe = () => {
                     title="Product information"
                     description="Manage your product details and Stripe integration."
                 />
+
+                <!-- Info Banner -->
+                <div
+                    v-if="product?.stripe_product_id"
+                    class="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950"
+                >
+                    <p class="text-sm text-blue-700 dark:text-blue-300">
+                        <strong class="font-medium">Stripe Sync:</strong> When
+                        you save changes, they will automatically be pushed to
+                        Stripe. This updates your product name, description,
+                        active status, and pricing in your Stripe account. Price
+                        changes will create a new Stripe price and set it as the
+                        default.
+                    </p>
+                </div>
 
                 <!-- Stripe Preview -->
                 <div
@@ -230,7 +253,8 @@ const previewFromStripe = () => {
                                 />
                                 <p class="text-xs text-muted-foreground">
                                     Find this in your Stripe Dashboard →
-                                    Products
+                                    Products. Changes will be automatically
+                                    synced to Stripe when you save.
                                 </p>
                                 <InputError
                                     :message="form.errors.stripe_product_id"

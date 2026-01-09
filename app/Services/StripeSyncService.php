@@ -313,6 +313,7 @@ class StripeSyncService
             StripeProduct::update($product->stripe_product_id, [
                 'name' => $product->name,
                 'description' => $product->description ?? '',
+                'active' => $product->is_active,
             ]);
 
         } catch (\Throwable $e) {
