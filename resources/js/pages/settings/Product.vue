@@ -328,8 +328,7 @@ const previewFromStripe = () => {
                         <div class="flex items-center gap-3">
                             <Switch
                                 id="is_active"
-                                :checked="form.is_active"
-                                @update:checked="form.is_active = $event"
+                                v-model:checked="form.is_active"
                             />
                             <Label for="is_active" class="cursor-pointer">
                                 Product is active
