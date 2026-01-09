@@ -67,6 +67,14 @@ onUnmounted(() => {
                         >
                             <a href="/#pricing">Pricing</a>
                         </Button>
+                        <Button
+                            as-child
+                            variant="ghost"
+                            size="sm"
+                            class="text-muted-foreground hover:text-foreground"
+                        >
+                            <a href="https://github.com/honeymelon-app/support" target="_blank">Support</a>
+                        </Button>
                         <div class="ml-2">
                             <Button as-child size="sm">
                                 <a href="/#download">Download</a>
@@ -113,6 +121,13 @@ onUnmounted(() => {
                                         class="justify-start"
                                     >
                                         <a href="/#pricing">Pricing</a>
+                                    </Button>
+                                    <Button
+                                        as-child
+                                        variant="ghost"
+                                        class="justify-start"
+                                    >
+                                        <a href="https://github.com/honeymelon-app/support" target="_blank">Support</a>
                                     </Button>
                                     <Button
                                         as-child
@@ -228,6 +243,17 @@ onUnmounted(() => {
                             <li>
                                 <a
                                     href="https://docs.honeymelon.app"
+                                    target="_blank"
+                                    rel="noopener"
+                                    class="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
+                                >
+                                    Documentation
+                                    <ExternalLink class="h-3 w-3" />
+                                </a>
+                            </li>
+                            <li>
+                                <a
+                                    href="https://github.com/honeymelon-app/support"
                                     target="_blank"
                                     rel="noopener"
                                     class="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
