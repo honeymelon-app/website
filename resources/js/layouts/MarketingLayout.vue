@@ -51,30 +51,15 @@ onUnmounted(() => {
 
                     <!-- Desktop Navigation -->
                     <nav class="hidden items-center gap-1 md:flex">
-                        <Button
-                            as-child
-                            variant="ghost"
-                            size="sm"
-                            class="text-muted-foreground hover:text-foreground"
-                        >
+                        <Button as-child variant="ghost" size="sm">
                             <a href="/#features">Features</a>
                         </Button>
-                        <Button
-                            as-child
-                            variant="ghost"
-                            size="sm"
-                            class="text-muted-foreground hover:text-foreground"
-                        >
+                        <Button as-child variant="ghost" size="sm">
                             <a href="/#pricing">Pricing</a>
                         </Button>
-                        <Button
-                            as-child
-                            variant="ghost"
-                            size="sm"
-                            class="text-muted-foreground hover:text-foreground"
-                        >
+                        <Button as-child variant="ghost" size="sm">
                             <a
-                                href="https://github.com/honeymelon-app/support"
+                                href="https://github.com/orgs/honeymelon-app/discussions"
                                 target="_blank"
                                 >Support</a
                             >
@@ -132,7 +117,7 @@ onUnmounted(() => {
                                         class="justify-start"
                                     >
                                         <a
-                                            href="https://github.com/honeymelon-app/support"
+                                            href="https://github.com/orgs/honeymelon-app/discussions"
                                             target="_blank"
                                             >Support</a
                                         >
@@ -261,7 +246,7 @@ onUnmounted(() => {
                             </li>
                             <li>
                                 <a
-                                    href="https://github.com/honeymelon-app/support"
+                                    href="https://github.com/orgs/honeymelon-app/discussions"
                                     target="_blank"
                                     rel="noopener"
                                     class="inline-flex items-center gap-1 text-muted-foreground transition-colors hover:text-foreground"
