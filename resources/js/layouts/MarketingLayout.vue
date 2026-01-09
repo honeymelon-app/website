@@ -73,7 +73,11 @@ onUnmounted(() => {
                             size="sm"
                             class="text-muted-foreground hover:text-foreground"
                         >
-                            <a href="https://github.com/honeymelon-app/support" target="_blank">Support</a>
+                            <a
+                                href="https://github.com/honeymelon-app/support"
+                                target="_blank"
+                                >Support</a
+                            >
                         </Button>
                         <div class="ml-2">
                             <Button as-child size="sm">
@@ -127,7 +131,11 @@ onUnmounted(() => {
                                         variant="ghost"
                                         class="justify-start"
                                     >
-                                        <a href="https://github.com/honeymelon-app/support" target="_blank">Support</a>
+                                        <a
+                                            href="https://github.com/honeymelon-app/support"
+                                            target="_blank"
+                                            >Support</a
+                                        >
                                     </Button>
                                     <Button
                                         as-child
