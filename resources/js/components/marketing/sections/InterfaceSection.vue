@@ -112,6 +112,143 @@ import { Check } from 'lucide-vue-next';
                     </div>
                 </AnimatedSection>
             </div>
+
+            <!-- Preset Selection Screenshot -->
+            <div class="mt-32 grid items-center gap-16 lg:grid-cols-2">
+                <AnimatedSection direction="left">
+                    <div>
+                        <h3
+                            class="text-2xl font-semibold tracking-tight text-foreground"
+                        >
+                            Smart Preset System
+                        </h3>
+                        <p class="mt-4 text-lg text-muted-foreground">
+                            Choose from dozens of optimized presets or create
+                            your own custom configurations. No command-line
+                            knowledge required.
+                        </p>
+                        <ul class="mt-6 space-y-3">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Platform-specific presets</span>
+                            </li>
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Quality-optimized profiles</span>
+                            </li>
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Save custom configurations</span>
+                            </li>
+                        </ul>
+                    </div>
+                </AnimatedSection>
+                <div>
+                    <ScreenshotFrame
+                        src="/images/screens/Media-Format-Dropdown-Light-Mode.png"
+                        alt="Preset Selection Interface"
+                        direction="right"
+                        :delay="100"
+                    />
+                </div>
+            </div>
+
+            <!-- Destination Directory Screenshot -->
+            <div class="mt-32 grid items-center gap-16 lg:grid-cols-2">
+                <div class="order-2 lg:order-1">
+                    <ScreenshotFrame
+                        src="/images/screens/Destination-Directory-Chosen-Light-Mode.png"
+                        alt="Custom Destination Directory"
+                        direction="left"
+                        :delay="100"
+                    />
+                </div>
+                <AnimatedSection direction="right" class="order-1 lg:order-2">
+                    <div>
+                        <h3
+                            class="text-2xl font-semibold tracking-tight text-foreground"
+                        >
+                            Flexible Output Options
+                        </h3>
+                        <p class="mt-4 text-lg text-muted-foreground">
+                            Choose where your converted files go. Keep them
+                            organized with custom naming patterns and folder
+                            structures.
+                        </p>
+                        <ul class="mt-6 space-y-3">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Custom output directories</span>
+                            </li>
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Automatic folder creation</span>
+                            </li>
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Smart file naming</span>
+                            </li>
+                        </ul>
+                    </div>
+                </AnimatedSection>
+            </div>
+
+            <!-- Language Selection Screenshot -->
+            <div class="mt-32 grid items-center gap-16 lg:grid-cols-2">
+                <AnimatedSection direction="left">
+                    <div>
+                        <h3
+                            class="text-2xl font-semibold tracking-tight text-foreground"
+                        >
+                            Multi-Language Support
+                        </h3>
+                        <p class="mt-4 text-lg text-muted-foreground">
+                            Use Honeymelon in your preferred language. Built
+                            with internationalization in mind from day one.
+                        </p>
+                        <ul class="mt-6 space-y-3">
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Multiple language options</span>
+                            </li>
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Native translations</span>
+                            </li>
+                            <li
+                                class="flex items-center gap-3 text-muted-foreground"
+                            >
+                                <Check class="h-5 w-5 shrink-0 text-primary" />
+                                <span>Community contributions</span>
+                            </li>
+                        </ul>
+                    </div>
+                </AnimatedSection>
+                <div>
+                    <ScreenshotFrame
+                        src="/images/screens/Language-Dropdown-Light-Mode.png"
+                        alt="Language Selection Interface"
+                        direction="right"
+                        :delay="100"
+                    />
+                </div>
+            </div>
         </div>
     </section>
 </template>
