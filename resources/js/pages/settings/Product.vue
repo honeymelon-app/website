@@ -12,7 +12,7 @@ import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { preview, sync, update } from '@/routes/product';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
 interface ProductData {
@@ -64,6 +64,18 @@ const breadcrumbItems: BreadcrumbItem[] = [
 const syncing = ref(false);
 const previewing = ref(false);
 const stripePreview = ref<Flash['stripe_preview']>(null);
+
+const displayStripePriceId = computed(() => {
+    return props.product?.stripe_price_id || 'Not set';
+});
+
+const displayCurrentPrice = computed(() => {
+    return props.product?.price_cents ?? 0;
+});
+
+const displayCurrency = computed(() => {
+    return props.product?.currency ?? 'usd';
+});
 
 // Watch for product changes and update form
 watch(
@@ -278,9 +290,7 @@ const previewFromStripe = () => {
                                 <Input
                                     id="stripe_price_id"
                                     type="text"
-                                    :value="
-                                        product?.stripe_price_id ?? 'Not set'
-                                    "
+                                    :value="displayStripePriceId"
                                     class="max-w-md font-mono text-sm"
                                     disabled
                                     readonly
@@ -327,17 +337,11 @@ const previewFromStripe = () => {
                             <div class="grid gap-2">
                                 <Label>Current Price</Label>
                                 <div class="text-2xl font-semibold">
-                                    ${{
-                                        formatPrice(product?.price_cents ?? 0)
-                                    }}
+                                    ${{ formatPrice(displayCurrentPrice) }}
                                     <span
                                         class="text-sm font-normal text-muted-foreground"
                                     >
-                                        {{
-                                            (
-                                                product?.currency ?? 'usd'
-                                            ).toUpperCase()
-                                        }}
+                                        {{ displayCurrency.toUpperCase() }}
                                     </span>
                                 </div>
                                 <p class="text-xs text-muted-foreground">
