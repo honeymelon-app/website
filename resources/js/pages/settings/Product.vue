@@ -63,7 +63,7 @@ const breadcrumbItems: BreadcrumbItem[] = [
 
 const syncing = ref(false);
 const previewing = ref(false);
-const stripePreview = ref<Flash['stripe_preview']>(null);
+const stripePreview = ref<Flash['stripe_preview'] | null>(null);
 
 const displayStripePriceId = computed(() => {
     return props.product?.stripe_price_id || 'Not set';
