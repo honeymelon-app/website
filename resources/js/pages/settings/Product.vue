@@ -11,8 +11,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { preview, sync, update } from '@/routes/product';
 import type { BreadcrumbItem } from '@/types';
-import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed, ref, watch } from 'vue';
+import { Form, Head, router } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 import { toast } from 'vue-sonner';
 
 interface ProductData {
@@ -47,13 +47,6 @@ interface Flash {
 
 const props = defineProps<Props>();
 
-const form = useForm({
-    name: props.product?.name ?? '',
-    description: props.product?.description ?? '',
-    stripe_product_id: props.product?.stripe_product_id ?? '',
-    is_active: props.product?.is_active ?? true,
-});
-
 const breadcrumbItems: BreadcrumbItem[] = [
     {
         title: 'Product settings',
@@ -77,39 +70,23 @@ const displayCurrency = computed(() => {
     return props.product?.currency ?? 'usd';
 });
 
-// Watch for product changes and update form
-watch(
-    () => props.product,
-    (newProduct) => {
-        if (newProduct) {
-            form.name = newProduct.name;
-            form.description = newProduct.description ?? '';
-            form.stripe_product_id = newProduct.stripe_product_id ?? '';
-            form.is_active = newProduct.is_active;
-        }
-    },
-    { deep: true },
-);
-
 const formatPrice = (cents: number): string => {
     return (cents / 100).toFixed(2);
 };
 
-const submit = () => {
-    form.put(update().url, {
-        preserveScroll: true,
-        onSuccess: (page) => {
-            const flash = page.props.flash as Flash | undefined;
-            if (flash?.error) {
-                toast.error(flash.error);
-            } else if (flash?.success) {
-                toast.success(flash.success);
-            } else {
-                toast.success('Product settings updated successfully.');
-            }
-        },
-        onError: () => toast.error('Failed to update product settings.'),
-    });
+const handleSuccess = (page: any) => {
+    const flash = page.props.flash as Flash | undefined;
+    if (flash?.error) {
+        toast.error(flash.error);
+    } else if (flash?.success) {
+        toast.success(flash.success);
+    } else {
+        toast.success('Product settings updated successfully.');
+    }
+};
+
+const handleError = () => {
+    toast.error('Failed to update product settings.');
 };
 
 const syncFromStripe = () => {
@@ -231,29 +208,45 @@ const previewFromStripe = () => {
                     </p>
                 </div>
 
-                <form @submit.prevent="submit" class="space-y-6">
+                <Form
+                    :action="update().url"
+                    method="put"
+                    :data="{
+                        name: product?.name ?? '',
+                        description: product?.description ?? '',
+                        stripe_product_id: product?.stripe_product_id ?? '',
+                        is_active: product?.is_active ?? true,
+                    }"
+                    :preserve-scroll="true"
+                    @success="handleSuccess"
+                    @error="handleError"
+                    #default="{ errors, processing }"
+                    class="space-y-6"
+                >
                     <div class="grid gap-2">
                         <Label for="name">Product name</Label>
                         <Input
                             id="name"
                             type="text"
+                            name="name"
                             required
-                            v-model="form.name"
+                            :model-value="product?.name ?? ''"
                             class="max-w-md"
                             placeholder="Honeymelon"
                         />
-                        <InputError :message="form.errors.name" />
+                        <InputError :message="errors.name" />
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="description">Description</Label>
                         <Textarea
                             id="description"
-                            v-model="form.description"
+                            name="description"
+                            :model-value="product?.description ?? ''"
                             class="max-w-md"
                             placeholder="A beautiful video converter for macOS..."
                         />
-                        <InputError :message="form.errors.description" />
+                        <InputError :message="errors.description" />
                     </div>
 
                     <div class="border-t pt-6">
@@ -269,7 +262,9 @@ const previewFromStripe = () => {
                                 <Input
                                     id="stripe_product_id"
                                     type="text"
-                                    v-model="form.stripe_product_id"
+                                    name="stripe_product_id"
+                                    :model-value="product?.stripe_product_id ?? ''
+                                        "
                                     class="max-w-md font-mono text-sm"
                                     placeholder="prod_..."
                                 />
@@ -278,9 +273,7 @@ const previewFromStripe = () => {
                                     Products. Changes will be automatically
                                     synced to Stripe when you save.
                                 </p>
-                                <InputError
-                                    :message="form.errors.stripe_product_id"
-                                />
+                                <InputError :message="errors.stripe_product_id" />
                             </div>
 
                             <div class="grid gap-2">
@@ -305,9 +298,8 @@ const previewFromStripe = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    :disabled="
-                                        !form.stripe_product_id || previewing
-                                    "
+                                    :disabled="!product?.stripe_product_id || previewing
+                                        "
                                     @click="previewFromStripe"
                                 >
                                     <Spinner v-if="previewing" />
@@ -316,9 +308,8 @@ const previewFromStripe = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    :disabled="
-                                        !form.stripe_product_id || syncing
-                                    "
+                                    :disabled="!product?.stripe_product_id || syncing
+                                        "
                                     @click="syncFromStripe"
                                 >
                                     <Spinner v-if="syncing" />
@@ -355,7 +346,11 @@ const previewFromStripe = () => {
 
                     <div class="border-t pt-6">
                         <div class="flex items-center gap-3">
-                            <Switch id="is_active" v-model="form.is_active" />
+                            <Switch
+                                id="is_active"
+                                name="is_active"
+                                :model-value="product?.is_active ?? true"
+                            />
                             <Label for="is_active" class="cursor-pointer">
                                 Product is active
                             </Label>
@@ -363,14 +358,14 @@ const previewFromStripe = () => {
                         <p class="mt-1 text-xs text-muted-foreground">
                             Inactive products cannot be purchased
                         </p>
-                        <InputError :message="form.errors.is_active" />
+                        <InputError :message="errors.is_active" />
                     </div>
 
-                    <Button type="submit" :disabled="form.processing">
-                        <Spinner v-if="form.processing" />
+                    <Button type="submit" :disabled="processing">
+                        <Spinner v-if="processing" />
                         Save changes
                     </Button>
-                </form>
+                </Form>
             </div>
         </SettingsLayout>
     </AppLayout>
