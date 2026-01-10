@@ -275,33 +275,32 @@ class StripeSyncService
     }
 
     /**
-     * Push local product changes to Stripe.
+     * Push product metadata (name, description, active status) to Stripe.
+     * Pricing is managed in Stripe and should be synced FROM Stripe using syncProduct().
+     */
+    public function pushProductMetadataToStripe(Product $product): void
+    {
+        if (! $product->stripe_product_id) {
+            return;
+        }
+
+        $this->updateStripeProduct($product);
+    }
+
+    /**
+     * @deprecated Use pushProductMetadataToStripe() instead. This method is kept for backward compatibility.
      *
      * @return array{product_updated: bool, price_created: bool, new_price_id: ?string}
      */
     public function pushToStripe(Product $product): array
     {
-        $result = [
-            'product_updated' => false,
+        $this->pushProductMetadataToStripe($product);
+
+        return [
+            'product_updated' => true,
             'price_created' => false,
             'new_price_id' => null,
         ];
-
-        if (! $product->stripe_product_id) {
-
-            return $result;
-        }
-
-        $this->updateStripeProduct($product);
-        $result['product_updated'] = true;
-
-        $priceResult = $this->syncPriceToStripe($product);
-        if ($priceResult) {
-            $result['price_created'] = true;
-            $result['new_price_id'] = $priceResult;
-        }
-
-        return $result;
     }
 
     /**

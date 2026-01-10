@@ -12,7 +12,7 @@ import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { preview, sync, update } from '@/routes/product';
 import type { BreadcrumbItem } from '@/types';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { toast } from 'vue-sonner';
 
 interface ProductData {
@@ -51,9 +51,6 @@ const form = useForm({
     name: props.product?.name ?? '',
     description: props.product?.description ?? '',
     stripe_product_id: props.product?.stripe_product_id ?? '',
-    stripe_price_id: props.product?.stripe_price_id ?? '',
-    price_cents: props.product?.price_cents ?? 0,
-    currency: props.product?.currency ?? 'usd',
     is_active: props.product?.is_active ?? true,
 });
 
@@ -67,6 +64,20 @@ const breadcrumbItems: BreadcrumbItem[] = [
 const syncing = ref(false);
 const previewing = ref(false);
 const stripePreview = ref<Flash['stripe_preview']>(null);
+
+// Watch for product changes and update form
+watch(
+    () => props.product,
+    (newProduct) => {
+        if (newProduct) {
+            form.name = newProduct.name;
+            form.description = newProduct.description ?? '';
+            form.stripe_product_id = newProduct.stripe_product_id ?? '';
+            form.is_active = newProduct.is_active;
+        }
+    },
+    { deep: true },
+);
 
 const formatPrice = (cents: number): string => {
     return (cents / 100).toFixed(2);
@@ -151,12 +162,11 @@ const previewFromStripe = () => {
                     class="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950"
                 >
                     <p class="text-sm text-blue-700 dark:text-blue-300">
-                        <strong class="font-medium">Stripe Sync:</strong> When
-                        you save changes, they will automatically be pushed to
-                        Stripe. This updates your product name, description,
-                        active status, and pricing in your Stripe account. Price
-                        changes will create a new Stripe price and set it as the
-                        default.
+                        <strong class="font-medium">Stripe Integration:</strong>
+                        Product name, description, and active status will be
+                        pushed to Stripe when you save. Pricing is managed in
+                        Stripe and must be synced using the "Sync from Stripe"
+                        button below.
                     </p>
                 </div>
 
@@ -263,22 +273,22 @@ const previewFromStripe = () => {
 
                             <div class="grid gap-2">
                                 <Label for="stripe_price_id"
-                                    >Stripe Price ID</Label
+                                    >Stripe Price ID (Read-only)</Label
                                 >
                                 <Input
                                     id="stripe_price_id"
                                     type="text"
-                                    v-model="form.stripe_price_id"
+                                    :value="
+                                        product?.stripe_price_id ?? 'Not set'
+                                    "
                                     class="max-w-md font-mono text-sm"
-                                    placeholder="price_..."
+                                    disabled
+                                    readonly
                                 />
                                 <p class="text-xs text-muted-foreground">
-                                    This is synced automatically from Stripe's
-                                    default price
+                                    This is synced from Stripe's default price.
+                                    Use "Sync from Stripe" to update.
                                 </p>
-                                <InputError
-                                    :message="form.errors.stripe_price_id"
-                                />
                             </div>
 
                             <div class="flex max-w-md gap-2">
@@ -309,51 +319,39 @@ const previewFromStripe = () => {
                     </div>
 
                     <div class="border-t pt-6">
-                        <h3 class="mb-4 text-sm font-medium">Pricing</h3>
+                        <h3 class="mb-4 text-sm font-medium">
+                            Pricing (Managed in Stripe)
+                        </h3>
 
                         <div class="space-y-4">
                             <div class="grid gap-2">
-                                <Label for="price_cents"
-                                    >Price (in cents)</Label
-                                >
-                                <Input
-                                    id="price_cents"
-                                    type="number"
-                                    min="0"
-                                    step="1"
-                                    v-model.number="form.price_cents"
-                                    class="max-w-[200px]"
-                                />
-                                <p class="text-xs text-muted-foreground">
-                                    Display: ${{
-                                        formatPrice(form.price_cents)
+                                <Label>Current Price</Label>
+                                <div class="text-2xl font-semibold">
+                                    ${{
+                                        formatPrice(product?.price_cents ?? 0)
                                     }}
+                                    <span
+                                        class="text-sm font-normal text-muted-foreground"
+                                    >
+                                        {{
+                                            (
+                                                product?.currency ?? 'usd'
+                                            ).toUpperCase()
+                                        }}
+                                    </span>
+                                </div>
+                                <p class="text-xs text-muted-foreground">
+                                    Pricing is managed in your Stripe Dashboard.
+                                    Use "Sync from Stripe" above to update the
+                                    local price.
                                 </p>
-                                <InputError
-                                    :message="form.errors.price_cents"
-                                />
-                            </div>
-
-                            <div class="grid gap-2">
-                                <Label for="currency">Currency</Label>
-                                <Input
-                                    id="currency"
-                                    type="text"
-                                    v-model="form.currency"
-                                    class="max-w-[100px] uppercase"
-                                    placeholder="USD"
-                                />
-                                <InputError :message="form.errors.currency" />
                             </div>
                         </div>
                     </div>
 
                     <div class="border-t pt-6">
                         <div class="flex items-center gap-3">
-                            <Switch
-                                id="is_active"
-                                v-model:checked="form.is_active"
-                            />
+                            <Switch id="is_active" v-model="form.is_active" />
                             <Label for="is_active" class="cursor-pointer">
                                 Product is active
                             </Label>

@@ -27,9 +27,6 @@ class UpdateProductRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:2000'],
             'stripe_product_id' => ['nullable', 'string', 'max:255', 'regex:/^prod_[a-zA-Z0-9]+$/'],
-            'stripe_price_id' => ['nullable', 'string', 'max:255', 'regex:/^price_[a-zA-Z0-9]+$/'],
-            'price_cents' => ['required', 'integer', 'min:0'],
-            'currency' => ['required', 'string', 'size:3'],
             'is_active' => ['required', 'boolean'],
         ];
     }
@@ -43,7 +40,6 @@ class UpdateProductRequest extends FormRequest
     {
         return [
             'stripe_product_id.regex' => 'The Stripe product ID must start with "prod_".',
-            'stripe_price_id.regex' => 'The Stripe price ID must start with "price_".',
         ];
     }
 }

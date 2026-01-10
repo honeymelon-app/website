@@ -62,15 +62,14 @@ class ProductSettingsTest extends TestCase
             'name' => 'Old Name',
             'description' => 'Old description',
             'stripe_product_id' => null,
+            'price_cents' => 1999,
+            'currency' => 'usd',
         ]);
 
         $response = $this->actingAs($user)->put(route('product.update'), [
             'name' => 'New Name',
             'description' => 'New description',
             'stripe_product_id' => '',
-            'stripe_price_id' => '',
-            'price_cents' => 2999,
-            'currency' => 'usd',
             'is_active' => true,
         ]);
 
@@ -80,7 +79,9 @@ class ProductSettingsTest extends TestCase
         $product->refresh();
         $this->assertEquals('New Name', $product->name);
         $this->assertEquals('New description', $product->description);
-        $this->assertEquals(2999, $product->price_cents);
+        // Price should remain unchanged since it's not submitted
+        $this->assertEquals(1999, $product->price_cents);
+        $this->assertEquals('usd', $product->currency);
     }
 
     public function test_product_is_created_when_none_exists(): void
@@ -91,9 +92,6 @@ class ProductSettingsTest extends TestCase
             'name' => 'Honeymelon',
             'description' => 'A beautiful video converter',
             'stripe_product_id' => '',
-            'stripe_price_id' => '',
-            'price_cents' => 1999,
-            'currency' => 'usd',
             'is_active' => true,
         ]);
 
@@ -114,29 +112,10 @@ class ProductSettingsTest extends TestCase
         $response = $this->actingAs($user)->put(route('product.update'), [
             'name' => 'Test',
             'stripe_product_id' => 'invalid_format',
-            'price_cents' => 1999,
-            'currency' => 'usd',
             'is_active' => true,
         ]);
 
         $response->assertSessionHasErrors('stripe_product_id');
-    }
-
-    public function test_product_update_validates_stripe_price_id_format(): void
-    {
-        $user = User::factory()->create();
-        Product::factory()->create();
-
-        $response = $this->actingAs($user)->put(route('product.update'), [
-            'name' => 'Test',
-            'stripe_product_id' => 'prod_valid123',
-            'stripe_price_id' => 'invalid_format',
-            'price_cents' => 1999,
-            'currency' => 'usd',
-            'is_active' => true,
-        ]);
-
-        $response->assertSessionHasErrors('stripe_price_id');
     }
 
     public function test_sync_requires_stripe_product_id(): void

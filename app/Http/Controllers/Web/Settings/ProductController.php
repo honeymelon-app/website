@@ -59,14 +59,7 @@ class ProductController extends Controller
 
         if ($product->stripe_product_id) {
             try {
-                $result = $this->stripeSyncService->pushToStripe($product);
-
-                // Reload the product to get the updated stripe_price_id if a new price was created
-                if ($result['price_created'] && $result['new_price_id']) {
-                    $product->refresh();
-
-                    return back()->with('success', 'Product settings updated and synced to Stripe successfully. A new price was created.');
-                }
+                $this->stripeSyncService->pushProductMetadataToStripe($product);
 
                 return back()->with('success', 'Product settings updated and synced to Stripe successfully.');
             } catch (\Throwable $e) {
