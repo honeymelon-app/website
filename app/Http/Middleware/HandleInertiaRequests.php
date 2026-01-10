@@ -51,6 +51,12 @@ class HandleInertiaRequests extends Middleware
                     'email_verified_at' => $user->email_verified_at?->toIso8601String(),
                 ] : null,
             ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'info' => fn () => $request->session()->get('info'),
+                'stripe_preview' => fn () => $request->session()->get('stripe_preview'),
+            ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'appUrl' => config('app.url'),
             'seo' => [

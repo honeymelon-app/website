@@ -11,8 +11,8 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { preview, sync, update } from '@/routes/product';
 import type { BreadcrumbItem } from '@/types';
-import { Form, Head, router } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { Head, router, useForm } from '@inertiajs/vue3';
+import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 
 interface ProductData {
@@ -27,110 +27,74 @@ interface ProductData {
     is_active: boolean;
 }
 
-interface Props {
+interface StripePreview {
+    name: string;
+    description: string | null;
+    stripe_product_id: string;
+    stripe_price_id: string | null;
+    price_cents: number;
+    currency: string;
+}
+
+const props = defineProps<{
     product: ProductData | null;
-}
-
-interface Flash {
-    success?: string;
-    error?: string;
-    info?: string;
-    stripe_preview?: {
-        name: string;
-        description: string | null;
-        stripe_product_id: string;
-        stripe_price_id: string | null;
-        price_cents: number;
-        currency: string;
-    };
-}
-
-const props = defineProps<Props>();
+}>();
 
 const breadcrumbItems: BreadcrumbItem[] = [
-    {
-        title: 'Product settings',
-        href: '/settings/product',
-    },
+    { title: 'Product settings', href: '/settings/product' },
 ];
+
+const form = useForm({
+    name: props.product?.name ?? '',
+    description: props.product?.description ?? '',
+    stripe_product_id: props.product?.stripe_product_id ?? '',
+    is_active: props.product?.is_active ?? true,
+});
 
 const syncing = ref(false);
 const previewing = ref(false);
-const stripePreview = ref<Flash['stripe_preview'] | null>(null);
+const stripePreview = ref<StripePreview | null>(null);
 
-const displayStripePriceId = computed(() => {
-    return props.product?.stripe_price_id || 'Not set';
-});
+const formatPrice = (cents: number): string => (cents / 100).toFixed(2);
 
-const displayCurrentPrice = computed(() => {
-    return props.product?.price_cents ?? 0;
-});
-
-const displayCurrency = computed(() => {
-    return props.product?.currency ?? 'usd';
-});
-
-const formatPrice = (cents: number): string => {
-    return (cents / 100).toFixed(2);
-};
-
-const handleSuccess = (page: any) => {
-    const flash = page.props.flash as Flash | undefined;
-    if (flash?.error) {
-        toast.error(flash.error);
-    } else if (flash?.success) {
-        toast.success(flash.success);
-    } else {
-        toast.success('Product settings updated successfully.');
-    }
-};
-
-const handleError = () => {
-    toast.error('Failed to update product settings.');
+const submit = () => {
+    form.put(update().url, {
+        preserveScroll: true,
+        onSuccess: () => toast.success('Product settings updated successfully.'),
+        onError: () => toast.error('Failed to update product settings.'),
+    });
 };
 
 const syncFromStripe = () => {
     syncing.value = true;
     stripePreview.value = null;
-    router.post(
-        sync().url,
-        {},
-        {
-            preserveScroll: true,
-            onSuccess: () => {
-                toast.success('Product synced from Stripe successfully.');
-                router.reload({ only: ['product'] });
-            },
-            onError: () => toast.error('Failed to sync from Stripe.'),
-            onFinish: () => {
-                syncing.value = false;
-            },
+    router.post(sync().url, {}, {
+        preserveScroll: true,
+        onSuccess: () => {
+            toast.success('Product synced from Stripe successfully.');
+            router.reload({ only: ['product'] });
         },
-    );
+        onError: () => toast.error('Failed to sync from Stripe.'),
+        onFinish: () => (syncing.value = false),
+    });
 };
 
 const previewFromStripe = () => {
     previewing.value = true;
-    router.post(
-        preview().url,
-        {},
-        {
-            preserveScroll: true,
-            onSuccess: (page) => {
-                const flash = page.props.flash as Flash | undefined;
-                if (flash?.stripe_preview) {
-                    stripePreview.value = flash.stripe_preview;
-                    toast.success('Preview loaded from Stripe.');
-                } else if (flash?.error) {
-                    toast.error(flash.error);
-                }
-            },
-            onError: () => toast.error('Failed to fetch preview from Stripe.'),
-            onFinish: () => {
-                previewing.value = false;
-            },
+    router.post(preview().url, {}, {
+        preserveScroll: true,
+        onSuccess: (page) => {
+            const flash = page.props.flash as { stripe_preview?: StripePreview; error?: string; } | undefined;
+            if (flash?.stripe_preview) {
+                stripePreview.value = flash.stripe_preview;
+                toast.success('Preview loaded from Stripe.');
+            } else if (flash?.error) {
+                toast.error(flash.error);
+            }
         },
-    );
+        onError: () => toast.error('Failed to fetch preview from Stripe.'),
+        onFinish: () => (previewing.value = false),
+    });
 };
 </script>
 
@@ -145,17 +109,15 @@ const previewFromStripe = () => {
                     description="Manage your product details and Stripe integration."
                 />
 
-                <!-- Info Banner -->
+                <!-- Stripe Integration Info -->
                 <div
                     v-if="product?.stripe_product_id"
                     class="rounded-md border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-950"
                 >
                     <p class="text-sm text-blue-700 dark:text-blue-300">
                         <strong class="font-medium">Stripe Integration:</strong>
-                        Product name, description, and active status will be
-                        pushed to Stripe when you save. Pricing is managed in
-                        Stripe and must be synced using the "Sync from Stripe"
-                        button below.
+                        Product name, description, and active status will be pushed to Stripe when you save.
+                        Pricing is managed in Stripe and must be synced using the "Sync from Stripe" button below.
                     </p>
                 </div>
 
@@ -164,133 +126,89 @@ const previewFromStripe = () => {
                     v-if="stripePreview"
                     class="rounded-md border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-950"
                 >
-                    <h4
-                        class="mb-2 text-sm font-medium text-yellow-800 dark:text-yellow-200"
-                    >
+                    <h4 class="mb-2 text-sm font-medium text-yellow-800 dark:text-yellow-200">
                         Preview from Stripe
                     </h4>
-                    <dl
-                        class="space-y-1 text-sm text-yellow-700 dark:text-yellow-300"
-                    >
+                    <dl class="space-y-1 text-sm text-yellow-700 dark:text-yellow-300">
                         <div class="flex gap-2">
                             <dt class="font-medium">Name:</dt>
                             <dd>{{ stripePreview.name }}</dd>
                         </div>
-                        <div
-                            v-if="stripePreview.description"
-                            class="flex gap-2"
-                        >
+                        <div v-if="stripePreview.description" class="flex gap-2">
                             <dt class="font-medium">Description:</dt>
                             <dd>{{ stripePreview.description }}</dd>
                         </div>
                         <div class="flex gap-2">
                             <dt class="font-medium">Price:</dt>
-                            <dd>
-                                ${{ formatPrice(stripePreview.price_cents) }}
-                                {{ stripePreview.currency.toUpperCase() }}
-                            </dd>
+                            <dd>${{ formatPrice(stripePreview.price_cents) }} {{ stripePreview.currency.toUpperCase() }}</dd>
                         </div>
-                        <div
-                            v-if="stripePreview.stripe_price_id"
-                            class="flex gap-2"
-                        >
+                        <div v-if="stripePreview.stripe_price_id" class="flex gap-2">
                             <dt class="font-medium">Price ID:</dt>
-                            <dd class="font-mono text-xs">
-                                {{ stripePreview.stripe_price_id }}
-                            </dd>
+                            <dd class="font-mono text-xs">{{ stripePreview.stripe_price_id }}</dd>
                         </div>
                     </dl>
-                    <p
-                        class="mt-3 text-xs text-yellow-600 dark:text-yellow-400"
-                    >
-                        Click "Sync from Stripe" to update your local product
-                        with these values.
+                    <p class="mt-3 text-xs text-yellow-600 dark:text-yellow-400">
+                        Click "Sync from Stripe" to update your local product with these values.
                     </p>
                 </div>
 
-                <Form
-                    :action="update().url"
-                    method="put"
-                    :data="{
-                        name: product?.name ?? '',
-                        description: product?.description ?? '',
-                        stripe_product_id: product?.stripe_product_id ?? '',
-                        is_active: product?.is_active ?? true,
-                    }"
-                    :preserve-scroll="true"
-                    @success="handleSuccess"
-                    @error="handleError"
-                    #default="{ errors, processing }"
-                    class="space-y-6"
-                >
+                <form @submit.prevent="submit" class="space-y-6">
                     <div class="grid gap-2">
                         <Label for="name">Product name</Label>
                         <Input
                             id="name"
+                            v-model="form.name"
                             type="text"
-                            name="name"
                             required
-                            :model-value="product?.name ?? ''"
                             class="max-w-md"
                             placeholder="Honeymelon"
                         />
-                        <InputError :message="errors.name" />
+                        <InputError :message="form.errors.name" />
                     </div>
 
                     <div class="grid gap-2">
                         <Label for="description">Description</Label>
                         <Textarea
                             id="description"
-                            name="description"
-                            :model-value="product?.description ?? ''"
+                            v-model="form.description"
                             class="max-w-md"
                             placeholder="A beautiful video converter for macOS..."
                         />
-                        <InputError :message="errors.description" />
+                        <InputError :message="form.errors.description" />
                     </div>
 
                     <div class="border-t pt-6">
-                        <h3 class="mb-4 text-sm font-medium">
-                            Stripe Integration
-                        </h3>
+                        <h3 class="mb-4 text-sm font-medium">Stripe Integration</h3>
 
                         <div class="space-y-4">
                             <div class="grid gap-2">
-                                <Label for="stripe_product_id"
-                                    >Stripe Product ID</Label
-                                >
+                                <Label for="stripe_product_id">Stripe Product ID</Label>
                                 <Input
                                     id="stripe_product_id"
+                                    v-model="form.stripe_product_id"
                                     type="text"
-                                    name="stripe_product_id"
-                                    :model-value="product?.stripe_product_id ?? ''
-                                        "
                                     class="max-w-md font-mono text-sm"
                                     placeholder="prod_..."
                                 />
                                 <p class="text-xs text-muted-foreground">
-                                    Find this in your Stripe Dashboard →
-                                    Products. Changes will be automatically
-                                    synced to Stripe when you save.
+                                    Find this in your Stripe Dashboard → Products.
+                                    Changes will be automatically synced to Stripe when you save.
                                 </p>
-                                <InputError :message="errors.stripe_product_id" />
+                                <InputError :message="form.errors.stripe_product_id" />
                             </div>
 
                             <div class="grid gap-2">
-                                <Label for="stripe_price_id"
-                                    >Stripe Price ID (Read-only)</Label
-                                >
+                                <Label for="stripe_price_id">Stripe Price ID (Read-only)</Label>
                                 <Input
                                     id="stripe_price_id"
                                     type="text"
-                                    :value="displayStripePriceId"
+                                    :model-value="product?.stripe_price_id || 'Not set'"
                                     class="max-w-md font-mono text-sm"
                                     disabled
                                     readonly
                                 />
                                 <p class="text-xs text-muted-foreground">
-                                    This is synced from Stripe's default price.
-                                    Use "Sync from Stripe" to update.
+                                    This is synced from Stripe's default price. Use "Sync from Stripe" to update.
                                 </p>
                             </div>
 
@@ -298,8 +216,7 @@ const previewFromStripe = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    :disabled="!product?.stripe_product_id || previewing
-                                        "
+                                    :disabled="!product?.stripe_product_id || previewing"
                                     @click="previewFromStripe"
                                 >
                                     <Spinner v-if="previewing" />
@@ -308,8 +225,7 @@ const previewFromStripe = () => {
                                 <Button
                                     type="button"
                                     variant="outline"
-                                    :disabled="!product?.stripe_product_id || syncing
-                                        "
+                                    :disabled="!product?.stripe_product_id || syncing"
                                     @click="syncFromStripe"
                                 >
                                     <Spinner v-if="syncing" />
@@ -320,52 +236,39 @@ const previewFromStripe = () => {
                     </div>
 
                     <div class="border-t pt-6">
-                        <h3 class="mb-4 text-sm font-medium">
-                            Pricing (Managed in Stripe)
-                        </h3>
+                        <h3 class="mb-4 text-sm font-medium">Pricing (Managed in Stripe)</h3>
 
-                        <div class="space-y-4">
-                            <div class="grid gap-2">
-                                <Label>Current Price</Label>
-                                <div class="text-2xl font-semibold">
-                                    ${{ formatPrice(displayCurrentPrice) }}
-                                    <span
-                                        class="text-sm font-normal text-muted-foreground"
-                                    >
-                                        {{ displayCurrency.toUpperCase() }}
-                                    </span>
-                                </div>
-                                <p class="text-xs text-muted-foreground">
-                                    Pricing is managed in your Stripe Dashboard.
-                                    Use "Sync from Stripe" above to update the
-                                    local price.
-                                </p>
+                        <div class="grid gap-2">
+                            <Label>Current Price</Label>
+                            <div class="text-2xl font-semibold">
+                                ${{ formatPrice(product?.price_cents ?? 0) }}
+                                <span class="text-sm font-normal text-muted-foreground">
+                                    {{ (product?.currency ?? 'usd').toUpperCase() }}
+                                </span>
                             </div>
+                            <p class="text-xs text-muted-foreground">
+                                Pricing is managed in your Stripe Dashboard.
+                                Use "Sync from Stripe" above to update the local price.
+                            </p>
                         </div>
                     </div>
 
                     <div class="border-t pt-6">
                         <div class="flex items-center gap-3">
-                            <Switch
-                                id="is_active"
-                                name="is_active"
-                                :model-value="product?.is_active ?? true"
-                            />
-                            <Label for="is_active" class="cursor-pointer">
-                                Product is active
-                            </Label>
+                            <Switch id="is_active" v-model="form.is_active" />
+                            <Label for="is_active" class="cursor-pointer">Product is active</Label>
                         </div>
                         <p class="mt-1 text-xs text-muted-foreground">
                             Inactive products cannot be purchased
                         </p>
-                        <InputError :message="errors.is_active" />
+                        <InputError :message="form.errors.is_active" />
                     </div>
 
-                    <Button type="submit" :disabled="processing">
-                        <Spinner v-if="processing" />
+                    <Button type="submit" :disabled="form.processing">
+                        <Spinner v-if="form.processing" />
                         Save changes
                     </Button>
-                </Form>
+                </form>
             </div>
         </SettingsLayout>
     </AppLayout>

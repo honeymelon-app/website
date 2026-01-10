@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import AuthBase from '@/layouts/AuthLayout.vue';
-import { Form, Head, router } from '@inertiajs/vue3';
+import { Head, useForm } from '@inertiajs/vue3';
 
 defineProps<{
     status?: string;
@@ -15,8 +15,16 @@ defineProps<{
     canRegister: boolean;
 }>();
 
-const handleSuccess = () => {
-    // Password will be cleared automatically by form reset
+const form = useForm({
+    email: '',
+    password: '',
+    remember: false,
+});
+
+const submit = () => {
+    form.post('/login', {
+        onFinish: () => form.reset('password'),
+    });
 };
 </script>
 
@@ -34,24 +42,13 @@ const handleSuccess = () => {
             {{ status }}
         </div>
 
-        <Form
-            action="/login"
-            method="post"
-            :data="{
-                email: '',
-                password: '',
-                remember: false,
-            }"
-            @success="handleSuccess"
-            #default="{ errors, processing, reset }"
-            class="flex flex-col gap-6"
-        >
+        <form @submit.prevent="submit" class="flex flex-col gap-6">
             <div class="grid gap-6">
                 <div class="grid gap-2">
                     <Label for="email">Email address</Label>
                     <Input
                         id="email"
-                        name="email"
+                        v-model="form.email"
                         type="email"
                         required
                         autofocus
@@ -59,7 +56,7 @@ const handleSuccess = () => {
                         autocomplete="email"
                         placeholder="email@example.com"
                     />
-                    <InputError :message="errors.email" />
+                    <InputError :message="form.errors.email" />
                 </div>
 
                 <div class="grid gap-2">
@@ -76,18 +73,18 @@ const handleSuccess = () => {
                     </div>
                     <Input
                         id="password"
-                        name="password"
+                        v-model="form.password"
                         type="password"
                         required
                         :tabindex="2"
                         autocomplete="current-password"
                         placeholder="Password"
                     />
-                    <InputError :message="errors.password" />
+                    <InputError :message="form.errors.password" />
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <Checkbox id="remember" name="remember" :tabindex="3" />
+                    <Checkbox id="remember" v-model:checked="form.remember" :tabindex="3" />
                     <Label for="remember" class="text-sm font-normal">
                         Remember me
                     </Label>
@@ -97,9 +94,9 @@ const handleSuccess = () => {
                     type="submit"
                     class="mt-2 w-full"
                     :tabindex="4"
-                    :disabled="processing"
+                    :disabled="form.processing"
                 >
-                    <Spinner v-if="processing" />
+                    <Spinner v-if="form.processing" />
                     Log in
                 </Button>
             </div>
@@ -117,6 +114,6 @@ const handleSuccess = () => {
                     Sign up
                 </TextLink>
             </div>
-        </Form>
+        </form>
     </AuthBase>
 </template>
