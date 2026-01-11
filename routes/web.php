@@ -110,6 +110,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('artifacts', ArtifactController::class)->only(['index', 'show', 'destroy']);
         Route::resource('licenses', LicenseController::class)->only(['index', 'show', 'store']);
         Route::post('licenses/{license}/revoke', [LicenseController::class, 'revoke'])->name('licenses.revoke');
+        Route::post('licenses/{license}/reset-activation', [LicenseController::class, 'resetActivation'])->name('licenses.reset-activation');
         Route::resource('orders', OrderController::class)->only(['index', 'show']);
         Route::post('orders/{order}/refund', [OrderController::class, 'refund'])->name('orders.refund');
         Route::resource('faqs', FaqController::class)->only(['index', 'store', 'update', 'destroy']);

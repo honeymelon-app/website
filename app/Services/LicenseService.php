@@ -119,6 +119,25 @@ class LicenseService implements LicenseManager
     }
 
     /**
+     * Reset a license activation.
+     * Clears activation data allowing the license to be used on a different device.
+     */
+    public function resetActivation(License $license): void
+    {
+        Log::info('Resetting license activation', ['license_id' => $license->id]);
+
+        $license->update([
+            'activated_at' => null,
+            'device_id' => null,
+            'activation_count' => 0,
+        ]);
+
+        Cache::forget("license:valid:{$license->key}");
+
+        Log::info('License activation reset', ['license_id' => $license->id]);
+    }
+
+    /**
      * Find a license by its key.
      */
     public function findByKey(string $key): ?License

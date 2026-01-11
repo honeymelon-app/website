@@ -13,13 +13,20 @@ import { formatDate, truncateId } from '@/lib/formatters';
 import { getStatusVariant } from '@/lib/variants';
 import type { License } from '@/types/resources';
 import type { ColumnDef } from '@tanstack/vue-table';
-import { ArrowUpDown, Eye, MoreHorizontal, ShieldOff } from 'lucide-vue-next';
+import {
+    ArrowUpDown,
+    Eye,
+    MoreHorizontal,
+    RotateCcw,
+    ShieldOff,
+} from 'lucide-vue-next';
 import { h } from 'vue';
 
 // Define an interface for the actions context (passed via meta)
 interface ColumnActions {
     viewLicense: (license: License) => void;
     revokeLicense: (license: License) => void;
+    resetLicenseActivation: (license: License) => void;
 }
 
 export const columns: ColumnDef<License, ColumnActions>[] = [
@@ -87,7 +94,7 @@ export const columns: ColumnDef<License, ColumnActions>[] = [
             return h(
                 'span',
                 { class: 'text-sm text-muted-foreground' },
-                version === 999 ? 'Lifetime' : `v${version}.x`,
+                version === 255 ? 'Lifetime' : `v${version}.x`,
             );
         },
     },
@@ -234,6 +241,30 @@ export const columns: ColumnDef<License, ColumnActions>[] = [
                                                 ],
                                             },
                                         ),
+                                        license.status === 'active' &&
+                                        license.activated_at
+                                            ? h(DropdownMenuSeparator)
+                                            : null,
+                                        license.status === 'active' &&
+                                        license.activated_at
+                                            ? h(
+                                                  DropdownMenuItem,
+                                                  {
+                                                      onClick: () =>
+                                                          meta?.resetLicenseActivation(
+                                                              license,
+                                                          ),
+                                                  },
+                                                  {
+                                                      default: () => [
+                                                          h(RotateCcw, {
+                                                              class: 'mr-2 h-4 w-4',
+                                                          }),
+                                                          'Reset Activation',
+                                                      ],
+                                                  },
+                                              )
+                                            : null,
                                         license.status === 'active'
                                             ? h(DropdownMenuSeparator)
                                             : null,

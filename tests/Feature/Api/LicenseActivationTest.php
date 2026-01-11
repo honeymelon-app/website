@@ -89,7 +89,7 @@ class LicenseActivationTest extends TestCase
         $response->assertStatus(409)
             ->assertJson([
                 'success' => false,
-                'error' => 'This license has already been activated.',
+                'error' => 'This license has already been activated on another device.',
                 'error_code' => 'license_already_activated',
             ]);
     }
@@ -272,6 +272,174 @@ class LicenseActivationTest extends TestCase
             ->assertJson([
                 'success' => false,
                 'error_code' => 'license_not_active',
+            ]);
+    }
+
+    public function test_lifetime_license_can_be_activated_multiple_times(): void
+    {
+        $license = License::factory()->for($this->user)->for($this->order)->create([
+            'status' => LicenseStatus::ACTIVE,
+            'max_major_version' => 255, // Lifetime license
+            'activated_at' => null,
+        ]);
+
+        // First activation on device 1
+        $response1 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '1.0.0',
+            'device_id' => 'device-1',
+        ]);
+
+        $response1->assertOk()
+            ->assertJson([
+                'success' => true,
+                'license' => [
+                    'id' => $license->id,
+                    'max_major_version' => 255,
+                ],
+            ]);
+
+        $license->refresh();
+        $this->assertEquals(1, $license->activation_count);
+        $this->assertNull($license->device_id); // Lifetime licenses don't bind to devices
+
+        // Second activation on device 2 (should succeed)
+        $response2 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '1.5.0',
+            'device_id' => 'device-2',
+        ]);
+
+        $response2->assertOk()
+            ->assertJson([
+                'success' => true,
+            ]);
+
+        $license->refresh();
+        $this->assertEquals(2, $license->activation_count);
+        $this->assertNull($license->device_id); // Still no device binding
+
+        // Third activation on device 3 (should also succeed)
+        $response3 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '2.0.0',
+            'device_id' => 'device-3',
+        ]);
+
+        $response3->assertOk();
+        $license->refresh();
+        $this->assertEquals(3, $license->activation_count);
+    }
+
+    public function test_lifetime_license_works_with_any_major_version(): void
+    {
+        $license = License::factory()->for($this->user)->for($this->order)->create([
+            'status' => LicenseStatus::ACTIVE,
+            'max_major_version' => 255, // Lifetime license
+            'activated_at' => null,
+        ]);
+
+        // Test with version 1.x
+        $response1 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '1.0.0',
+            'device_id' => 'device-1',
+        ]);
+        $response1->assertOk();
+
+        // Test with version 5.x (should work even though max_major_version check would normally fail)
+        $response5 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '5.0.0',
+            'device_id' => 'device-2',
+        ]);
+        $response5->assertOk();
+
+        // Test with version 10.x
+        $response10 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '10.2.5',
+            'device_id' => 'device-3',
+        ]);
+        $response10->assertOk();
+
+        $license->refresh();
+        $this->assertEquals(3, $license->activation_count);
+    }
+
+    public function test_version_specific_license_cannot_be_activated_on_different_device(): void
+    {
+        $license = License::factory()->for($this->user)->for($this->order)->create([
+            'status' => LicenseStatus::ACTIVE,
+            'max_major_version' => 1, // Version-specific license
+            'activated_at' => null,
+        ]);
+
+        // First activation on device 1
+        $response1 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '1.0.0',
+            'device_id' => 'device-1',
+        ]);
+
+        $response1->assertOk();
+
+        $license->refresh();
+        $this->assertEquals('device-1', $license->device_id);
+
+        // Attempt activation on device 2 (should fail)
+        $response2 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '1.0.0',
+            'device_id' => 'device-2',
+        ]);
+
+        $response2->assertStatus(409)
+            ->assertJson([
+                'success' => false,
+                'error' => 'This license has already been activated on another device.',
+                'error_code' => 'license_already_activated',
+            ]);
+
+        $license->refresh();
+        $this->assertEquals(1, $license->activation_count); // Count should not increase
+    }
+
+    public function test_version_specific_license_only_works_with_designated_major_version(): void
+    {
+        $license = License::factory()->for($this->user)->for($this->order)->create([
+            'status' => LicenseStatus::ACTIVE,
+            'max_major_version' => 2, // Only works with v1.x and v2.x
+            'activated_at' => null,
+        ]);
+
+        // Version 1.x should work
+        $response1 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '1.5.0',
+            'device_id' => 'device-1',
+        ]);
+        $response1->assertOk();
+
+        // Version 2.x should work (reactivation on same device)
+        $response2 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '2.0.0',
+            'device_id' => 'device-1',
+        ]);
+        $response2->assertOk();
+
+        // Version 3.x should fail
+        $response3 = $this->postJson('/api/licenses/activate', [
+            'license_key' => $license->key_plain,
+            'app_version' => '3.0.0',
+            'device_id' => 'device-1',
+        ]);
+        $response3->assertForbidden()
+            ->assertJson([
+                'success' => false,
+                'error' => 'This license is valid up to Honeymelon 2.x.',
+                'error_code' => 'license_version_not_allowed',
             ]);
     }
 }

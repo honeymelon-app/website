@@ -62,4 +62,13 @@ class LicensePolicy
     {
         return false;
     }
+
+    /**
+     * Determine whether the user can reset the license activation.
+     */
+    public function resetActivation(User $user, License $license): bool
+    {
+        // Only allow resetting activation if license is active and already activated
+        return $license->isActive() && $license->isActivated();
+    }
 }

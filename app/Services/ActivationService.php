@@ -80,10 +80,48 @@ class ActivationService
             ];
         }
 
-        // Check if already activated (one-time activation)
-        // Allow idempotent re-activation on the same device (supports reinstall),
-        // but do not allow switching devices without support.
-        if ($license->isActivated()) {
+        // Verify the key signature is valid
+        if (! $isValid) {
+            Log::warning('Activation attempted with invalid license signature', [
+                'license_id' => $license->id,
+            ]);
+
+            return [
+                'success' => false,
+                'error' => 'License key signature is invalid.',
+                'error_code' => self::ERROR_LICENSE_NOT_FOUND,
+            ];
+        }
+
+        // Check if this is a lifetime license (255 = works with any major version)
+        $isLifetimeLicense = (int) ($license->max_major_version ?? 0) === 255;
+
+        // Enforce major-version licensing BEFORE checking activation status
+        // Lifetime licenses work with any major version
+        // Version-specific licenses only work with their designated major version
+        if (! $isLifetimeLicense) {
+            $maxMajor = (int) ($license->max_major_version ?? 0);
+            if ($appMajor > $maxMajor) {
+                Log::info('Activation attempted for unsupported app major version', [
+                    'license_id' => $license->id,
+                    'app_version' => $appVersion,
+                    'app_major' => $appMajor,
+                    'max_major_version' => $maxMajor,
+                ]);
+
+                return [
+                    'success' => false,
+                    'error' => "This license is valid up to Honeymelon {$maxMajor}.x.",
+                    'error_code' => self::ERROR_LICENSE_VERSION_NOT_ALLOWED,
+                ];
+            }
+        }
+
+        // Check if already activated
+        // Lifetime licenses (255) can be activated unlimited times on any device
+        // Version-specific licenses can only be re-activated on the same device (supports reinstall)
+        if ($license->isActivated() && ! $isLifetimeLicense) {
+            // For non-lifetime licenses, allow idempotent re-activation on the same device only
             if ($deviceId !== null && $license->device_id !== null && hash_equals($license->device_id, $deviceId)) {
                 Log::info('Activation replay accepted for same device', [
                     'license_id' => $license->id,
@@ -103,48 +141,21 @@ class ActivationService
 
             return [
                 'success' => false,
-                'error' => 'This license has already been activated.',
+                'error' => 'This license has already been activated on another device.',
                 'error_code' => self::ERROR_LICENSE_ALREADY_ACTIVATED,
             ];
         }
 
-        // Verify the key signature is valid
-        if (! $isValid) {
-            Log::warning('Activation attempted with invalid license signature', [
-                'license_id' => $license->id,
-            ]);
-
-            return [
-                'success' => false,
-                'error' => 'License key signature is invalid.',
-                'error_code' => self::ERROR_LICENSE_NOT_FOUND,
-            ];
-        }
-
-        // Enforce major-version licensing (255 == lifetime/all majors)
-        $maxMajor = (int) ($license->max_major_version ?? 0);
-        if ($maxMajor !== 255 && $appMajor > $maxMajor) {
-            Log::info('Activation attempted for unsupported app major version', [
-                'license_id' => $license->id,
-                'app_version' => $appVersion,
-                'app_major' => $appMajor,
-                'max_major_version' => $maxMajor,
-            ]);
-
-            return [
-                'success' => false,
-                'error' => "This license is valid up to Honeymelon {$maxMajor}.x.",
-                'error_code' => self::ERROR_LICENSE_VERSION_NOT_ALLOWED,
-            ];
-        }
-
         // Activate the license
-        $license->markAsActivated($deviceId);
+        // For lifetime licenses, track activation count but don't bind to device
+        // For version-specific licenses, bind to first device
+        $license->markAsActivated($isLifetimeLicense ? null : $deviceId, $isLifetimeLicense);
 
         Log::info('License activated successfully', [
             'license_id' => $license->id,
             'app_version' => $appVersion,
             'device_id' => $deviceId,
+            'is_lifetime' => $isLifetimeLicense,
         ]);
 
         // Return the license data - the app will store this locally

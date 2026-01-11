@@ -1,3 +1,4 @@
+import type { AppPageProps } from '@/types';
 import { usePage } from '@inertiajs/vue3';
 import type { MaybeRefOrGetter } from 'vue';
 import { computed, toValue } from 'vue';
@@ -42,7 +43,7 @@ interface SeoConfig {
     google_site_verification?: string;
 }
 
-interface PageProps {
+interface SeoPageProps extends AppPageProps {
     appUrl?: string;
     seo?: SeoConfig;
 }
@@ -96,7 +97,7 @@ function toAbsoluteUrl(path: string | undefined, baseUrl: string): string {
  * ```
  */
 export function useSeoMeta(options: UseSeoMetaOptions = {}) {
-    const page = usePage<PageProps>();
+    const page = usePage<SeoPageProps>();
     const seoConfig = computed(() => page.props.seo || {});
     const baseUrl = computed(() => page.props.appUrl || '');
 

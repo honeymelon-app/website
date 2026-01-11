@@ -40,7 +40,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { formatDateTime } from '@/lib/formatters';
 import { getStatusVariant } from '@/lib/variants';
 import { dashboard } from '@/routes';
-import licensesRoute from '@/routes/admin/licenses';
+import licensesRoute, { revoke as revokeRoute } from '@/routes/admin/licenses';
 import type { BreadcrumbItem } from '@/types';
 import type { FilterParams, PaginatedResponse } from '@/types/api';
 import type { License } from '@/types/resources';
@@ -98,6 +98,11 @@ const selectedLicense = ref<License | null>(null);
 const isRevokeDialogOpen = ref(false);
 const licenseToRevoke = ref<License | null>(null);
 const isRevoking = ref(false);
+
+// Reset activation dialog state
+const isResetDialogOpen = ref(false);
+const licenseToReset = ref<License | null>(null);
+const isResetting = ref(false);
 
 // Bulk revoke dialog state
 const isBulkRevokeDialogOpen = ref(false);
@@ -173,14 +178,37 @@ const confirmRevokeLicense = (): void => {
 
     isRevoking.value = true;
     router.post(
-        '/api/admin/licenses/revoke',
-        { license_id: licenseToRevoke.value.id },
+        revokeRoute(licenseToRevoke.value.id).url,
+        {},
         {
             preserveScroll: true,
             onFinish: () => {
                 isRevoking.value = false;
                 isRevokeDialogOpen.value = false;
                 licenseToRevoke.value = null;
+            },
+        },
+    );
+};
+
+const resetLicenseActivation = (license: License): void => {
+    licenseToReset.value = license;
+    isResetDialogOpen.value = true;
+};
+
+const confirmResetLicenseActivation = (): void => {
+    if (!licenseToReset.value) return;
+
+    isResetting.value = true;
+    router.post(
+        `/admin/licenses/${licenseToReset.value.id}/reset-activation`,
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                isResetting.value = false;
+                isResetDialogOpen.value = false;
+                licenseToReset.value = null;
             },
         },
     );
@@ -200,7 +228,7 @@ const {
     allowedPageSizes,
 } = useDataTable({
     data: computed(() => props.licenses),
-    columns,
+    columns: columns as any,
     sorting: computed(() => props.sorting),
     filters: computed(() => props.filters as Record<string, unknown>),
     pagination: computed(() => props.pagination),
@@ -210,6 +238,7 @@ const {
     meta: {
         viewLicense,
         revokeLicense,
+        resetLicenseActivation,
     },
 });
 
@@ -245,8 +274,8 @@ const confirmBulkRevoke = () => {
     let completed = 0;
     licenses.forEach((license) => {
         router.post(
-            '/api/admin/licenses/revoke',
-            { license_id: license.id },
+            revokeRoute(license.id).url,
+            {},
             {
                 preserveScroll: true,
                 onFinish: () => {
@@ -281,7 +310,7 @@ const exportSelected = () => {
             [
                 license.id,
                 license.status,
-                license.max_major_version === 999
+                license.max_major_version === 255
                     ? 'Lifetime'
                     : `v${license.max_major_version}.x`,
                 license.activation_count ?? 0,
@@ -376,9 +405,8 @@ const handleIssueLicense = (): void => {
                                             >Max Major Version</Label
                                         >
                                         <Select
-                                            v-model="
-                                                issueForm.max_major_version
-                                            "
+                                            v-model="issueForm.max_major_version
+                                                "
                                         >
                                             <SelectTrigger
                                                 id="max_major_version"
@@ -589,9 +617,8 @@ const handleIssueLicense = (): void => {
                         </div>
                         <div class="col-span-2">
                             <Badge
-                                :variant="
-                                    getStatusVariant(selectedLicense.status)
-                                "
+                                :variant="getStatusVariant(selectedLicense.status)
+                                    "
                                 class="capitalize"
                             >
                                 {{ selectedLicense.status }}
@@ -673,7 +700,7 @@ const handleIssueLicense = (): void => {
                             variant="destructive"
                             @click="
                                 revokeLicense(selectedLicense);
-                                isDetailsDialogOpen = false;
+                            isDetailsDialogOpen = false;
                             "
                         >
                             <ShieldOff class="mr-2 h-4 w-4" />
@@ -703,6 +730,33 @@ const handleIssueLicense = (): void => {
                 <li>The license will no longer be valid for activation</li>
                 <li>Already activated installations will continue to work</li>
                 <li>This action cannot be undone</li>
+            </ul>
+        </ConfirmDialog>
+
+        <!-- Reset Activation Confirmation Dialog -->
+        <ConfirmDialog
+            v-model:open="isResetDialogOpen"
+            title="Reset License Activation"
+            confirm-label="Reset Activation"
+            :loading="isResetting"
+            :show-trigger="false"
+            @confirm="confirmResetLicenseActivation"
+        >
+            <p class="mb-4">
+                Are you sure you want to reset activation for license
+                <code class="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                    {{ licenseToReset?.id.substring(0, 8) }}... </code
+                >?
+            </p>
+            <ul class="list-disc space-y-1 pl-6 text-sm text-muted-foreground">
+                <li>
+                    The license activation will be cleared (device ID, activated
+                    date)
+                </li>
+                <li>
+                    The license can be activated on a new device after reset
+                </li>
+                <li>The license key remains valid and active</li>
             </ul>
         </ConfirmDialog>
 

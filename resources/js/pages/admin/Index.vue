@@ -12,7 +12,7 @@ import { dashboard } from '@/routes';
 import licensesRoute from '@/routes/admin/licenses';
 import ordersRoute from '@/routes/admin/orders';
 import releasesRoute from '@/routes/admin/releases';
-import { type BreadcrumbItem, type SharedData } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import {
     ArrowRight,
@@ -112,7 +112,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const page = usePage<SharedData>();
+const page = usePage();
 
 const userName = computed(() => {
     const name = page.props.auth.user?.name ?? 'there';
@@ -446,8 +446,8 @@ function getDeviceIcon(device: string) {
                                 :categories="['Revenue']"
                                 :colors="['var(--color-honey-500)']"
                                 :y-formatter="
-                                    (value: number) =>
-                                        formatCurrency(value * 100)
+                                    (value: number | Date) =>
+                                        formatCurrency((value as number) * 100)
                                 "
                                 :show-legend="false"
                                 class="h-[280px]"
@@ -701,8 +701,8 @@ function getDeviceIcon(device: string) {
                                         'var(--color-violet-500)',
                                     ]"
                                     :y-formatter="
-                                        (value: number) =>
-                                            value.toLocaleString()
+                                        (value: number | Date) =>
+                                            (value as number).toLocaleString()
                                     "
                                     class="h-[280px]"
                                 />

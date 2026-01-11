@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Web\Admin;
 use App\Enums\ReleaseChannel;
 use App\Filters\LicenseFilter;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AdminResetLicenseActivationRequest;
 use App\Http\Requests\AdminRevokeLicenseRequest;
 use App\Http\Requests\StoreLicenseRequest;
 use App\Http\Resources\LicenseResource;
@@ -163,6 +164,32 @@ class LicenseController extends Controller
                 $e,
                 'admin.licenses.show',
                 'Failed to revoke license',
+                ['license_id' => $license->id],
+                [$license]
+            );
+        }
+    }
+
+    /**
+     * Reset a license activation.
+     * Allows the license to be activated again on a different device.
+     */
+    public function resetActivation(
+        AdminResetLicenseActivationRequest $request,
+        License $license,
+        LicenseService $licenseService
+    ): RedirectResponse {
+        try {
+            $licenseService->resetActivation($license);
+
+            return redirect()
+                ->route('admin.licenses.show', $license)
+                ->with('success', 'License activation has been reset. The license can now be activated on a new device.');
+        } catch (\Exception $e) {
+            return $this->handleWebException(
+                $e,
+                'admin.licenses.show',
+                'Failed to reset license activation',
                 ['license_id' => $license->id],
                 [$license]
             );

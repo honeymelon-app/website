@@ -177,24 +177,50 @@ class License extends Model implements Filterable
     }
 
     /**
+     * Check if this is a lifetime license (works with any major version).
+     */
+    public function isLifetime(): bool
+    {
+        return (int) ($this->max_major_version ?? 0) === 255;
+    }
+
+    /**
      * Check if the license can be activated.
-     * Must be active and not already activated.
+     * Lifetime licenses can always be activated if status is active.
+     * Version-specific licenses must be active and not already activated.
      */
     public function canActivate(): bool
     {
-        return $this->status->allowsActivation() && ! $this->isActivated();
+        if (! $this->status->allowsActivation()) {
+            return false;
+        }
+
+        return $this->isLifetime() || ! $this->isActivated();
     }
 
     /**
      * Mark the license as activated.
+     *
+     * @param  string|null  $deviceId  The device ID to bind (null for lifetime licenses)
+     * @param  bool  $isLifetime  Whether this is a lifetime license (allows multiple activations)
      */
-    public function markAsActivated(?string $deviceId = null): void
+    public function markAsActivated(?string $deviceId = null, bool $isLifetime = false): void
     {
-        $this->update([
-            'activated_at' => now(),
+        $updates = [
             'activation_count' => $this->activation_count + 1,
-            'device_id' => $deviceId,
-        ]);
+        ];
+
+        // Only set activated_at on first activation, or always for non-lifetime licenses
+        if (! $this->activated_at || ! $isLifetime) {
+            $updates['activated_at'] = now();
+        }
+
+        // Only bind device_id for non-lifetime licenses
+        if (! $isLifetime && $deviceId !== null) {
+            $updates['device_id'] = $deviceId;
+        }
+
+        $this->update($updates);
     }
 
     /**

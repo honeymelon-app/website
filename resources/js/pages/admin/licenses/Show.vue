@@ -269,7 +269,7 @@ const processRevoke = (): void => {
                                 <Label>Max Major Version</Label>
                                 <p class="text-sm">
                                     {{
-                                        license.max_major_version === 999
+                                        license.max_major_version === 255
                                             ? 'Lifetime (All Versions)'
                                             : `Version ${license.max_major_version}.x`
                                     }}
